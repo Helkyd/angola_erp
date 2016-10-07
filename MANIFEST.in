@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include angola_erp *.css
+recursive-include angola_erp *.csv
+recursive-include angola_erp *.html
+recursive-include angola_erp *.ico
+recursive-include angola_erp *.js
+recursive-include angola_erp *.json
+recursive-include angola_erp *.md
+recursive-include angola_erp *.png
+recursive-include angola_erp *.py
+recursive-include angola_erp *.svg
+recursive-include angola_erp *.txt
+recursive-exclude angola_erp *.pyc
