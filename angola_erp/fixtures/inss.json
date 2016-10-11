@@ -1,0 +1,10 @@
+[
+ {
+  "docstatus": 0, 
+  "doctype": "INSS", 
+  "modified": "2016-10-11 11:06:41.441746", 
+  "name": "INSS", 
+  "seguranca_social": 0.03, 
+  "seguranca_social_empresa": 0.08
+ }
+]

@@ -1,0 +1,122 @@
+[
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:01:42.691874", 
+  "name": "1", 
+  "parcela_fixa": 0.0, 
+  "valor_fim": 17000.0, 
+  "valor_inicio": 0.0, 
+  "valor_percentual": 0.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:01:47.967122", 
+  "name": "2", 
+  "parcela_fixa": 0.0, 
+  "valor_fim": 19000.0, 
+  "valor_inicio": 17001.0, 
+  "valor_percentual": 2.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:01:52.183959", 
+  "name": "3", 
+  "parcela_fixa": 40.0, 
+  "valor_fim": 21000.0, 
+  "valor_inicio": 19001.0, 
+  "valor_percentual": 4.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:01:57.037879", 
+  "name": "4", 
+  "parcela_fixa": 120.0, 
+  "valor_fim": 23000.0, 
+  "valor_inicio": 21001.0, 
+  "valor_percentual": 5.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:01:59.937959", 
+  "name": "5", 
+  "parcela_fixa": 220.0, 
+  "valor_fim": 28000.0, 
+  "valor_inicio": 23001.0, 
+  "valor_percentual": 6.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:02.654901", 
+  "name": "6", 
+  "parcela_fixa": 520.0, 
+  "valor_fim": 33000.0, 
+  "valor_inicio": 28001.0, 
+  "valor_percentual": 7.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:09.193409", 
+  "name": "7", 
+  "parcela_fixa": 1670.0, 
+  "valor_fim": 53000.0, 
+  "valor_inicio": 43001.0, 
+  "valor_percentual": 9.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:13.191819", 
+  "name": "8", 
+  "parcela_fixa": 2570.0, 
+  "valor_fim": 63000.0, 
+  "valor_inicio": 53001.0, 
+  "valor_percentual": 10.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:16.402631", 
+  "name": "9", 
+  "parcela_fixa": 3570.0, 
+  "valor_fim": 73000.0, 
+  "valor_inicio": 63001.0, 
+  "valor_percentual": 11.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:19.535587", 
+  "name": "10", 
+  "parcela_fixa": 4670.0, 
+  "valor_fim": 83000.0, 
+  "valor_inicio": 73001.0, 
+  "valor_percentual": 12.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:22.799261", 
+  "name": "11", 
+  "parcela_fixa": 5870.0, 
+  "valor_fim": 93000.0, 
+  "valor_inicio": 83001.0, 
+  "valor_percentual": 14.0
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "IRT", 
+  "modified": "2016-10-07 20:02:30.139840", 
+  "name": "12", 
+  "parcela_fixa": 7270.0, 
+  "valor_fim": 93002.0, 
+  "valor_inicio": 93001.0, 
+  "valor_percentual": 15.0
+ }
+]
