@@ -46,4 +46,3 @@ def set_ded(ded,d_val):
 
 
 
-		
