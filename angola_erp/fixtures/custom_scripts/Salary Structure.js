@@ -5,32 +5,6 @@ var irt=0;
 var inss=0;
 var salario = 0;
 
-cur_frm.cscript.onload = function(doc, dt, dn){
-
-	e_tbl = doc.earnings || [];
-	d_tbl = doc.deductions || [];
-	if (e_tbl.length == 0 && d_tbl.length == 0){
-		alert("MINHA SCRPT")
-		alert(dt)	
-		alert(dn)
-		
-
-		return $c_obj(doc,'make_earn_ded_table','', function(r, rt) { 
-		var rr = r	
-		if (rr.docs.[0].earnings.length != 0 && rr.docs.[0].deductions.length != 0){
-			alert("JA TEM REG")
-			for (var i = 0; i < rr.docs.[0].earnings.length; i++){
-				
-			}
-		}
-		refresh_many(['earnings', 'deductions']);});
-
-
-	}else{
-			alert("CORRIGIR")
-
-	}
-}
 
 frappe.ui.form.on('Salary Structure', {
 	refresh: function(frm) {
@@ -98,5 +72,6 @@ frappe.ui.form.on('Salary Structure', {
 		calculate_totals(frm.doc);
 	},
 });
+
 
 
