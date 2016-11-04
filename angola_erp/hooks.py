@@ -81,7 +81,10 @@ doc_events = {
 	"Salary Component":{
 		"validate": "angola_erp.angola_erpnext.validations.salary_component.validate",
 	},
+	"Employee": {
+		"validate": "angola_erp.angola_erpnext.validations.employee.validate",
 
+	},
 }
 
 # Scheduled Tasks
