@@ -11,6 +11,17 @@ import frappe.model
 import frappe.utils
 
 @frappe.whitelist()
+def get_faltas(emp,mes,ano):
+	ret = {}
+	j= frappe.db.sql(""" SELECT count(status)
+	from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s """,(emp,mes,ano), as_dict=True)
+
+	print " ATTENDANCE"
+	print j	
+	return j
+
+
+@frappe.whitelist()
 def get_irt(start):
 	ret = {}
 	j= frappe.db.sql(""" SELECT valor_inicio, valor_fim, valor_percentual,parcela_fixa
@@ -46,7 +57,3 @@ def set_ded(ded,d_val):
 
 
 
-@frappe.whitelist()
-def cria_tabelas(dn):
-	frappe.throw(_(dn))
-		

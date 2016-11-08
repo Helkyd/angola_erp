@@ -4,7 +4,7 @@
 var irt=0;
 var inss=0;
 var salario = 0;
-
+var numero_faltas =0;
 
 frappe.ui.form.on('Salary Structure', {
 	refresh: function(frm) {
@@ -44,6 +44,11 @@ frappe.ui.form.on('Salary Structure', {
 						}else{
 							alert("INSS")
 						}
+					}else if (tbl2[j].salary_component == "Faltas Injustificadas" ){	
+						//so pode ser feito no SALARY SLIP due to the Month being processed.
+
+							//desconto_valor =cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.set_ded",args:{"ded":tbl2[j].name,"d_val":flt(salario)*numero_faltas}});
+
 					}	
 				}
 				cur_frm.refresh()
