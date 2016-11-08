@@ -1,0 +1,8 @@
+{
+    "service_account":"163061214770-compute@developer.gserviceaccount.com",
+    "private_key12_path":"GestOficinas-8b9c3d30ab4e.p12",
+    "backup_folder_id":"0B-VOEjxk5NCNTWdHNDVOZG1nNjg",
+    "description" : "Description for backup file",
+    "max_file_in_folder": 5
+}
+
