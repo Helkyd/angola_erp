@@ -14,7 +14,7 @@ import frappe.utils
 def get_faltas(emp,mes,ano):
 	ret = {}
 	j= frappe.db.sql(""" SELECT count(status)
-	from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s """,(emp,mes,ano), as_dict=True)
+	from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s """,(emp,mes,ano), as_dict=False)
 
 	print " ATTENDANCE"
 	print j	
