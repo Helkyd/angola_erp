@@ -27,7 +27,6 @@ def validate(doc,method):
 	for desconto in frappe.db.sql(""" SELECT * from `tabSalary Detail` where parent = %s """,doc.name, as_dict=True):
 		dd = frappe.get_doc("Salary Detail",desconto.name)
 		print "valor ", dd.amount
-		print "default ", dd.default_amount
 		dd.amount = desconto.default_amount
 		dd.save()
 

@@ -78,8 +78,8 @@ doc_events = {
 # 		"on_trash": "method"
 #	}
 
-	"Salary Component":{
-		"validate": "angola_erp.angola_erpnext.validations.salary_component.validate",
+	"Salary Slip":{
+		"validate": "angola_erp.angola_erpnext.validations.salary_slip.validate",
 	},
 	"Employee": {
 		"validate": "angola_erp.angola_erpnext.validations.employee.validate",

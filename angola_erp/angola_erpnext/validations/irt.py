@@ -10,6 +10,17 @@ from frappe.model.document import Document
 import frappe.model
 import frappe.utils
 
+
+@frappe.whitelist()
+def set_salary_slip_pay_days(pag,emp,ano,mes):
+	ret = {}
+	j= frappe.db.sql(""" UPDATE `tabSalary Slip` SET payment_days = %s where employee = %s and fiscal_year = %s and month = %s """,(pag,emp,ano,mes), as_dict=False)
+
+	print " Atualizar SALARY SLIP"
+	print j
+	return j
+
+
 @frappe.whitelist()
 def get_faltas(emp,mes,ano):
 	ret = {}
@@ -41,6 +52,15 @@ def get_irt(start):
 	print  j
 	return j
 
+@frappe.whitelist()
+def get_lista_irt():
+	j= frappe.db.sql(""" SELECT valor_inicio, valor_fim, valor_percentual,parcela_fixa
+	from `tabIRT` """,as_dict=True)
+
+	print " LISTA IRT"
+	print j	
+	return j
+
 
 @frappe.whitelist()
 def get_inss():
@@ -51,7 +71,8 @@ def get_inss():
 @frappe.whitelist()
 def set_ded(ded,d_val):
 
-	jj= frappe.db.sql("UPDATE `tabSalary Detail` SET amount=%s where name =%s",(flt(d_val),ded))
+#	jj= frappe.db.sql("UPDATE `tabSalary Detail` SET default_amount=%s where name =%s",(flt(d_val),ded))
+	jj= frappe.db.sql("UPDATE `tabSalary Detail` SET amount=%s, default_amount=%s where name =%s",(flt(d_val),flt(d_val),ded))
 
 	return jj
 
