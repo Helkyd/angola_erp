@@ -15,6 +15,15 @@ var parcela_fixa = 0;
 
 lista_irt = cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_lista_irt",args:{}})
 
+cur_frm.cscript.fiscal_year = function(doc,dt,dn){
+		alert("vou carregar !!!")
+		return $c_obj(doc, 'angola_erp.angola_erpnext.validations.salary_slip.get_emp_and_leave_details','',function(r, rt) {
+			var doc = locals[dt][dn];
+			cur_frm.refresh();
+			calculate_all(doc, dt, dn);
+		});
+}
+
 frappe.ui.form.on('Salary Slip', {
 
 	refresh: function(frm) {
@@ -28,7 +37,16 @@ frappe.ui.form.on('Salary Slip', {
 		inss_valor =cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_inss",args:{}})	
 
 		if (frm.doc.employee != undefined){
-			numero_faltas = cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_faltas",args:{"emp":frm.doc.employee, "mes":frm.doc.month, "ano":frm.doc.fiscal_year}}) 
+			if (numero_faltas.readyState == 4){
+				cur_frm.doc.numero_de_faltas = numero_faltas.responseJSON.message[0]
+			}else{
+				numero_faltas = cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_faltas",args:{"emp":frm.doc.employee, "mes":frm.doc.month, "ano":frm.doc.fiscal_year}}) 
+			}
+
+		}else if (numero_faltas !=0){
+			if (numero_faltas.readyState != 1){
+				cur_frm.doc.numero_de_faltas = numero_faltas.responseJSON.message[0]
+			}
 		}
 		
 		for(var i = 0; i < tbl1.length; i++){
@@ -54,10 +72,9 @@ frappe.ui.form.on('Salary Slip', {
 
 						}
 					}
+				}else{
+					irt_valor =cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_irt",args:{"start":salario}})
 				}
-
-
-				irt_valor =cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_irt",args:{"start":salario}})
 
 			}
 
@@ -109,6 +126,7 @@ frappe.ui.form.on('Salary Slip', {
 
 		//calculate_all(frm.doc);
 
+
 	},
 
 });
@@ -129,7 +147,12 @@ cur_frm.cscript.calcular_irt_inss = function(doc,cdt,cdn){
 
 					if (tbl1[i].salary_component == "Salario Base" || tbl1[i].salary_component == "Basic" && tbl1[i].amount != 0){
 
-						if (irt_valor.responseJSON.message[0].valor_inicio !=undefined){
+						if (valor_fim !=0){
+							irt = flt(salario) - valor_inicio;
+
+							irt = (irt * valor_percentual/ 100) + parcela_fixa;
+ 						
+						}else if (irt_valor.responseJSON.message[0].valor_inicio !=undefined){
 
 							irt = flt(salario) - irt_valor.responseJSON.message[0].valor_inicio;
 

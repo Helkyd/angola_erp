@@ -15,6 +15,8 @@ var parcela_fixa = 0;
 
 lista_irt = cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_lista_irt",args:{}})
 
+
+
 frappe.ui.form.on('Salary Slip', {
 
 	refresh: function(frm) {
@@ -28,7 +30,16 @@ frappe.ui.form.on('Salary Slip', {
 		inss_valor =cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_inss",args:{}})	
 
 		if (frm.doc.employee != undefined){
-			numero_faltas = cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_faltas",args:{"emp":frm.doc.employee, "mes":frm.doc.month, "ano":frm.doc.fiscal_year}}) 
+			if (numero_faltas.readyState == 4){
+				cur_frm.doc.numero_de_faltas = numero_faltas.responseJSON.message[0]
+			}else{
+				numero_faltas = cur_frm.call({method:"angola_erp.angola_erpnext.validations.irt.get_faltas",args:{"emp":frm.doc.employee, "mes":frm.doc.month, "ano":frm.doc.fiscal_year}}) 
+			}
+
+		}else if (numero_faltas !=0){
+			if (numero_faltas.readyState != 1){
+				cur_frm.doc.numero_de_faltas = numero_faltas.responseJSON.message[0]
+			}
 		}
 		
 		for(var i = 0; i < tbl1.length; i++){
@@ -107,6 +118,7 @@ frappe.ui.form.on('Salary Slip', {
 		});
 
 		//calculate_all(frm.doc);
+
 
 	},
 
