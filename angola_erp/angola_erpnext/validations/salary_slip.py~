@@ -18,20 +18,21 @@ def validate(doc,method):
 	tot_cont = 0
 
 	#Salva Payment Days e recalcula o IRT, INSS
-	PRINT "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+	print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
 	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(doc.employee,doc.month,doc.fiscal_year), as_dict=True)
-	print doc.employee
+	print doc.name , " + ", doc.employee
 	print doc.payment_days - j[0]['count(status)']
 	
 	doc.numero_de_faltas = j[0]['count(status)']
 	doc.payment_days = doc.payment_days - j[0]['count(status)']
 
-	for desconto in frappe.db.sql(""" SELECT * from `tabSalary Detail` where parent = %s """,doc.name, as_dict=True):
-		dd = frappe.get_doc("Salary Detail",desconto.name)
-		print "valor ", dd.amount
-		print "default ", dd.default_amount
-		dd.amount = desconto.default_amount
-		dd.save()
+#	for desconto in frappe.db.sql(""" SELECT * from `tabSalary Detail` where parent = %s """,doc.name, as_dict=True):
+#		dd = frappe.get_doc("Salary Detail",desconto.name)
+	print "valor ", dd.amount
+	print "default ", dd.default_amount
+#		dd.amount = desconto.default_amount
+#		dd.save()
 
 #	if not (len(doc.get("earnings")) or len(doc.get("deductions"))):
 		# get details from salary structure

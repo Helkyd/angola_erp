@@ -10,6 +10,24 @@ from frappe.model.document import Document
 import frappe.model
 import frappe.utils
 
+@frappe.whitelist()
+def set_faltas(mes,ano):
+	print " DADOS ATTENDANCE"
+	print  mes, ' ', ano
+	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' """, as_dict=True):
+		print tra.name
+		j= frappe.db.sql(""" SELECT count(status)
+		from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
+		print " ATTENDANCE"
+		print j[0][0]	
+		#save on Employee record
+		j1 = frappe.get_doc("Employee",tra.name)
+		j1.numer_faltas = j[0][0]
+		j1.save()
+	return j
+
+
 
 @frappe.whitelist()
 def set_salary_slip_pay_days(pag,emp,ano,mes):
@@ -23,12 +41,17 @@ def set_salary_slip_pay_days(pag,emp,ano,mes):
 
 @frappe.whitelist()
 def get_faltas(emp,mes,ano):
-	ret = {}
+	print " DADOS ATTENDANCE"
+	print emp, ' ', mes, ' ', ano
 	j= frappe.db.sql(""" SELECT count(status)
 	from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(emp,mes,ano), as_dict=False)
 
 	print " ATTENDANCE"
-	print j	
+	print j[0][0]	
+	#save on Employee record
+	j1 = frappe.get_doc("Employee",emp)
+	j1.numer_faltas = j[0][0]
+	j1.save()
 	return j
 
 

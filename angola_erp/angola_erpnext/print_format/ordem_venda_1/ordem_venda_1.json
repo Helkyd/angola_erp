@@ -1,0 +1,22 @@
+{
+ "align_labels_left": 0, 
+ "creation": "2016-12-01 09:48:10.567709", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Sales Order", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "{% if letter_head and not no_letterhead -%}\n    <div class=\"letter-head\">{{ letter_head }}</div>\n<hr>    \n{%- endif %}\n<h2><div class=\"text-center\"> {{ \"ORDEM DE VENDA\" }} </div></h2>\n<table border=\"0\" width=\"100%\" id=\"t03\">\n\t<tbody>\n\t\t<tr><h4>\n\t\t\t<th class=\"text-left\"> <font size=\"4\"><b>{{doc.name }}</b></th>\n\t\t\t<th class=\"text-right\"><b>Data:</b> {{ doc.get_formatted(\"transaction_date\") }}</th>\n\t\t</h4></tr>\n\t</tbody>\t\n</table>\n\n<div class=\"row\">\n  <div class=\"col-xs-8\" ><h4><b>Cliente: {{ doc.customer_name}}</b></h4>  \n\t<div class=\"row\">\n        <div class=\"col-xs-6\" ><b>Folha de Obra: </b>{{ doc.project}}</div>\n        <div class=\"col-xs-6\" ><b>Estado: </b>{{ doc.status }}</div>\n    </div>\n\t\n  </div>\n   \n</div>\n\n\n{% if doc.items%}\n\t<table class=\"table table-bordered \" id=\"t02\">\n\t\t<tbody>\n\t\t\t<tr>\n\t\t\t\t<th>Nr</th>\n\t\t\t\t<th class=\"text-center\">Descricao</th>\n\t\t\t\t<th class=\"text-center\">Qtd</th>\n\t\t\t\t<th class=\"text-center\">Pre\u00e7o</th>\n\t\t\t\t<th class=\"text-center\">Total</th>\t\t\t\t\n\t\t\t</tr>\n\t\t\t{%- for row in doc.items -%}\n\t\t\t<tr>\n\t\t\t\t<td style=\"width: 1%;\">{{ row.idx }}</td>\n\t\t\t\t<td align=\"left\" width= 20%>{{ row.description }} </td>\n\t\t\t\t<td align=\"center\" width= 2%>{{ row.get_formatted(\"qty\",doc) }}</td>\t\t\t\t\n\t\t\t\t<td id=\"td01\" align=\"right\" width= 8%>{{ row.get_formatted(\"rate\", doc)}}</td>\n\t\t\t\t<td id=\"td01\" align=\"right\" width= 8%>{{ row.get_formatted(\"amount\", doc)}}</td>\n\t\t\t\t\n\t\t\t</tr>\n\t\t\t{%- endfor -%}\t\n\t\t</tbody>\t\n\t</table>\n\t\n{% endif %}\n\t\n </div>\n<div class=\"row\">\n  <div class=\"col-xs-6 text-right\" ><h4><b>TOTAL GERAL KZ:</b></h4>    </div>\n  <div class=\"col-xs-6 text-right\" ><h5><b> {{ doc.get_formatted(\"rounded_total\") }} </b> </h5>  </div>\n </div>\n\n<div class=\"row\">\n  <div class=\"col-xs-6 text-right\" ><h6><b>Contra Valor Usd: </b></h6>  </div>\n  <div class=\"col-xs-6 text-right\" ><h6><b> </b> {{ doc.get_formatted(\"contra_valor\",doc) }}</h6> </div>  \n </div>\n\n \n<h5><div class=\"text-left small\"><b>OBS: {{doc.terms}} </b></div></h5>\n\n<div id=\"footer-html\" class=\"text-center small visible-pdf\">\n        {% if letter_head and not no_letterhead -%}\n\t{% set ff = frappe.get_doc(\"Letter Head\", doc.letter_head) %}\n        <div class=\"text-center small letter-head-footer\">\n            {{ ff.footer }}\n        </div>\n        {% endif %}\n        <p class=\"text-center small page-number visible-pdf\">\n            {{ _(\"Page {0} of {1}\").format('<span class=\"page\"></span>', '<span class=\"topage\"></span>') }}\n        </p>\n    </div>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2016-12-01 09:48:44.185042", 
+ "modified_by": "Administrator", 
+ "module": "Angola ERPNext", 
+ "name": "Ordem Venda_1", 
+ "owner": "Administrator", 
+ "print_format_builder": 1, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}
