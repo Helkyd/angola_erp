@@ -1,12 +1,44 @@
-// Copyright (c) 2016, Helio de Jesus and contributors
-// For license information, please see license.txt
+# -*- coding: utf-8 -*-
+# Copyright (c) 2016, Helio de Jesus and contributors
+# For license information, please see license.txt
 
 from __future__ import unicode_literals
 
+from frappe.model.document import Document
+import frappe.model
 import frappe
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate
+
+
+@frappe.whitelist()
+def get_taxa_ipc():
+	#locate account 34210000
+	j= frappe.db.sql(""" select name, description, account_head,parent  from `tabSales Taxes and Charges` where description like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA TAXE IPC conta 3421"
+	print j	
+	return j
+
+
+@frappe.whitelist()
+def get_lista_retencoes():
+	j= frappe.db.sql(""" SELECT name, descricao, percentagem from `tabRetencoes` """,as_dict=True)
+
+	print " LISTA RETENCOES"
+	print j	
+	return j
+
+
+
+@frappe.whitelist()
+def get_lista_taxas_vendas():
+	j= frappe.db.sql(""" select name, description  from `tabSales Taxes and Charges` """,as_dict=True)
+
+	print " LISTA TAXES e CHARGES"
+	print j	
+	return j
 
 
 # 

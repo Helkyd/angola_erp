@@ -10,6 +10,18 @@ from frappe.model.document import Document
 import frappe.model
 import frappe.utils
 
+
+
+@frappe.whitelist()
+def get_lista_retencoes():
+	j= frappe.db.sql(""" SELECT name, descricao, percentagem from `tabRetencoes` """,as_dict=True)
+
+	print " LISTA RETENCOES"
+	print j	
+	return j
+
+
+
 @frappe.whitelist()
 def set_faltas(mes,ano,empresa):
 	print " DADOS ATTENDANCE"
