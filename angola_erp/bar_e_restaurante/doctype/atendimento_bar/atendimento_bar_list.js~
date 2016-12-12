@@ -1,0 +1,216 @@
+// Copyright (c) 2016, Helio de Jesus and contributors
+// For license information, please see license.txt
+
+
+cx_open =cur_frm.call({method:"check_caixa_aberto",args:{"start":"none"}})
+
+
+
+frappe.ui.form.on('Atendimento Bar', {
+	onload: function(frm) {
+
+		//Verifica se o Caixa esta aberto ... segudo controle caso cx_aberto nao retorne valores ....
+
+		frappe.call({
+			method:"frappe.client.get_list",
+			args:{
+				doctype:"Caixa de Registo",
+				filters: {
+						"status_caixa":['in', 'Aberto, Em Curso']
+				},
+				fields: ["status_caixa"]
+			},
+			callback: function(r) {
+				if (r.message) {
+					$.each(r.message, function(i,d) {
+						console.log(i.toString() + ": " + d.status_caixa);
+						caixaopen = d.status_caixa;
+					});
+				}
+			}
+		});
+
+
+
+		show_alert("Verificando CAIXA ABERTO...",3)
+		cur_frm.enable_save()
+//		if (cx_open.statusText=="OK" ){
+
+		if ((cur_frm.docname.substring(0,3)=="New" || cur_frm.docname.substring(0,3)=="Nov") && cx_open.responseText != "{}"){
+			//CAIXA aberto ...
+
+
+
+			if (cx_open.responseText == undefined){
+
+				show_alert("É necessário fazer a Abertura do CAIXA...",3)
+			}else if (frm.doc.status_atendimento=="Ocupado" && frm.doc.bar_tender ==undefined && cx_open.responseText != undefined){
+
+				//Novo Registo 
+				show_alert("Novo Registo de Caixa...",3)
+				cur_frm.toggle_enable("bar_tender",false)
+				cur_frm.toggle_enable("pagamento_por",false)
+				cur_frm.toggle_enable("status_atendimento",false)
+			
+
+			}else if (frm.doc.status_atendimento=="Ocupado" && frm.doc.total_servicos !=0){
+				cur_frm.toggle_enable("nome_mesa",false)
+				cur_frm.toggle_enable("cartao_numero",false)
+				cur_frm.toggle_enable("nome_cliente",false)
+				cur_frm.toggle_enable("status_atendimento",false)
+		//			cur_frm.toggle_enable("hora_entrada",false)
+		//			cur_frm.toggle_enable("hora_saida",false)
+		//			cur_frm.toggle_enable("pagamento_por",false)	
+		//			cur_frm.toggle_enable("status_reserva",false)	
+		//			cur_frm.set_df_property("reserva_numero","hidden",true)
+		//			cur_frm.set_df_property("servico_pago_por","hidden",true)
+			}else if (frm.doc.status_atendimento=="Fechado"){
+				cur_frm.toggle_enable("nome_mesa",false)
+				cur_frm.toggle_enable("cartao_numero",false)
+				cur_frm.toggle_enable("nome_cliente",false)
+				cur_frm.toggle_enable("pagamento_por",false)
+				cur_frm.toggle_enable("status_atendimento",false)
+				cur_frm.toggle_enable("produtos",false)
+				cur_frm.toggle_enable("pagamento_botao",false)
+				if (frm.doc.conta_corrente_status =="Pago"){
+					cur_frm.toggle_enable("conta_corrente_status",false)
+				}else{
+					cur_frm.toggle_enable("conta_corrente_status",true)
+				}
+	
+		//			cur_frm.toggle_enable("status_reserva",false)	
+		//			cur_frm.set_df_property("reserva_numero","hidden",true)
+		//			cur_frm.set_df_property("servico_pago_por","hidden",true)
+			}else{
+				alert("Outro coisa")
+			}
+
+		
+
+		}else if (cx_open.responseText == "{}" && cx_open.readyState == 4){
+			//alert("Faca abertura do Caixa primeiro.")
+			cur_frm.toggle_enable("nome_mesa",false)
+			cur_frm.toggle_enable("nome_cliente",false)
+			cur_frm.toggle_enable("produtos",false)
+			cur_frm.toggle_enable("status_atendimento",false)
+			cur_frm.disable_save()
+			return
+		
+		}else{
+//			alert("CAIXA")
+			//JSON status still 1... no CAIXA Info
+			cur_frm.toggle_enable("nome_mesa",false)
+			cur_frm.toggle_enable("nome_cliente",false)
+			cur_frm.toggle_enable("produtos",false)
+			cur_frm.toggle_enable("status_atendimento",false)
+			if (frm.doc.conta_corrente_status =="Pago"){
+				cur_frm.toggle_enable("conta_corrente_status",false)
+			}else{
+				cur_frm.toggle_enable("conta_corrente_status",true)
+			}
+			
+			return
+
+		}
+
+
+	}
+});
+
+frappe.ui.form.on('Atendimento Bar', {
+	refresh: function(frm) {
+
+	}
+});
+
+
+frappe.ui.form.on("Atendimento Bar","nome_mesa",function(frm,cdt,cdn){
+
+	if (cx_open.statusText=="OK" ){
+		if (cx_open.responseText != "{}"){
+				//CAIXA aberto ...
+			frappe.model.set_value(cdt,cdn,'bar_tender',frappe.session.user)
+			cur_frm.refresh_fields('bar_tender')
+		}
+	}
+	frm.fields_dict.produtos.grid.get_field('produtos').get_query = function() {
+		return {
+			filters: {
+				
+	 			"disabled":0
+			}
+		}
+			
+	}
+
+	cur_frm.toggle_enable("status_atendimento",false)
+
+});
+
+cur_frm.add_fetch('produtos','standard_rate','produtos_preco')	
+
+frappe.ui.form.on("Atendimento Bar Itens","produtos",function(frm,cdt,cdn){
+
+	var d =locals[cdt][cdn];
+	
+	if (d.produtos !=""){
+		servicos_('Item',d.produtos)
+	}
+
+	if (frm.doc.status_atendimento=="Fechado"){
+		frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "nome_servico"})[0].read_only = true;	
+		frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "quantidade"})[0].read_only = true;	
+		frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_preco"})[0].read_only = true;
+		frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_total"})[0].read_only = true;
+	
+	}else{
+		frappe.model.set_value(cdt,cdn,'produtos_total',d.produtos_preco*d.quantidade)
+		frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_preco"})[0].read_only = true;
+		frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_total"})[0].read_only = true;
+		
+		calculate_totals(frm, cdt, cdn);
+	}
+
+});
+
+
+frappe.ui.form.on("Atendimento Bar Itens","quantidade",function(frm,cdt,cdn){
+
+	var d =locals[cdt][cdn];
+//	cur_frm.add_fetch('nome_servico','preco','preco_servico')
+
+	servicos_('Item',d.nome_servico)
+
+	frappe.model.set_value(cdt,cdn,'produtos_total',d.produtos_preco*d.quantidade)
+	frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_preco"})[0].read_only = true;
+	frappe.utils.filter_dict(frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_total"})[0].read_only = true;
+
+	calculate_totals(frm, cdt, cdn);
+
+
+});
+
+//FUNCOES PARA CALCULOS
+
+var servicos_ = function(frm,cdt,cdn){
+	frappe.model.with_doc(frm, cdt, function() { 
+		var d = frappe.model.get_doc(frm,cdt)
+		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["produtos"].grid.docfields, {"fieldname": "produtos_preco"}),d.standard_rate)
+		cur_frm.refresh_fields()
+
+
+	});
+}
+
+
+var calculate_totals = function(frm, cdt,cdn) {
+	var tbl1 = frm.doc.produtos || [];
+	var total_valor = 0; 
+	for(var i = 0; i < tbl1.length; i++){
+		total_valor += flt(tbl1[i].produtos_total);
+	}
+	frappe.model.set_value(cdt,cdn,'total_servicos',total_valor)
+	frm.doc.total_servicos = total_valor
+	refresh_many(['total_servicos']);
+}
+

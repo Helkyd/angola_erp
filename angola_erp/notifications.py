@@ -1,0 +1,16 @@
+
+# Copyright (c) 2016, Helio de Jesus and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+
+def get_notification_config():
+	return { "for_doctype":
+		{
+			"Atendimento Bar": {"status_atendimento": 'Ocupado'},
+			"Mesas": {"status_mesa": 'Ocupada'}
+
+		}
+	}
+
+

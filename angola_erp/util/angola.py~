@@ -10,12 +10,67 @@ import frappe
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate
+from frappe.model.naming import make_autoname
+
+@frappe.whitelist()
+def check_caixa_aberto():
+
+	if (frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Aberto' """, as_dict=False)) != ():
+		print "AAAAAAAA"
+		return frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Aberto' """, as_dict=False)
+	elif (frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Em Curso' """, as_dict=False)) != ():
+		return frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Em Curso' """, as_dict=False)
+		print "BBBBBBBBB"
+		print frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Aberto' """, as_dict=False)	
+
+@frappe.whitelist()
+def caixa_movimentos_in(start,caixa,fecho):
+
+		total_tpa = 0
+		total_ccorrente = 0
+		total_caixa = 0
+		for d in  frappe.db.sql("""select hora_atendimento, name,total_servicos,pagamento_por, status_atendimento, bar_tender, company from `tabAtendimento Bar` where status_atendimento ='Fechado' and hora_atendimento >= %(start)s and hora_atendimento <= %(end)s """, {"start": start,"end": frappe.utils.now()	}, as_dict=True):
+			
+			print "MOVIMENTOS BAR RESTAURANTE +++++++++++++++++++++++++++++++"
+			ddd = make_autoname('MOV-' + '.#####')
+			if len(frappe.db.sql("SELECT name,descricao_movimento from tabMovimentos_Caixa WHERE descricao_movimento=%(mov)s""",{"mov":d.name}, as_dict=True))==0:
+				frappe.db.sql("INSERT into tabMovimentos_Caixa (name, docstatus, parent, parenttype, parentfield, tipo_pagamento, descricao_movimento, valor_pago, hora_atendimento, creation, modified, usuario_movimentos, company) values (%s,0,%s,'Caixa de Registo','movimentos_caixa',%s,%s,%s,%s,%s,%s,%s,%s) ",(ddd, caixa, d.pagamento_por ,d.name, d.total_servicos, d.hora_atendimento, frappe.utils.now(), frappe.utils.now(),d.bar_tender,d.company))
+				total_caixa = d.total_servicos+total_caixa
+				if (d.pagamento_por == "TPA"):
+					total_tpa = d.total_servicos+total_tpa
+				
+				if (d.pagamento_por == "Conta-Corrente"):
+					total_ccorrente = d.total_servicos+total_ccorrente
+		print "Abre Caixa"
+		print total_caixa
+		reser = frappe.get_doc("Caixa de Registo",caixa)
+		if (total_caixa > 1) and (reser.amount_caixa == 0):
+			reser.amount_caixa = total_caixa+reser.amount_caixa
+			reser.amount_tpa = total_tpa+reser.amount_tpa
+			reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
+			reser.status_caixa='Em Curso'
+			reser.save()
+		elif (total_caixa > 1) and (reser.amount_caixa >= 0):
+			reser.amount_caixa = total_caixa+reser.amount_caixa
+			reser.amount_tpa = total_tpa+reser.amount_tpa
+			reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
+			reser.save()
+		print fecho
+		print reser.status_caixa
+		if (fecho==2):
+			reser.status_caixa='Fechado'
+			reser.save()
+
+		
+
+		return total_caixa
+
 
 
 @frappe.whitelist()
 def get_taxa_ipc():
 	#locate account 34210000
-	j= frappe.db.sql(""" select name, description, account_head,parent  from `tabSales Taxes and Charges` where description like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where description like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
 	print " LISTA TAXE IPC conta 3421"
 	print j	
