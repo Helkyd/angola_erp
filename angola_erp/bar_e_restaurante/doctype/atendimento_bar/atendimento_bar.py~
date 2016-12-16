@@ -34,14 +34,14 @@ class AtendimentoBar(Document):
 
 	def on_update(self):
 		self.Mesas_Status()
-		self.Clientes_Status()
-		self.Contas_Correntes()
+		#self.Clientes_Status()
+		#self.Contas_Correntes()
 
 
 	def Mesas_Status(self):
 
 		# Change Mesas status 
-		mesa = frappe.get_doc("MESAS", self.nome_mesa)
+		mesa = frappe.get_doc("Mesas", self.nome_mesa)
 		
 		if self.status_atendimento == "Ocupado":
 			mesa.status_mesa = "Ocupada"
@@ -57,7 +57,7 @@ class AtendimentoBar(Document):
 		#Update Cliente caso Conta-Corrente
 
 		if (self.conta_corrente !="nome do cliente") and (self.conta_corrente !=None):
-			cliente = frappe.get_doc("CLIENTES", self.conta_corrente)	
+			cliente = frappe.get_doc("Customer", self.conta_corrente)	
 			if (self.status_atendimento == "Fechado") and (self.conta_corrente != "nome do cliente") :
 				cliente.conta_corrente = "Conta-Corrente"
 				cliente.save()

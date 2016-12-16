@@ -13,7 +13,11 @@ class AtendimentoBar(Document):
 
 
 	def autoname(self):
-		self.name = make_autoname(self.nome_mesa + '-' + '.#####')
+
+		if self.is_pos:
+			self.name = make_autoname(self.naming_series + '.#####')	
+		else:
+			self.name = make_autoname(self.nome_mesa + '-' + '.#####')
 
 
 	def validate(self):

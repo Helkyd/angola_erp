@@ -1,4 +1,4 @@
-.erpnext-footer {
+.angola_erp-footer {
   margin: 11px auto;
   text-align: center;
 }
@@ -13,13 +13,13 @@
   margin: -10px auto;
 }
 /* pos */
-.pos-item-area {
+.pos-mesa-area {
   padding: 0px 10px;
 }
-.pos-item-wrapper {
+.pos-mesas-wrapper {
   padding: 5px;
 }
-.pos-item {
+.pos-mesa {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
@@ -28,17 +28,46 @@
   border: 1px solid #d1d8dd;
   margin-bottom: 5px;
 }
-.pos-item-text {
-  padding: 0px 5px;
-}
-.pos-item .item-code {
+.pos-mesa-select {
+  overflow: hidden;
+  text-overflow: ellipsis;	
+  cursor: pointer;
+  padding: 4px;
+  padding-bottom: 5px;
+  border: 1px solid ;
+  border-color: #ff0000 #0000ff;
   margin-bottom: 0px;
 }
-.pos-item .no-image {
+
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150%;
+    vertical-align: middle;
+
+}
+
+
+.pos-mesa-text {
+  padding: 0px 5px;
+}
+.pos-mesa .nome-mesa {
+  margin-bottom: 0px;
+}
+.pos-mesa-select .nome-mesa {
+  margin-bottom: 0px;
+}
+.pos-mesa .no-image {
   background-color: #fafbfc;
   border: 1px dashed #d1d8dd;
 }
-.pos-item-image {
+.pos-mesa-select .no-image {
+  background-color: #fafbfc;
+  border: 1px dashed #d1d8dd;
+}
+
+.pos-mesa-image {
   width: 100%;
   height: 0px;
   padding: 50% 0;
@@ -51,11 +80,12 @@
   background-position: center;
   background-repeat: no-repeat;
 }
-.pos-item-area {
+
+.pos-mesa-area {
   border: 1px solid #d1d8dd;
   border-top: none;
 }
-.pos-item-toolbar {
+.pos-mesa-toolbar {
   padding: 10px 0px;
   border-bottom: 1px solid #d1d8dd;
 }
@@ -68,7 +98,7 @@
   border-bottom: 1px solid #d1d8dd;
   height: 51px;
 }
-.pos-item-toolbar .form-group {
+.pos-mesa-toolbar .form-group {
   margin-bottom: 0px;
 }
 .pos-bill-wrapper {
@@ -99,6 +129,9 @@
   margin-top: 3px;
   cursor: pointer;
   font-size: 120%;
+}
+.pos .search-mesa .form-group {
+  max-width: 100% !important;
 }
 .pos .search-area .form-group {
   max-width: 100% !important;
