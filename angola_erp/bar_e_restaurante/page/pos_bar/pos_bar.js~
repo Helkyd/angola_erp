@@ -613,9 +613,12 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 			return $.grep(this.mesas, function(item){
 //				alert("Ainda por ver")
 				if(search_status){
-					if(reg.test(item.nome_mesa.toLowerCase()) || reg.test(item.numero_cartao.toLowerCase()) ){
-//					reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase()) ){
+					if(reg.test(item.nome_mesa.toLowerCase()) ){
 						return true
+					}else if (item.numero_cartao != null){
+						if(reg.test(item.numero_cartao.toLowerCase()) ){
+							return true
+						}
 					}
 				}
 			})

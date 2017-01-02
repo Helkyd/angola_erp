@@ -307,7 +307,8 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	setup: function(){
 
-		this.wrapper.html(frappe.render_template("pos_bar", this.frm.doc, is_path=true));
+//		this.wrapper.html(frappe.render_template("pos_bar", this.frm.doc, is_path=true));
+		this.wrapper.html(frappe.render_template("pos_bar", this.frm.doc));
 		this.set_transaction_defaults("Customer");
 		this.make();
 		this.set_primary_action();
