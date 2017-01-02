@@ -1,12 +1,19 @@
-<div class="pos-mesas-wrapper col-xs-3">
+<div class="pos-mesas-wrapper col-xs-2">
 	<div class="pos-mesa" data-nome-mesa="{%= nome_mesa %}" title="{%= nome_mesa  %}">
+		<div class="pos-mesa-text">
+			<h6 class="nome-mesa text-ellipsis">{%= nome_mesa %}</h6>
+		</div>
+
 		<div class="pos-mesa-image"
 			 style="{% if (mesa_image) { %} background-image: {{ mesa_image }} {% }
 			 	else { %} background-color: {{ color }} {% } %}">
 			{% if (!mesa_image) { %}{{ abbr }}{% } %}
 		</div>
-		<div class="pos-mesa-text">
-			<h6 class="nome-mesa text-ellipsis">{%= nome_mesa ? (nome_mesa + " (" + status_mesa + ")") : status_mesa %}</h6>
+		<div class="pos-mesa-text1">
+			 {%if (status_mesa =="Livre") { %} <h6 class="nome-mesa text-ellipsis" style="color:green; text-align:center"> {{ status_mesa  }} </h6> {% } %} 
+
+			 {%if (status_mesa =="Ocupada") { %} <h6 class="nome-mesa text-ellipsis" style="color:rede; text-align:center"> {{ status_mesa  }} </h6> {% } %} 
+
 			<div class="small text-ellipsis">{%= numero_cartao %}</div>
 		</div>
 	</div>

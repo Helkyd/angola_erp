@@ -55,8 +55,8 @@ def get_pos_data():
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
 			'items': frappe.get_meta('Sales Invoice Item'),
-			'taxes': frappe.get_meta('Sales Taxes and Charges'),
-			'atend_bar':frappe.get_meta('Atendimento Bar')
+			'taxes': frappe.get_meta('Sales Taxes and Charges')
+#			'atend_bar':frappe.get_meta('Atendimento Bar'),
 #			'atend_bar_item':frappe.get_meta('Atendimento Bar Itens')
 		}
 	}
@@ -127,14 +127,14 @@ def update_tax_table(doc):
 def get_mesas_list():
 
 	print "mesas "
-	print frappe.db.sql(""" select name, nome_mesa, numero_cartao, mesa_image, status_mesa from tabMesas where status_mesa = 'Livre' """, as_dict=1)
+	print frappe.db.sql(""" select name, nome_mesa, numero_cartao, mesa_image, status_mesa from tabMesas where status_mesa in ('Livre','Ocupada')  """, as_dict=1)
 	return frappe.db.sql(""" 
 		select
 			name, nome_mesa, numero_cartao, mesa_image, status_mesa
 		from
 			tabMesas
 		where
-			status_mesa = 'Livre' """, as_dict=1)
+			status_mesa in ('Livre','Ocupada')  """, as_dict=1)
 
 def get_items_list(pos_profile):
 	cond = "1=1"

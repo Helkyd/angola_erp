@@ -285,6 +285,10 @@ frappe.ui.form.on("Atendimento Bar","nome_mesa",function(frm,cdt,cdn){
 		alert("CAIXA ESTA FECHADO. NAO PODE FAZER VENDAS!")
 //		show_alert(cx_open.responseText)
 		cur_frm.disable_save()	
+		cur_frm.toggle_enable("cartao_numero",false)
+		cur_frm.toggle_enable("nome_cliente",false)
+		cur_frm.toggle_enable("produtos",false)
+
 	}else{
 		frappe.model.set_value(cdt,cdn,'bar_tender',frappe.session.user)
 		cur_frm.refresh_fields('bar_tender')

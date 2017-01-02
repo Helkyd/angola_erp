@@ -71,6 +71,7 @@ frappe.ui.form.on('Atendimento Bar', {
 				cur_frm.toggle_enable("status_atendimento",false)
 				cur_frm.toggle_enable("total_servicos",false)
 				cur_frm.toggle_enable("valor_pago",false)
+				cur_frm.toggle_enable("naming_series",false)
 
 			}else if (frm.doc.status_atendimento=="Ocupado" && frm.doc.total_servicos !=0){
 				cur_frm.toggle_enable("nome_mesa",false)
@@ -80,6 +81,7 @@ frappe.ui.form.on('Atendimento Bar', {
 				cur_frm.toggle_enable("status_atendimento",false)
 				cur_frm.toggle_enable("total_servicos",false)
 				cur_frm.toggle_enable("valor_pago",false)
+				cur_frm.toggle_enable("naming_series",false)
 
 		//			cur_frm.toggle_enable("hora_entrada",false)
 		//			cur_frm.toggle_enable("hora_saida",false)
@@ -97,6 +99,7 @@ frappe.ui.form.on('Atendimento Bar', {
 				cur_frm.toggle_enable("pagamento_botao",false)
 				cur_frm.toggle_enable("total_servicos",false)
 				cur_frm.toggle_enable("valor_pago",false)
+				cur_frm.toggle_enable("naming_series",false)
 
 				if (frm.doc.conta_corrente_status =="Pago"){
 					cur_frm.toggle_enable("conta_corrente_status",false)
@@ -123,6 +126,7 @@ frappe.ui.form.on('Atendimento Bar', {
 			cur_frm.toggle_enable("status_atendimento",false)
 			cur_frm.toggle_enable("total_servicos",false)
 			cur_frm.toggle_enable("valor_pago",false)
+			cur_frm.toggle_enable("naming_series",false)
 
 			cur_frm.disable_save()
 			return
@@ -138,6 +142,7 @@ frappe.ui.form.on('Atendimento Bar', {
 			cur_frm.toggle_enable("status_atendimento",false)
 			cur_frm.toggle_enable("total_servicos",false)
 			cur_frm.toggle_enable("valor_pago",false)
+			cur_frm.toggle_enable("naming_series",false)
 
 			if (frm.doc.conta_corrente_status =="Pago"){
 				cur_frm.toggle_enable("conta_corrente_status",false)

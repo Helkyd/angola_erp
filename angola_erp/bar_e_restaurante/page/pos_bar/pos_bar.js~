@@ -147,8 +147,11 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 				doc_data = me.get_invoice_doc(me.si_docs)
 				atendbar_data = me.get_atendimento_doc(me.at_bar)
 				if(atendbar_data){
-					me.frm.atendbar = atendbar_data[0][me.name];
-					me.refresh(false);
+					//me.frm.atendbar = atendbar_data[0][me.name];
+					me.frm.atendbar.nome_mesa = atendbar_data[0][me.name].nome_mesa;
+					me.mesas_campo =atendbar_data[0][me.name].nome_mesa;
+					show_alert(atendbar_data[0][me.name].nome_mesa,2)
+					//me.refresh(false);
 				}
 
 
@@ -368,8 +371,8 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.mesas_campo = frappe.ui.form.make_control({
 			df: {
 				"fieldtype": "Data",
-//				"options": this.mesas,
-				"label": "Mesas",
+				"options": this.mesas,
+				"label": this.mesas, //"Mesas",
 				"fieldname": "mesa_cartao",
 				"placeholder": __("Select Table or Card")
 			},
@@ -377,6 +380,12 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 			only_input: true,
 		});
 		this.mesas_campo.make_input();
+		this.mesas_campo.$input.on("keyup", function() {
+			setTimeout(function() {
+				me.mesas = me.get_mesas();
+				me.make_mesa_list();
+			}, 1000);
+		});
 		this.mesas_campo.set_focus()
 	},
 
@@ -595,34 +604,23 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 			})
 		}
 
-		key =  this.search.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
+		key =  this.mesas_campo.$input.val().toLowerCase().replace(/[&\/\\#,+()\[\]$~.'":*?<>{}]/g,'\\$&');
 		var re = new RegExp('%', 'g');
 		var reg = new RegExp(key.replace(re, '[\\w*\\s*[a-zA-Z0-9]*]*'))
 		search_status = true
 
 		if(key){
 			return $.grep(this.mesas, function(item){
-				alert("Ainda por ver")
+//				alert("Ainda por ver")
 				if(search_status){
-					if(in_list(me.batch_no_data[item.item_code], me.search.$input.val())){
-						search_status = false;
-						return me.item_batch_no[item.item_code] = me.search.$input.val()
-					} else if( me.serial_no_data[item.item_code]
-						&& in_list(Object.keys(me.serial_no_data[item.item_code]), me.search.$input.val())) {
-						search_status = false;
-						me.item_serial_no[item.item_code] = [me.search.$input.val(), me.serial_no_data[item.item_code][me.search.$input.val()]]
-						return true
-					} else if(item.barcode == me.search.$input.val()) {
-						search_status = false;
-						return item.barcode == me.search.$input.val();
-					} else if(reg.test(item.item_code.toLowerCase()) || reg.test(item.description.toLowerCase()) ||
-					reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase()) ){
+					if(reg.test(item.nome_mesa.toLowerCase()) || reg.test(item.numero_cartao.toLowerCase()) ){
+//					reg.test(item.item_name.toLowerCase()) || reg.test(item.item_group.toLowerCase()) ){
 						return true
 					}
 				}
 			})
 		}else{
-			return this.item_data;
+			return this.mesas;
 		}
 	},
 
@@ -726,7 +724,7 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.remove_produto = []
 		$.each(this.frm.atendbar["produtos"] || [], function(i, d) {
 			if (d.produtos == item_code) {
-				if (field=='qtd') {
+				if (field=='qty') {
 					d['quantidade'] = flt(value);
 				}else if (field=='rate') {
 					d['produtos_preco'] = flt(value);
