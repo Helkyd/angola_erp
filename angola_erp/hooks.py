@@ -92,9 +92,11 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
+scheduler_events = {
+ 	"all": [
 # 		"angola_erp.tasks.all"
+
+		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida" #Saida dos Quartos
 # 	],
 # 	"daily": [
 # 		"angola_erp.tasks.daily"
@@ -107,8 +109,8 @@ doc_events = {
 # 	]
 # 	"monthly": [
 # 		"angola_erp.tasks.monthly"
-# 	]
-# }
+ 	]
+}
 
 # Testing
 # -------

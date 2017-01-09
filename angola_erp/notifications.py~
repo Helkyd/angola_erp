@@ -8,9 +8,7 @@ def get_notification_config():
 	return { "for_doctype":
 		{
 			"Atendimento Bar": {"status_atendimento": 'Ocupado'},
-			"Mesas": {"status_mesa": 'Ocupada'},
-			"Gestao de Quartos": {"status_quarto": "Ocupado"},
-			"Reservas": {"reservation_status": "Nova"},
+			"Mesas": {"status_mesa": 'Ocupada'}
 
 		}
 	}
