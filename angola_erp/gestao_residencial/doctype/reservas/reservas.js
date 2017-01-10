@@ -12,6 +12,7 @@ frappe.ui.form.on('Reservas', {
 			cur_frm.toggle_enable("numero_cliente",true)	
 			cur_frm.toggle_enable("reservation_status",false)	
 			cur_frm.toggle_enable("number_days",false)
+			cur_frm.toggle_enable("total_reserva",false)
 			cur_frm.set_df_property("pagamentos","hidden",true)
 		
 		}else if (frm.doc.reservation_status=="Nova" && frm.doc.pay_advance !="Sim"){
@@ -29,54 +30,14 @@ frappe.ui.form.on('Reservas', {
 			cur_frm.toggle_enable("num_infants",false)	
 			cur_frm.toggle_enable("pay_advance",false)	
 
-		}else if (frm.doc.reservation_status=="Cancelada" ){
-			cur_frm.toggle_enable("booked_by",false)	
-			cur_frm.toggle_enable("check_in",false)	
-			cur_frm.toggle_enable("check_out",false)	
-			cur_frm.toggle_enable("num_adults",false)	
-			cur_frm.toggle_enable("num_childs",false)	
-			cur_frm.toggle_enable("num_infants",false)	
-			cur_frm.toggle_enable("numero_quarto",false)	
-			cur_frm.toggle_enable("numero_cliente",false)	
-			cur_frm.toggle_enable("reservation_status",false)
-			cur_frm.toggle_enable("pay_advance",false)		
-			cur_frm.toggle_enable("number_days",false)
-			cur_frm.toggle_enable("preco_quarto",false)
 		
-		}else if (frm.doc.reservation_status=="Ativo"){
-			cur_frm.toggle_enable("booked_by",false)	
-			cur_frm.toggle_enable("check_in",false)	
-			cur_frm.toggle_enable("check_out",false)	
-			cur_frm.toggle_enable("num_adults",false)	
-			cur_frm.toggle_enable("num_childs",false)	
-			cur_frm.toggle_enable("num_infants",false)	
-			cur_frm.toggle_enable("numero_quarto",false)	
-			cur_frm.toggle_enable("numero_cliente",false)	
-			cur_frm.toggle_enable("pay_advance",false)
-			cur_frm.toggle_enable("number_days",false)
-			cur_frm.toggle_enable("preco_quarto",false)
-			cur_frm.toggle_enable("quarto_tipo",false)
-			cur_frm.toggle_enable("paid_type",false)
-			cur_frm.toggle_enable("valor_pago",false)
+		}else if (frm.doc.reservation_status=="Ativo" || frm.doc.reservation_status=="Cancelada"){
+			cur_frm.doc.docstatus = 1
 			cur_frm.disable_save()
 
 
 		}else if (frm.doc.reservation_status=="Fechada" ){
-			cur_frm.toggle_enable("booked_by",false)	
-			cur_frm.toggle_enable("check_in",false)	
-			cur_frm.toggle_enable("check_out",false)	
-			cur_frm.toggle_enable("num_adults",false)	
-			cur_frm.toggle_enable("num_childs",false)	
-			cur_frm.toggle_enable("num_infants",false)	
-			cur_frm.toggle_enable("numero_quarto",false)	
-			cur_frm.toggle_enable("numero_cliente",false)	
-			cur_frm.toggle_enable("reservation_status",false)
-			cur_frm.toggle_enable("pay_advance",false)		
-			cur_frm.toggle_enable("number_days",false)
-			cur_frm.toggle_enable("preco_quarto",false)
-			cur_frm.toggle_enable("quarto_tipo",false)
-			cur_frm.toggle_enable("paid_type",false)
-			cur_frm.toggle_enable("valor_pago",false)
+			cur_frm.doc.docstatus = 1
 			cur_frm.disable_save()
 		}
 
@@ -108,6 +69,7 @@ frappe.ui.form.on('Reservas', {
 			frm.set_df_property("reservation_status","options","Ativo\nPago")
 		}else if (cur_frm.doc.reservation_status=="Nova"){
 			frm.set_df_property("reservation_status","options","Nova\nAtivo\nCancelada")
+			cur_frm.toggle_enable("booked_by",false)
 
 		}
 
@@ -224,7 +186,8 @@ frappe.ui.form.on('Reservas','reservation_status',function(frm,cdt,cdn){
 
 	}else if (frm.doc.reservation_status =="Ativo") {
 	//Cria na Gestao_quartos...
-		 show_alert("Status do Quarto Ocupado depois de SALVAR O REGISTO...",2)
+		show_alert("Status do Quarto Ocupado depois de SALVAR O REGISTO...",2)
+		this.cur_page.page.frm._save()	
 
 	}	
 });

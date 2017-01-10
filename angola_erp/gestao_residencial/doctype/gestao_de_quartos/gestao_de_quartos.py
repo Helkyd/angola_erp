@@ -177,6 +177,13 @@ def lista_clientes():
 
 
 @frappe.whitelist()
+def quartos_reservados():
+
+	return frappe.db.sql("""select name,numero_quarto,check_in,reservation_status from `tabReservas` where reservation_status = 'Nova' """, as_dict=True)
+
+
+
+@frappe.whitelist()
 def atualiza_ccorrente(cliente,recibo):
 
 	print cliente

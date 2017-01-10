@@ -114,7 +114,7 @@ class GestaodeQuartos(Document):
 
 				cc_detalhes = frappe.new_doc("CC_detalhes")
 				cc_detalhes.parent = ccorrente.name
-				cc_detalhes.parentfield = "cc_tables_detalhes"
+				cc_detalhes.parentfield = "cc_table_detalhes"
 				cc_detalhes.parenttype = "Contas Correntes"
 					
 				cc_detalhes.descricao_servico = self.name #extras.nome_servico
@@ -151,7 +151,7 @@ class GestaodeQuartos(Document):
 
 				cc_detalhes = frappe.new_doc("CC_detalhes")
 				cc_detalhes.parent =ccorrente.name
-				cc_detalhes.parentfield = "cc_tables_detalhes"
+				cc_detalhes.parentfield = "cc_table_detalhes"
 				cc_detalhes.parenttype = "Contas Correntes"
 
 					#print extras.nome_servico
@@ -174,6 +174,13 @@ class GestaodeQuartos(Document):
 def lista_clientes():
 
 	return frappe.db.sql("""select name from `tabCustomer` """, as_dict=False)
+
+
+@frappe.whitelist()
+def quartos_reservados():
+
+	return frappe.db.sql("""select name,numero_quarto,check_in,reservation_status from `tabReservas` where reservation_status = 'Nova' """, as_dict=False)
+
 
 
 @frappe.whitelist()

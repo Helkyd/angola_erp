@@ -95,7 +95,7 @@ doc_events = {
 scheduler_events = {
  	"all": [
 # 		"angola_erp.tasks.all"
-
+		"angola_erp.gestao_residencial.doctype.api.verifica_check_in",
 		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida" #Saida dos Quartos
 # 	],
 # 	"daily": [

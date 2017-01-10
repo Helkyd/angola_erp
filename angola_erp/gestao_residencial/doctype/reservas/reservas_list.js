@@ -22,6 +22,12 @@ frappe.listview_settings['Reservas'] = {
 	},
 	colwidths: {"subject": 3, "indicator": 3,"Data de Entrada": 3},
 
+	onload: function(listview){
+		frappe.route_options = {
+			'reservation_status':['in','Nova, Ativo']
+
+		};
+	},
 	
 };
 

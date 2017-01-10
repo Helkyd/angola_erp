@@ -2,8 +2,10 @@
 // For license information, please see license.txt
 
 
+var estadoQuarto;
+var horaentrada=0;
 lista =cur_frm.call({method:"lista_clientes",args:{"start":"moeda"}})
-
+quartosreservados  =cur_frm.call({method:"quartos_reservados",args:{"start":"moeda"}})
 
 
 frappe.ui.form.on('Gestao de Quartos', {
@@ -73,7 +75,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 		cur_frm.fields_dict['numero_quarto'].get_query = function(doc){
 			return{
 				filters:{
-					"status_quarto":"Livre"
+					"status_quarto":['in','Livre, Reservado'] 
 				}
 			}
 		}
@@ -111,9 +113,53 @@ frappe.ui.form.on('Gestao de Quartos', {
 			});
 
 		}
+
+		if (estadoQuarto != undefined){
+			//Reservado
+				
+		}
 	}
 });
 
+
+frappe.ui.form.on("Gestao de Quartos","numero_quarto",function(frm,cdt,cdn){
+
+
+	if (cur_frm.doc.numero_quarto != undefined && cur_frm.doc.numero_quarto != ""){
+
+		frappe.model.with_doc("Quartos", cur_frm.doc.numero_quarto, function() { 
+			var d = frappe.model.get_doc("Quartos",cur_frm.doc.numero_quarto)
+			estadoQuarto = d.status_quarto
+			if (horaentrada !=0){
+				if (estadoQuarto == "Reservado"){
+					if (quartosreservados.responseText != "{}") {
+						x = 0
+						for (x in quartosreservados.responseJSON.message){
+							if (quartosreservados.responseJSON.message[x].numero_quarto == cur_frm.doc.numero_quarto){
+								horaentrada = quartosreservados.responseJSON.message[x].check_in
+								x = quartosreservados.responseJSON.message.length + 1
+							}			
+						}
+					}			
+
+					if (frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat) <=2){
+						alert("Quarto Reservado!!! Menos de duas horas para ficar Ativo.\n Por favor selecione outro Quarto.")
+						//horaentrada = 0
+						frappe.model.set_value(cdt,cdn,'numero_quarto',"");
+			
+					}
+					show_alert("Faltam: " + frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat).toString() ) + " Horas."
+				}
+			}
+		});
+
+
+
+	}
+
+
+	
+});
 
 frappe.ui.form.on("Gestao de Quartos","conta_corrente_status",function(frm,cdt,cdn){
 	if (cur_frm.doc.conta_corrente_status == "Pago"){
@@ -173,6 +219,32 @@ frappe.ui.form.on('Gestao de Quartos','tipo_quarto',function(frm,cdt,cdn){
 	cur_frm.refresh_fields();
 
 
+	//Check if Quarto RESERVADO ... calculate time available 	
+
+	if (estadoQuarto != undefined){
+		if (estadoQuarto == "Reservado"){
+			//Reservado
+			if (quartosreservados.responseText != "{}") {
+				x = 0
+				for (x in quartosreservados.responseJSON.message){
+					if (quartosreservados.responseJSON.message[x].numero_quarto == cur_frm.doc.numero_quarto){
+						horaentrada = quartosreservados.responseJSON.message[x].check_in
+						x = quartosreservados.responseJSON.message.length + 1
+					}			
+				}
+			}
+			if (horaentrada !=0){
+				if (frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat) <=2){
+					alert("Quarto Reservado!!! Menos de duas horas para ficar Ativo.\n Por favor selecione outro Quarto.")
+					//horaentrada = 0
+					frappe.model.set_value(cdt,cdn,'numero_quarto',"");
+
+				}
+				show_alert("Faltam: " + frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat).toString() ) + " Horas."
+
+			}
+		}			
+	}
 
 
 
@@ -272,23 +344,21 @@ frappe.ui.form.on("Servicos_Quarto","quantidade",function(frm,cdt,cdn){
 
 frappe.ui.form.on('Gestao de Quartos', {
 	validate: function(frm) {
+
+
+	//Check if reservado selected ....
+
 		
-//cur_frm.cscript.custom_validate = function (doc){
 
 		show_alert("Validando Dados...",1)
 
 
 		if (cur_frm.doc.hora_diaria_noite =="Noite"){
-			//disable Horas and set 1; disable hora_entrada and calculate as from now until 
-	//		frappe.model.set_value(cdt,cdn,'horas',1);
-		//	frappe.model.set_value(cdt,cdn,'hora_entrada',frappe.utils.data.now_datetime());
 			cur_frm.set_df_property("horas","label","Noites")
 			cur_frm.doc.hora_saida= moment(cur_frm.doc.hora_entrada).add(12,'hours');
 			cur_frm.doc.total=cur_frm.doc.preco*cur_frm.doc.horas
 		}else if (cur_frm.doc.hora_diaria_noite =="Diaria"){
 			// Horas set 1 Dia; 
-			//frappe.model.set_value(cdt,cdn,'horas',1);
-		//	frappe.model.set_value(cdt,cdn,'hora_entrada',frappe.utils.data.now_datetime());
 			cur_frm.set_df_property("horas","label","Dias")
 			cur_frm.doc.hora_saida=frappe.datetime.add_days(cur_frm.doc.hora_entrada, cur_frm.doc.horas);
 			cur_frm.doc.total=cur_frm.doc.preco*cur_frm.doc.horas
@@ -301,7 +371,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.refresh_fields();	
 
 		}
-
+		horaentrada=0;
 
 
 	
@@ -536,6 +606,7 @@ var quartos_ = function(frm,cdt,cdn){
 
 
 }
+
 
 var servicos_ = function(frm,cdt,cdn){
 	frappe.model.with_doc(frm, cdt, function() { 
