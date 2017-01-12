@@ -43,7 +43,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.toggle_enable("status_quarto",false)	
 			cur_frm.set_df_property("reserva_numero","hidden",true)
 			cur_frm.set_df_property("servico_pago_por","hidden",true)
-			cur_frm.set_df_property("pagar_servicos","hidden",true)
+			//cur_frm.set_df_property("pagar_servicos","hidden",true)
 			cur_frm.toggle_enable("nome_cliente",false)
 			cur_frm.doc.docstatus = 1 
 			if (frm.doc.conta_corrente_status =="Pago"){

@@ -1,19 +1,32 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe, json
-from frappe import _
 from frappe.utils import nowdate
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import get_pos_profile
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from frappe.utils import cstr, get_datetime, getdate, cint, get_datetime_str
+
+
+def as_unicode(text, encoding='utf-8'):
+# 	'''Convert to unicode if required'''
+	if text and not isinstance(text, unicode):
+	if isinstance(text, unicode):
+		return text
+	elif text==None:
+		return ''
+	elif isinstance(text, basestring):
+ 		return unicode(text, encoding)
+ 	else:
+		return text or ''
+		return unicode(text)
 
 @frappe.whitelist()
 def get_pos_data():
-
-	
 	doc = frappe.new_doc('Sales Invoice')
 	doc.is_pos = 1;
 	pos_profile = get_pos_profile(doc.company) or {}
@@ -29,20 +42,20 @@ def get_pos_data():
 	default_print_format = pos_profile.get('print_format') or "Point of Sale"
 	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
 
+
 	# Atendimento Bar e Mesas 
 	atendbar = frappe.new_doc('Atendimento Bar')
 	atendbar.is_pos = 1;
 	atendbar.company = doc.company
 	atendbar.hora_atendimento = frappe.utils.now()
 	atendbar.bar_tender = frappe.session.user
-	
 
 	return {
 		'doc': doc,
 		'atendbar':atendbar,
-		'default_customer': pos_profile.get('customer'),
 		'mesas': get_mesas_list(),
-		'items': get_items_list(pos_profile),
+		'default_customer': pos_profile.get('customer'),
+		'items': as_unicode(get_items_list(pos_profile)),
 		'customers': get_customers_list(pos_profile),
 		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
 		'batch_no_data': get_batch_no_data(),
@@ -54,10 +67,12 @@ def get_pos_data():
 		'pos_profile': pos_profile,
 		'meta': {
 			'invoice': frappe.get_meta('Sales Invoice'),
+			'customer': frappe.get_meta('Customer'),
 			'items': frappe.get_meta('Sales Invoice Item'),
-			'taxes': frappe.get_meta('Sales Taxes and Charges')
-#			'atend_bar':frappe.get_meta('Atendimento Bar'),
-#			'atend_bar_item':frappe.get_meta('Atendimento Bar Itens')
+			'taxes': frappe.get_meta('Sales Taxes and Charges'),
+			'atend_bar':frappe.get_meta('Atendimento Bar'),
+			'atend_bar_item':frappe.get_meta('Atendimento Bar Itens')
+
 		}
 	}
 
@@ -77,8 +92,10 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 
 	doc.currency = pos_profile.get('currency') or company_data.default_currency
 	doc.conversion_rate = 1.0
+	
 	if doc.currency != company_data.default_currency:
-		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency)
+		doc.conversion_rate = get_exchange_rate(doc.currency, company_data.default_currency, doc.posting_date)
+		
 	doc.selling_price_list = pos_profile.get('selling_price_list') or \
 		frappe.db.get_value('Selling Settings', None, 'selling_price_list')
 	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
@@ -136,14 +153,15 @@ def get_mesas_list():
 		where
 			status_mesa in ('Livre','Ocupada')  """, as_dict=1)
 
+
 def get_items_list(pos_profile):
 	cond = "1=1"
 	item_groups = []
 	if pos_profile.get('item_groups'):
 		# Get items based on the item groups defined in the POS profile
-
-		cond = "item_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('item_groups'))))
-		item_groups = [d.item_group for d in pos_profile.get('item_groups')]
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+		cond = "item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
 	return frappe.db.sql(""" 
 		select
@@ -161,13 +179,18 @@ def get_customers_list(pos_profile):
 	customer_groups = []
 	if pos_profile.get('customer_groups'):
 		# Get customers based on the customer groups defined in the POS profile
-
-		cond = "customer_group in (%s)"%(', '.join(['%s']*len(pos_profile.get('customer_groups'))))
-		customer_groups = [d.customer_group for d in pos_profile.get('customer_groups')]
+		for d in pos_profile.get('customer_groups'):
+			customer_groups.extend(get_child_nodes('Customer Group', d.customer_group))
+		cond = "customer_group in (%s)"%(', '.join(['%s']*len(customer_groups)))
 
 	return frappe.db.sql(""" select name, customer_name, customer_group,
 		territory from tabCustomer where disabled = 0
 		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
+
+def get_child_nodes(group_type, root):
+	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+	return frappe.db.sql_list(""" Select name from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt}""".format(tab=group_type, lft=lft, rgt=rgt))
 
 def get_serial_no_data(pos_profile, company):
 	# get itemwise serial no data
@@ -258,26 +281,21 @@ def get_pricing_rule_data(doc):
 	return pricing_rules
 
 @frappe.whitelist()
-def make_invoice(doc_list,atendbar_list):
+def make_invoice(doc_list):
 	if isinstance(doc_list, basestring):
 		doc_list = json.loads(doc_list)
 
-
+	#Atendimento Bar
 	if isinstance(atendbar_list, basestring):
 		atendbar_list = json.loads(atendbar_list)
+		print ("atendbar_list")
 		print (atendbar_list)
-
 
 	name_list = []
 
 	for docs in doc_list:
 		for name, doc in docs.items():
-			print ("make invoice ")
-			print (name)
-			print (doc)
-		
-			if not frappe.db.exists('Sales Invoice',
-				{'offline_pos_name': name, 'docstatus': ("<", "2")}):
+			if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 				validate_records(doc)
 				si_doc = frappe.new_doc('Sales Invoice')
 				si_doc.offline_pos_name = name
@@ -286,6 +304,7 @@ def make_invoice(doc_list,atendbar_list):
 				name_list.append(name)
 			else:
 				name_list.append(name)
+
 	#Atendimento Bar
 	for docs in atendbar_list:
 		for name, doc in docs.items():
@@ -340,6 +359,7 @@ def submit_invoice(si_doc, name):
 	try:
 		si_doc.insert()
 		si_doc.submit()
+		frappe.db.commit()
 	except Exception, e:
 		if frappe.message_log: frappe.message_log.pop()
 		frappe.db.rollback()
@@ -355,13 +375,12 @@ def submit_atendimento(si_doc, name):
 		frappe.db.rollback()
 		save_atendimento(e, si_doc, name)
 
+
 def save_invoice(e, si_doc, name):
 	if not frappe.db.exists('Sales Invoice', {'offline_pos_name': name}):
 		si_doc.docstatus = 0
 		si_doc.flags.ignore_mandatory = True
 		si_doc.insert()
-		frappe.log_error(frappe.get_traceback())
-
 
 def save_atendimento(e, si_doc, name):
 	if not frappe.db.exists('Atendimento Bar', {'offline_pos_name': name}):

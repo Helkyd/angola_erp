@@ -142,13 +142,13 @@ frappe.ui.form.on("Gestao de Quartos","numero_quarto",function(frm,cdt,cdn){
 						}
 					}			
 
-					if (frappe.datetime.get_hour_diff(horaentrada,moment.defaultDatetimeFormat()) <=2){
+					if (frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat) <=2){
 						alert("Quarto Reservado!!! Menos de duas horas para ficar Ativo.\n Por favor selecione outro Quarto.")
 						//horaentrada = 0
 						frappe.model.set_value(cdt,cdn,'numero_quarto',"");
 			
 					}
-					show_alert("Faltam: " + frappe.datetime.get_hour_diff(horaentrada,moment.defaultDatetimeFormat()).toString() ) + " Horas."
+					show_alert("Faltam: " + frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat).toString() ) + " Horas."
 				}
 			}
 		});
@@ -240,7 +240,7 @@ frappe.ui.form.on('Gestao de Quartos','tipo_quarto',function(frm,cdt,cdn){
 					frappe.model.set_value(cdt,cdn,'numero_quarto',"");
 
 				}
-				show_alert("Faltam: " + frappe.datetime.get_hour_diff(horaentrada,moment.defaultDatetimeFormat(moment())).toString() ) + " Horas."
+				show_alert("Faltam: " + frappe.datetime.get_hour_diff(horaentrada,moment().defaultDatetimeFormat).toString() ) + " Horas."
 
 			}
 		}			
