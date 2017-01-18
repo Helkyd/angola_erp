@@ -11,6 +11,7 @@
 		"public/js/pos_bar/pos_bar.html",
 		"public/js/pos_bar/pos_bar_bill_item.html",
 		"public/js/pos_bar/pos_bar_item.html",
+		"public/js/pos_bar/pos_bar_mesas.html",
 		"public/js/pos_bar/pos_bar_tax_row.html",
 		"public/js/pos_bar/pos_bar_invoice_list.html"
 	]

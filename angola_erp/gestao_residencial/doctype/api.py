@@ -75,7 +75,7 @@ def verifica_hora_saida():
 
 		# loop no Doc a procura de quartos com limite da DATA de ENTRADA.
 
-		for d in frappe.db.sql("""SELECT name,numero_quarto,hora_entrada,hora_saida,status_quarto FROM `tabGestao de Quartos` WHERE status_quarto = "Ocupado" and hora_saida <=%s """, frappe.utils.now(), as_dict=True):
+		for d in frappe.db.sql("""SELECT name,numero_quarto,hora_entrada,hora_saida,status_quarto FROM `tabGestao de Quartos` WHERE status_quarto = "Ocupado" or status_quarto = 'Ativo' and hora_saida <=%s """, frappe.utils.now(), as_dict=True):
 #			print "MINUTOS " + (frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_entrada)/60)
 
 

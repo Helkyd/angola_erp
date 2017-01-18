@@ -4,9 +4,13 @@
 
 var estadoQuarto;
 var horaentrada=0;
+var debito_p_contab;
+
 lista =cur_frm.call({method:"lista_clientes",args:{"start":"moeda"}})
 quartosreservados  =cur_frm.call({method:"quartos_reservados",args:{"start":"moeda"}})
+dados_perfil_pos = cur_frm.call({method:"erpnext.accounts.doctype.sales_invoice.pos.get_pos_data",args:{}})
 
+frappe.provide("erpnext.accounts");
 
 frappe.ui.form.on('Gestao de Quartos', {
 	onload: function(frm) {
@@ -43,7 +47,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.toggle_enable("status_quarto",false)	
 			cur_frm.set_df_property("reserva_numero","hidden",true)
 			cur_frm.set_df_property("servico_pago_por","hidden",true)
-			cur_frm.set_df_property("pagar_servicos","hidden",true)
+			//cur_frm.set_df_property("pagar_servicos","hidden",true)
 			cur_frm.toggle_enable("nome_cliente",false)
 			cur_frm.doc.docstatus = 1 
 			if (frm.doc.conta_corrente_status =="Pago"){
@@ -79,6 +83,17 @@ frappe.ui.form.on('Gestao de Quartos', {
 				}
 			}
 		}
+
+		cur_frm.fields_dict.servicos.grid.get_field('servico_produto').get_query = function(){
+			return{
+				filters:{
+					"is_sales_item": 1 
+				}
+			}
+		
+		}
+
+
 		calculate_totals(frm);
 
 		if (cur_frm.doc.status_quarto=="Livre"){
@@ -118,7 +133,10 @@ frappe.ui.form.on('Gestao de Quartos', {
 			//Reservado
 				
 		}
-	}
+
+	},
+
+
 });
 
 
@@ -152,6 +170,11 @@ frappe.ui.form.on("Gestao de Quartos","numero_quarto",function(frm,cdt,cdn){
 				}
 			}
 		});
+
+		if (cur_frm.doc.nome_cliente && cur_frm.doc.debit_to == undefined){
+			debito_p_contab = cur_frm.call({method:"debit_to_acc",args:{"company":cur_frm.doc.company}})
+			modopagamento = cur_frm.call({method:"mode_of_payment",args:{"company":cur_frm.doc.company}})
+		}
 
 
 
@@ -246,6 +269,12 @@ frappe.ui.form.on('Gestao de Quartos','tipo_quarto',function(frm,cdt,cdn){
 		}			
 	}
 
+	
+	if (debito_p_contab.readyState ==4){
+//		frappe.model.set_value(cdt,cdn,'debit_to',debito_p_contab.responseJSON.message[0])		
+		cur_frm.doc.debit_to = debito_p_contab.responseJSON.message[0][0]
+//		cur_frm.doc.debit_to ='31121000-Clientes Nacionais - CF'
+	}
 
 
 });
@@ -303,7 +332,10 @@ frappe.ui.form.on("Servicos_Quarto","servico_produto",function(frm,cdt,cdn){
 	var d =locals[cdt][cdn];
 	cur_frm.add_fetch('servico_produto','standard_rate','preco_servico_produto')	
 
-	if (d.servico_produto != ""){ servicos_('Item',d.servico_produto) }
+	if (d.servico_produto != ""){ 
+		servicos_('Item',d.servico_produto,cdn) 
+		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "income_account"}),'Sales - CF')
+	}
 
 	cur_frm.refresh_fields('preco_servico_produto')
 
@@ -588,10 +620,36 @@ frappe.ui.form.on("Gestao de Quartos","pagamento_por",function(frm,cdt,cdn){
 			//cur_frm.toggle_enable("pagamento_botao",false)		
 		}
 
-	
+	} else if (frm.doc.pagamento_por=="Cash"){
+
+	} else if (frm.doc.pagamento_por=="TPA"){
+
 	}
 
 });
+
+
+cur_frm.set_query("debit_to", function(doc) {
+	// filter on Account
+	if (cur_frm.doc.nome_cliente) {
+		return {
+			filters: {
+				'account_type': 'Receivable',
+				'is_group': 0,
+				'company': cur_frm.doc.company
+			}
+		}
+	} else {
+		return {
+			filters: {
+				'report_type': 'Balance Sheet',
+				'is_group': 0,
+				'company': cur_frm.doc.company
+			}
+		}
+	}
+});
+
 
 var quartos_ = function(frm,cdt,cdn){
 	frappe.model.with_doc(frm, cdt, function() { 
@@ -613,6 +671,21 @@ var servicos_ = function(frm,cdt,cdn){
 		var d = frappe.model.get_doc(frm,cdt)
 //		cur_frm.doc.preco_servico_produto = d.standard_rate
 		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "preco_servico_produto"}),d.standard_rate)
+	
+		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "income_account"}),"Sales") //dados_perfil_pos['income_account'] || d.income_account)
+
+
+		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "warehouse"}),dados_perfil_pos['warehouse'] || d.default_warehouse)
+
+		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "cost_center"}),dados_perfil_pos['cost_center'] || d.selling_cost_center)
+
+
+
+
+		if ( d.is_stock_item && d.total_projected_qty == 0 ){
+			alert("Este produto nao tem em Stock!!!")
+		}
+
 		cur_frm.refresh_fields()
 
 
@@ -690,4 +763,28 @@ var pagamento_cash = function(prioridade){
 	cur_frm.print_doc()
 
 
+}
+
+// Income Account in Details Table
+// --------------------------------
+cur_frm.set_query("income_account", "servicos", function(doc) {
+	return{
+		query: "erpnext.controllers.queries.get_income_account",
+		filters: {'company': doc.company}
+	}
+});
+
+// Cost Center in Details Table
+// -----------------------------
+cur_frm.fields_dict["servicos"].grid.get_field("cost_center").get_query = function(doc) {
+	return {
+		filters: {
+			'company': doc.company,
+			"is_group": 0
+		}
+	}
+}
+
+cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "servicos", "cost_center");
 }
