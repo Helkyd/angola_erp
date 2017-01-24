@@ -49,7 +49,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.set_df_property("servico_pago_por","hidden",true)
 			//cur_frm.set_df_property("pagar_servicos","hidden",true)
 			cur_frm.toggle_enable("nome_cliente",false)
-			cur_frm.doc.docstatus = 1 
+//			cur_frm.doc.docstatus = 1 
 			if (frm.doc.conta_corrente_status =="Pago"){
 				cur_frm.toggle_enable("conta_corrente_status",false)
 			}else{
@@ -334,7 +334,6 @@ frappe.ui.form.on("Servicos_Quarto","servico_produto",function(frm,cdt,cdn){
 
 	if (d.servico_produto != ""){ 
 		servicos_('Item',d.servico_produto,cdn) 
-		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "income_account"}),'Sales - CF')
 	}
 
 	cur_frm.refresh_fields('preco_servico_produto')
@@ -508,7 +507,7 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
 			frappe.model.set_value(cdt,cdn,'status_quarto',"Fechado")
 			cur_frm.refresh_fields("status_quarto");	
 
-			cur_frm.doc.docstatus = 1 
+//			cur_frm.doc.docstatus = 1 
 
 			cur_frm.disable_save()	
 			cur_frm.print_doc()
@@ -575,7 +574,10 @@ frappe.ui.form.on("Gestao de Quartos","status_quarto",function(frm,cdt,cdn){
 			}
 		} else if (frm.doc.total_servicos==0) {	
 			show_alert("QUARTO LIVRE. Sem servicos por pagar...",3)
+//			cur_frm.doc.docstatus = 1 //TO Submit
 			this.cur_page.page.frm._save()
+
+
 			cur_frm.toggle_enable("status_quarto",false)
 			cur_frm.reload_doc()
 			cur_frm.refresh_fields()
@@ -672,7 +674,7 @@ var servicos_ = function(frm,cdt,cdn){
 //		cur_frm.doc.preco_servico_produto = d.standard_rate
 		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "preco_servico_produto"}),d.standard_rate)
 	
-		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "income_account"}),"Sales") //dados_perfil_pos['income_account'] || d.income_account)
+		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "income_account"}),"Sales - CF") //dados_perfil_pos['income_account'] || d.income_account)
 
 
 		frappe.model.set_value(cdt,cdn,frappe.utils.filter_dict(cur_frm.fields_dict["servicos"].grid.docfields, {"fieldname": "warehouse"}),dados_perfil_pos['warehouse'] || d.default_warehouse)

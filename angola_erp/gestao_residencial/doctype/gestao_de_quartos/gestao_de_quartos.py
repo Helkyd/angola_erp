@@ -16,6 +16,9 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.stock.get_item_details import get_pos_profile
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.controllers.accounts_controller import AccountsController #get_gl_dict
+from erpnext.accounts.utils import get_account_currency
+from erpnext.controllers.stock_controller import StockController #get_items_and_warehouses
 
 #from erpnext.controllers.selling_controller import update_stock_ledger
 #import erpnext.controllers.selling_controller
@@ -26,15 +29,22 @@ form_grid_templates = {
 	"items": "templates/form_grid/gestao_quartos_list.html"
 }
 
-#class GestaodeQuartos(SalesInvoice):
-class GestaodeQuartos(Document):
+#class GestaodeQuartos(AccountsController):
+
+class GestaodeQuartos(StockController):
+	def __init__(self, arg1, arg2=None):
+		super(GestaodeQuartos, self).__init__(arg1, arg2)
+
+#class GestaodeQuartos(Document):
 
 	def autoname(self):
 		self.name = make_autoname(self.numero_quarto + '-' + '.#####')
+		self.update_stock = 1
 
 
 	def validate(self):
-		#super(GestaodeQuartos, self).validate()
+
+		super(GestaodeQuartos, self).validate()
 		print "DOC STATUS"
 		print self.name
 		print self.docstatus
@@ -62,7 +72,28 @@ class GestaodeQuartos(Document):
 		self.Quartos_Status()
 		self.Reservas_Status()
 		#self.valor_pago = self.total_servicos
+		print ("Doc Status ", self.docstatus)
+		if self.status_quarto == "Fechado":
+			print ("DEVE SER SUBMETIDO")
 
+			self.on_submit()
+
+
+	def on_submit(self):
+		#Deve submer para fazer pagamento ??????
+		print ("SUBMETER PAGAMENTO")
+		print ("servico pago por ", self.servico_pago_por)
+		self.docstatus=1
+		if self.servico_pago_por:
+			for d in self.get('servicos'):
+				if d.servico_produto:
+					#deveria ser ao SUBMIT / Payment
+					self.update_stock_ledger()
+
+
+					# this sequence because outstanding may get -ve
+					self.make_gl_entries()
+		self.save()
 
 	def Quartos_Status(self):
 
@@ -201,7 +232,7 @@ class GestaodeQuartos(Document):
 		if self.nome_cliente and account.account_type != "Receivable":
 			frappe.throw(_("Debit To account must be a Receivable account"))
 
-		#self.party_account_currency = account.account_currency
+		self.party_account_currency = account.account_currency
 
 	def validate_stocks(self):
 #		if cint(self.update_stock):
@@ -212,7 +243,7 @@ class GestaodeQuartos(Document):
 		self.actualiza_stock_corrente()
 #		self.validate_delivery_note()
 
-		self.update_stock_ledger()
+
 
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
@@ -227,14 +258,14 @@ class GestaodeQuartos(Document):
 			print ("Atualizar Stocks")
 			for d in self.get('servicos'):
 				if d.servico_produto:
-					bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s", d.servico_produto, as_dict = 1)
+					bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.servico_produto,d.warehouse), as_dict = 1)
 					d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
 	def validate_warehouse(self):
 		pos_profile = get_pos_profile(self.company) or {}
 		print (pos_profile)
 		for d in self.get('servicos'):
-			print (d.servico_produto)
+			print (unicode(d.servico_produto).encode('utf-8'))
 			artigo = frappe.get_doc("Item", d.servico_produto)
 			d.warehouse = pos_profile['warehouse'] or artigo.default_warehouse
 			d.income_account = pos_profile['income_account'] or artigo.income_account
@@ -251,7 +282,8 @@ class GestaodeQuartos(Document):
 				return_rate = 0
 #				if cint(self.is_return) and self.return_against and self.docstatus==1:
 #					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
-				print (d.servico_produto)
+				print ("servicos nome ",d.name)
+				print (unicode(d.servico_produto).encode('utf-8'))
 				print ("doctstatus ", self.docstatus)
 				if d.warehouse and self.docstatus==0:
 						sl_entries.append(self.get_sl_entries(d, {
@@ -261,23 +293,23 @@ class GestaodeQuartos(Document):
 
 		print ("Upd stock SL ENTRIES")
 		print (sl_entries)
-#		self.make_sl_entries(sl_entries)
+		self.make_sl_entries(sl_entries)
 
 
 	def get_sl_entries(self, d, args):
 		print ("produto ",d.get("servico_produto", None))
 		print ("armazem ",d.get("warehouse", None))
 		print ("hora ", self.hora_entrada)
-		print ("fiscal ", get_fiscal_year(self.hora_entrada, company=self.company)[0])
+		print ("fiscal ", get_fiscal_year(self.posting_date, company=self.company)[0])
 
 
 
 		sl_dict = frappe._dict({
 			"item_code": d.get("servico_produto", None),
 			"warehouse": d.get("warehouse", None),
-			"posting_date": self.hora_entrada,
+			"posting_date": self.posting_date,
 			"posting_time": self.hora_entrada,
-			'fiscal_year': get_fiscal_year(self.hora_entrada, company=self.company)[0],
+			'fiscal_year': get_fiscal_year(self.posting_date, company=self.company)[0],
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
@@ -304,7 +336,7 @@ class GestaodeQuartos(Document):
 
 
 	def make_gl_entries(self, repost_future_gle=True):
-		if not self.grand_total:
+		if not self.total_servicos:
 			return
 		gl_entries = self.get_gl_entries()
 
@@ -312,21 +344,24 @@ class GestaodeQuartos(Document):
 			from erpnext.accounts.general_ledger import make_gl_entries
 
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
-			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account) else "Yes"
+#			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account) else "Yes"
 
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False)
+#			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
+#				update_outstanding=update_outstanding, merge_entries=False)
 
-			if update_outstanding == "No":
-				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, "Customer", self.customer,
-					self.doctype, self.return_against if cint(self.is_return) else self.name)
+#			if update_outstanding == "No":
+#				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+#				update_outstanding_amt(self.debit_to, "Customer", self.customer,
+#					self.doctype, self.return_against if cint(self.is_return) else self.name)
 
-			if repost_future_gle and cint(self.update_stock) \
+#			if repost_future_gle and cint(self.update_stock) \
+			if repost_future_gle \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
-		elif self.docstatus == 2 and cint(self.update_stock) \
+
+#		elif self.docstatus == 2 and cint(self.update_stock) \
+		elif self.docstatus == 2  \
 			and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 				from erpnext.accounts.general_ledger import delete_gl_entries
 				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -335,39 +370,49 @@ class GestaodeQuartos(Document):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
-
+		print ("custom GL Entries ")
 		self.make_customer_gl_entry(gl_entries)
+		print ("custom GL Entries ",gl_entries)
 
+		print ("TAX GL Entries ")		
 		self.make_tax_gl_entries(gl_entries)
+		print ("TAX GL Entries ",gl_entries)
 
+		print ("ITEM GL Entries ")
 		self.make_item_gl_entries(gl_entries)
+		print ("ITEM GL Entries ",gl_entries)
 
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
+		print ("MERGED GL Entries ",gl_entries)
 
+		print ("POS GL Entries ")
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
+		print ("POS GL Entries ",gl_entries)
 
-		self.make_write_off_gl_entry(gl_entries)
+#pensa		self.make_gle_for_change_amount(gl_entries)
+
+#pensa		self.make_write_off_gl_entry(gl_entries)
 
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		if self.grand_total:
+#		if self.grand_total:
+		if self.total_servicos:
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(self.grand_total * self.conversion_rate,
-				self.precision("grand_total"))
+			grand_total_in_company_currency = flt(self.total_servicos,
+				self.precision("total_servicos"))
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
 					"party_type": "Customer",
-					"party": self.customer,
+					"party": self.nome_cliente,
 					"against": self.against_income_account,
 					"debit": grand_total_in_company_currency,
 					"debit_in_account_currency": grand_total_in_company_currency \
-						if self.party_account_currency==self.company_currency else self.grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+						if self.party_account_currency==self.company_currency else self.total_servicos,
+					"against_voucher": "NULL", #self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
 				}, self.party_account_currency)
 			)
@@ -379,7 +424,7 @@ class GestaodeQuartos(Document):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": self.customer,
+						"against": self.nome_cliente,
 						"credit": flt(tax.base_tax_amount_after_discount_amount),
 						"credit_in_account_currency": flt(tax.base_tax_amount_after_discount_amount) \
 							if account_currency==self.company_currency else flt(tax.tax_amount_after_discount_amount),
@@ -389,52 +434,44 @@ class GestaodeQuartos(Document):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
-		for item in self.get("items"):
-			if flt(item.base_net_amount):
-				if item.is_fixed_asset:
-					asset = frappe.get_doc("Asset", item.asset)
+		for item in self.get("servicos"):
+			if flt(item.total_servico_produto):
 
-					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset, item.base_net_amount)
-					for gle in fixed_asset_gl_entries:
-						gle["against"] = self.customer
-						gl_entries.append(self.get_gl_dict(gle))
-
-					asset.db_set("disposal_date", self.posting_date)
-					asset.set_status("Sold" if self.docstatus==1 else None)
-				else:
-					account_currency = get_account_currency(item.income_account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.income_account,
-							"against": self.customer,
-							"credit": item.base_net_amount,
-							"credit_in_account_currency": item.base_net_amount \
-								if account_currency==self.company_currency else item.net_amount,
-							"cost_center": item.cost_center
-						}, account_currency)
-					)
+				account_currency = get_account_currency(item.income_account)
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": item.income_account,
+						"against": self.nome_cliente,
+						"credit": item.total_servico_produto,
+						"credit_in_account_currency": item.total_servico_produto \
+							if account_currency==self.company_currency else item.total_servico_produto,
+						"cost_center": item.cost_center
+					}, account_currency)
+				)
 
 		# expense account gl entries
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.update_stock):
-			gl_entries += super(SalesInvoice, self).get_gl_entries()
+			print ("algo por saber")
+			#To check how this words ....
+			# gl_entries += super(GestaodeQuartos, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
-		if cint(self.is_pos):
-			for payment_mode in self.payments:
+		#if cint(self.is_pos):
+			for payment_mode in self.pagamento:
 				if payment_mode.amount:
 					# POS, make payment entries
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,
 							"party_type": "Customer",
-							"party": self.customer,
+							"party": self.nome_cliente,
 							"against": payment_mode.account,
 							"credit": payment_mode.base_amount,
 							"credit_in_account_currency": payment_mode.base_amount \
 								if self.party_account_currency==self.company_currency \
 								else payment_mode.amount,
-							"against_voucher": self.return_against if cint(self.is_return) else self.name,
+							"against_voucher": "NULL", #self.return_against if cint(self.is_return) else self.name,
 							"against_voucher_type": self.doctype,
 						}, self.party_account_currency)
 					)
@@ -443,7 +480,7 @@ class GestaodeQuartos(Document):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": payment_mode.account,
-							"against": self.customer,
+							"against": self.nome_cliente,
 							"debit": payment_mode.base_amount,
 							"debit_in_account_currency": payment_mode.base_amount \
 								if payment_mode_account_currency==self.company_currency \

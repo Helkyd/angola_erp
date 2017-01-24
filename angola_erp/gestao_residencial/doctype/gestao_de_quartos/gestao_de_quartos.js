@@ -49,7 +49,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.set_df_property("servico_pago_por","hidden",true)
 			//cur_frm.set_df_property("pagar_servicos","hidden",true)
 			cur_frm.toggle_enable("nome_cliente",false)
-			cur_frm.doc.docstatus = 1 
+//			cur_frm.doc.docstatus = 1 
 			if (frm.doc.conta_corrente_status =="Pago"){
 				cur_frm.toggle_enable("conta_corrente_status",false)
 			}else{
@@ -507,7 +507,7 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
 			frappe.model.set_value(cdt,cdn,'status_quarto',"Fechado")
 			cur_frm.refresh_fields("status_quarto");	
 
-			cur_frm.doc.docstatus = 1 
+//			cur_frm.doc.docstatus = 1 
 
 			cur_frm.disable_save()	
 			cur_frm.print_doc()
@@ -574,7 +574,10 @@ frappe.ui.form.on("Gestao de Quartos","status_quarto",function(frm,cdt,cdn){
 			}
 		} else if (frm.doc.total_servicos==0) {	
 			show_alert("QUARTO LIVRE. Sem servicos por pagar...",3)
+//			cur_frm.doc.docstatus = 1 //TO Submit
 			this.cur_page.page.frm._save()
+
+
 			cur_frm.toggle_enable("status_quarto",false)
 			cur_frm.reload_doc()
 			cur_frm.refresh_fields()
@@ -756,7 +759,7 @@ var pagamento_cash = function(prioridade){
 
 //	frappe.model.set_value(cur_frm.doctype,cur_frm.docname,'valor_pago',cur_frm.doc.total_servicos)
 
-	cur_frm.doc.docstatus = 1 
+//	cur_frm.doc.docstatus = 1 
 //	cur_frm.save() //this.cur_page.page.frm._save()
 	cur_frm.disable_save()	
 	cur_frm.print_doc()
