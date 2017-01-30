@@ -178,6 +178,7 @@ frappe.ui.form.on("Gestao de Quartos","numero_quarto",function(frm,cdt,cdn){
 
 
 
+
 	}
 
 
@@ -239,6 +240,8 @@ frappe.ui.form.on('Gestao de Quartos','tipo_quarto',function(frm,cdt,cdn){
 
 	}
 	frappe.model.set_value(cdt,cdn,'usuario_quarto',frappe.session.user)
+	frappe.model.set_value(cdt,cdn,'status_quarto','Ocupado')
+//	cur_frm.doc.status_quarto=="Ocupado"
 	cur_frm.refresh_fields();
 
 
@@ -374,12 +377,30 @@ frappe.ui.form.on("Servicos_Quarto","quantidade",function(frm,cdt,cdn){
 
 
 frappe.ui.form.on('Gestao de Quartos', {
+	before_save: function(frm){
+
+		//Pagamentos para os Quartos Insert first and for services secord record
+//		var pag = frm.add_child("pagamento")
+//		pag.name = cur_frm.name;
+//		pag.parentfield = "pagamento"
+//		pag.parenttype = "Gestao de Quartos"
+//		pag.amount = cur_frm.doc.total
+//		pag.base_amount = cur_frm.doc.total
+//		if (cur_frm.doc.pagamento_por == "Cash"){
+//			pag.mode_of_payment = "Cash"
+//		}else if (cur_frm.doc.pagamento_por == "TPA"){
+//			pag.mode_of_payment = "TPA"
+//
+//		}
+//		refresh_field("pagamento")
+	},
+
 	validate: function(frm) {
 
 
 	//Check if reservado selected ....
 
-		
+
 
 		show_alert("Validando Dados...",1)
 
@@ -439,7 +460,7 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
 
 //	alert("Apos pagamento dos Serviços o Quarto estará livre.");
 	show_alert("Apos pagamento dos Serviços o Quarto estará livre.",2)
-
+	show_alert(cur_frm.doc.docstatus)
 	if (cur_frm.doc.hora_diaria_noite =="Noite"){
 		//disable Horas and set 1; disable hora_entrada and calculate as from now until 
 //		frappe.model.set_value(cdt,cdn,'horas',1);
@@ -508,6 +529,8 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
 			cur_frm.refresh_fields("status_quarto");	
 
 //			cur_frm.doc.docstatus = 1 
+
+			//Adicionar o PAgamento na Sales Invoice Payment
 
 			cur_frm.disable_save()	
 			cur_frm.print_doc()
@@ -583,7 +606,7 @@ frappe.ui.form.on("Gestao de Quartos","status_quarto",function(frm,cdt,cdn){
 			cur_frm.refresh_fields()
 		} else {
 			// Esta vazio .....
-			alert("Nao pode Fechar pois ainda nao foram feitos os pagamentos...")	
+			alert("Pagamento de servicos em falta!!!")	
 			cur_frm.disable_save()
 //			frappe.model.set_value(cdt,cdn,'status',"Ocupado")
 //			cur_frm.refresh_fields("status");	
@@ -761,6 +784,11 @@ var pagamento_cash = function(prioridade){
 
 //	cur_frm.doc.docstatus = 1 
 //	cur_frm.save() //this.cur_page.page.frm._save()
+
+
+	//Adicionar o PAgamento na Sales Invoice Payment
+
+
 	cur_frm.disable_save()	
 	cur_frm.print_doc()
 

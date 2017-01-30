@@ -5,7 +5,7 @@
 
 frappe.listview_settings['Gestao de Quartos'] = {
 
-	add_fields: ["name", "hora_entrada", "hora_saida", "status_reserva", "tipo_quarto","hora_diaria_noite"],
+	add_fields: ["name", "hora_entrada", "hora_saida", "status_quarto", "tipo_quarto","hora_diaria_noite"],
 
 	column_render: {
 		"tipo_quarto": function(doc) {
@@ -28,22 +28,23 @@ frappe.listview_settings['Gestao de Quartos'] = {
 
 	get_indicator: function(doc) {
 
-		if (doc.status_reserva== "Livre" ) {
+		if (doc.status_quarto== "Livre" ) {
 			return [__("Livre  " ), "green"]
-		} else if (doc.status_reserva== "Ocupado" ) {
+		} else if (doc.status_quarto== "Ocupado" ) {
 			return [__("Ocupado * " + doc.hora_diaria_noite + " * SAIDA =>" + frappe.format(doc.hora_saida,{"fieldtype":"Date"})), "red"]
-		} else if (doc.status_reserva== "Ativo" ) {
+		} else if (doc.status_quarto== "Ativo" ) {
 			return [__("Ativo * " + doc.hora_diaria_noite + " * SAIDA =>" + frappe.format(doc.hora_saida,{"fieldtype":"Date"})), "blue"]
-		} else if (doc.status_reserva== "Fechado" ) {
+		} else if (doc.status_quarto== "Fechado" ) {
 			return [__("Fechado" ), "orange"]
 		
 		}
 	},
-	colwidths: {"subject": 3, "indicator": 9},
+	colwidths: {"subject": 2, "indicator": 1},
+//	colwidths: {"subject": 3},
 
 	onload: function(listview){
 		frappe.route_options = {
-			'status_reserva':['in','Ocupado, Ativo']
+			'status_quarto':['in','Ocupado, Ativo']
 
 		};
 	},

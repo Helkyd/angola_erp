@@ -39,7 +39,8 @@ frappe.listview_settings['Gestao de Quartos'] = {
 		
 		}
 	},
-	colwidths: {"subject": 3, "indicator": 9},
+	colwidths: {"subject": 3, "indicator": 1},
+//	colwidths: {"subject": 3},
 
 	onload: function(listview){
 		frappe.route_options = {
