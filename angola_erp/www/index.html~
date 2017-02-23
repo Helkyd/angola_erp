@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html><head>
+  <title>AngolaERP</title>
+
+
+  <meta name="description" content="website description">
+
+  <meta name="keywords" content="website keywords, website keywords">
+
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+
+ 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+<!-- modernizr enables HTML5 elements and feature detects -->
+  <script type="text/javascript" src="js/modernizr-1.5.min.js"></script>
+</head><body>
+<div id="main"> <header> </header>
+<div id="banner">
+<div id="welcome">
+<h3><span>
+<div class="jumbotron"> AngolaERP - Servicos integrados de Software </div>
+</span></h3>
+</div>
+<!--close welcome-->
+<div id="welcome_slogan"><img style="width: 68px; height: 54px;" src="images/angolaerp_logo.png" alt="AngolaERP Logo" align="top"></div>
+<!--close welcome_slogan--> </div>
+<!--close banner--> <nav> </nav>
+<div id="menubar">
+<ul id="nav">
+<li class="current"><a href="index.html">Pagina Inicial</a></li>
+<li><a href="#">O nosso trabalho</a></li>
+<!-- <li><a href="ourwork.html">O nosso trabalho</a></li> -->
+<li><a href="#">Testemunhos</a></li>
+<!-- <li><a href="testimonials.html">Testemunhos</a></li> -->
+<li><a href="#">Projectos</a></li>
+<!-- <li><a href="projects.html">Projectos</a></li> -->
+<!-- <li><a href="contact.html">Entre em contacto</a></li> -->
+<li><a href="#">Entre em contacto</a></li>
+</ul>
+</div>
+<!--close menubar-->
+<div id="site_content">
+<div class="sidebar_container">
+<div class="sidebar">
+<div class="sidebar_item">
+<h2>Novo Website</h2>
+<p>Bem vindo a nossa pagina. Seu feedback é sempre
+bem vindo.</p>
+</div>
+<!--close sidebar_item--> </div>
+<!--close sidebar-->
+<div class="sidebar">
+<div class="sidebar_item">
+<h2>Ultimas Atualizações</h2>
+<h3>Dezembro 2016</h3>
+<p>Melhorias no Modulo AngolaERP e criacão de outros 
+Modulos.</p>
+</div>
+<!--close sidebar_item--> </div>
+<!--close sidebar-->
+<div class="sidebar">
+<div class="sidebar_item">
+<h3>November 2016</h3>
+<p>Desenvolvimento de modulos AngolaERP.</p>
+</div>
+<!--close sidebar_item--> </div>
+<!--close sidebar-->
+<div class="sidebar">
+<div class="sidebar_item">
+<h2>Contacto</h2>
+<p>Phone: +244 923 534 109 / 923 569 438 </p>
+<p>Email: <a href="mailto:angolaerp@angolaerp.co.ao">angolaerp@angolaerp.co.ao</a></p>
+</div>
+<!--close sidebar_item--> </div>
+<!--close sidebar--> </div>
+<!--close sidebar_container-->
+<div id="content">
+<div class="content_item">
+<h1>Desenvolva os processos para o seu negócio com o ERPNext.</h1>
+<h2> Nós o ajudamos.</h2>
+<p>A nossa empresa está focada nos processos organizacionais das
+Empresas.
+Estamos preparados para organizar a sua Empresa em processos e contamos
+com o ERPNext como ferramenta essencial para alcançar os objectivos.</p>
+<div class="content_imagetext">
+
+<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top; text-align: center;">
+<p><img style="width: 175px; height: 158px;" src="images/erpnext-dashboard-shot.png" alt="ERPNext" align="top"></p>
+</td>
+<td style="text-align: center;">
+<p>ERPNext é uma solução Open Source (Codigo Aberto) desenvolvido
+por
+uma comunidade em todo o mundo. Conta com a ajuda de varios
+programadores
+experientes. Esta aplicação é livre (não precisa de licença) e permite
+que cada Empresa possa fazer as suas modificações ou acrescimos de
+acordo
+a sua necessidade.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<!--close content_imagetext--></div>
+<div class="content_container">
+<div class="row" style="text-align: justify;">
+<div class="col-lg-6 col-xs-12">
+<div id="newuser" class="panel panel-default home-promptpanel">
+<div class="panel-heading">
+<div class="panel-title"> <span class="txt-blue bold">Novo no Sistema
+ERPNext?</span> </div>
+</div>
+<div class="panel-body">
+<p class="para"> ERPNext é um sistema ERP potente em Pagina Web feito
+para PME's (Pequenas, Medias Empresas), repleta de processos, analises
+e quadros de integração. Permite ao seu usuário um grau de customização
+que não se vê em outras soluções de ERP.<br>
+<br>
+Na AngolaERP, o nosso trabalho é entender e melhorar ou criar processos
+usando o ERPNext como ferramenta para captação da informação.<br>
+Para ter uma ideia melhor sobre o ERPNext e sobre o que nós AngolaERP
+podemos fazer por si por favor acesse o link em baixo. </p>
+</div>
+</div>
+</div>
+</div>
+<div class="button_small" style="text-align: center;"> <a href="http://41.205.61.168/">DEMO</a> </div>
+<!--close button_small--> </div>
+<!--close content_container-->
+
+<div class="content_container">
+<div class="col-lg-6 col-xs-12">
+<div id="existinguser" class="panel panel-default home-promptpanel">
+<div class="panel-heading">
+<div class="panel-title"> <span class="txt-blue bold">Já usa o Sistema
+ERPNext?</span> </div>
+</div>
+<div class="panel-body">
+<p class="para">Então já viu as ferramentas e processos do ERPNext e
+está a considerar em fazer a implementação. Ou já fez a implementação
+do ERPNext na tua totalidade ou parcialmente. <br>
+<br>
+Muitas das vezes o ERPNext pode ser util na necessidade unica do&nbsp;
+seu negócio e melhor ainda com a ajuda da AngolaERP na sua
+customização. Aqui vão algumas questões que poderá ter sobre o sistema.
+Access o link aqui. </p>
+</div>
+</div>
+</div>
+</div>
+<div class="content_container">
+<div id="faq" class="well hide"><!-- style="display: none;"> -->
+<div questiontype="N" class="hide">
+<div class="txt-blue faq_question" style="color: blue;">O que é o ERPNext?</div>
+<p> </p><div class="faq_answer text-align: center;">ERPNext é uma aplicação ERP rica em ferramentas
+de fonte aberta e sem custo, com sistema de pagina Web.
+É atualizada todos os dias por um grupo ativo de programadores
+experientes.
+<br>
+Novas soluções e ferramentas são acrescentadas todos os dias.</div>
+<br>
+</div>
+<div questiontype="N" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">O que diferencia a implementação do 
+ERPNext com os outros sistemas ERP?</div>
+<p> </p><div class="faq_answer text-align: center;">Muitos dos sitemas ERP cobram de inicioa na
+instalação ou em subscrições. No caso do ERPNext, não tem custos
+para testar o sistema assim como está. Você pode experimentar a
+aplicação
+no site <a href="https://erpnext.com/pricing">ERPNext Cloud</a>, ou
+instalar
+num servidor seu, desde que tenha o conhecimento tecnico. <br>
+Uma vez a utilizar o sistema no seu dia-a-dia na(s) sua(s) empresa(s),
+poderá identificar necessidades de customização especificas para os
+processos do seu negócio. Uma vez identificados as necessidades,
+você pode:
+<ul>
+<li>Caso as necessidades sejam genericas, você pode entrar em contato
+com a AngolaERP para a criação desses processos.<br>
+<br>
+<br>
+    <br>
+</li>
+<li>Caso a integração do ERPNext na sua empresa seja satisfatorio
+e as suas necessidades na empresa sejam mais especificas, tais como
+acrescimos a base ERPNext, não é possivel mas como provedores de
+serviço nós podemos os ajudar a customizar ou a desenvolver
+modulos especificos para si.<br>
+<br>
+<br>
+    <br>
+</li>
+</ul>
+</div>
+<br>
+</div>
+<div questiontype="NE" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Quais os servidores e hostings disponiveis?</div>
+<p> </p><div class="faq_answer text-align: center;">Você tem as seguintes opções:
+<ol>
+<li>Servidor local (In-house server).<br>
+<p>Neste caso o servidor será seu e estará nas suas instalações.</p>
+    <br>
+</li>
+<li>Remotos:
+<ol>
+<li><a href="https://erpnext.com/pricing">ERPNext Cloud</a><br>
+        <br>
+</li>
+<li><a href="http://www.angolaerp.co.ao">AngolaERP</a><br>
+        <br>
+</li><li>Alojamento do site ERPNext.<br><br>
+</li>
+
+</ol>
+    <br>
+</li>
+</ol>
+</div>
+<br>
+</div>
+<div questiontype="NE" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Qual o preço?</div>
+<p> </p><div class="faq_answer text-align: center;">Custos de implementação com os seguintes
+senarios:
+<ol>
+<li>ERPNext software - Não tem custos.<br>
+    <br>
+</li>
+<li>Servidor local (Hosting In-house) - Custo de servidor,
+parameterização, treino.<br>
+    <br>
+</li>
+<li><a href="https://erpnext.com/pricing">ERPNext Cloud</a>: costs as
+per subscription plan.<br>
+    <br>
+</li>
+<li>Alojamento no AngolaERP de acordo a necessidade e proposta.<br>
+    <br>
+</li>
+</ol>
+</div>
+<br>
+</div>
+<div questiontype="N" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">A quem devo pagar?</div>
+<p> </p><div class="faq_answer text-align: center;">Se o ERPNext for alojado no <a href="https://erpnext.com/pricing">ERPNext Cloud</a>, deverá pagar a
+Frappe Technologies. <br>
+Se for alojado no Data Center da AngolaERP, deverá pagar a nós. <br>
+Para customização e suporte, deverá pagar a prestadores de serviço como
+nós AngolaERP</div>
+<br>
+</div>
+<div questiontype="NE" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Quanto a
+Atualizações?</div>
+<p> </p><div class="faq_answer text-align: center;">Atualizando o ERPNext e o Frappe no seu
+servidor é sem custo. <br>
+Se subscrever no <a href="https://erpnext.com/pricing">ERPNext
+Cloud</a> plano, as atualizações são por conta da Frappe Technologies. <br>
+<br>
+<br>
+Se subscrever no plano , as atualizações são por conta da AngolaERP. <br>
+<br>
+<i>Atualizações passam por um processo customizado de ferramentas. Os
+nossos programadores podem providenciar um accessment, identificar as
+customizações
+que poderam criar uma falha. Medidas corretivas podem ser vistas.</i></div>
+<br>
+</div>
+<div questiontype="NE" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Que tipo de
+Customizações podem ser feitas?</div>
+<p> </p><div class="faq_answer text-align: center;">O Frappe Framework, que é a base do ERPNext, é
+uma potente framework feita as patentes de desenho e praticas
+industriais uniformes
+que vem com os componentes de aplicações para Web e que podem ser
+usados com uma facilidade para:
+<ol>
+<li>Simples customizações<br>
+    <br>
+</li>
+<li>Instalação de aplicaçoes complexas usando o Frappe framework.<br>
+    <br>
+</li>
+<li>Integração com outras aplicações usando REST API.<br>
+    <br>
+</li>
+</ol>
+</div>
+<br>
+</div>
+<div questiontype="NE" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Como a AngolaERP
+lucra?</div>
+<p> </p><div class="faq_answer text-align: center;">O trabalho que nós fazemos pode ser divido em
+desenvolvimento e suporte. <br>
+Desevolvimento inclui a necessidade de se fazer um estudo, analise de
+Sistemas, Desenho de soluções e desenvolvimento. <br>
+As tarefas de Suporte podem incluide bug-fixing, ajuda na
+implementação, treinamento e
+acesso remoto para configurar o seu servidor de ERPNext. <br>
+<i>O suporte para Bug-fixing somente funciona para os modulos ou
+funções desenvolvidas pelo team de desenvolvimento da AngolaERP.</i></div>
+<br>
+</div>
+<div questiontype="NE" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Quais os preços
+da
+AngolaERP?</div>
+<p> </p><div class="faq_answer text-align: center;">A equação geral de preços no sistema ERP vai de
+acordo a Licença + Modificações. Vendo que o ERPNext está disponivel
+sem o pagamento de alguma Licença, os nossos custo para modificações
+focam-se
+no valor em apresentar soluçoes cujo o total de custo fica por um valor
+muito baixo para o cliente comparado com as outras soluções ERP.<br>
+Para começar os requesitos do cliente são dividos em Atividades de
+Desenvolvimento
+e actividades de Suporte. Nós enviamos o custo hora para as atividades
+na qual irá ajudar o cliente em identificar o custo de implementação do
+ERPNext.<br>
+Nós enviamos Horas de trabalho (num projecto ou tarefa) feitas
+periodicamente e as nossas faturas são com base nas horas de trabalho
+efetuadas.</div>
+<br>
+</div>
+<div questiontype="E" class="hide">
+<div class="txt-blue bold faq_question" style="color: blue;">Porque AngolaERP?</div>
+<p> </p><div class="faq_answer text-align: center;">Requesitos podem mudar durante o processo de 
+implementação com algumas funcionalidades a serem retiradas ou novas
+a serem adicionadas. Nestas situações a AngolaERP tem um preço 
+justo para ambos quer cliente ou provedor de serviço.</div>
+<br>
+</div>
+</div>
+</div>
+<!--close content_item--> </div>
+<!--close content--> </div>
+<!--close site_content--> </div>
+<!--close main--> <footer> <a href="index.html">Pagina Inicial</a> | <a href="ourwork.html">O nosso Trabalho</a> | <a href="testimonials.html">Testemunhos</a>
+| <a href="projects.html">Projectos</a> | <a href="contact.html">Contatos</a><br>
+<br>
+website template by <a href="http://www.freehtml5templates.co.uk">Free
+HTML5 Templates</a> </footer><!-- javascript at the bottom for fast page loading -->
+<script type="text/javascript" src="js/jquery.js"></script>
+<script>// $(function() {
+
+
+// $('#')
+
+// $('#faq').show();
+// });
+
+$(document).ready(function() {
+
+$('#newuser').click(function () {
+$( "#faq" ).removeClass('hide');
+
+$( "div[questiontype|='N']" ).removeClass('hide');
+$( "div[questiontype|='NE']" ).removeClass('hide');
+if (!$( "div[questiontype|='E']" ).hasClass('hide')) {
+$( "div[questiontype|='E']" ).addClass('hide');
+}
+
+$('html, body').animate({
+scrollTop: $("#faq").offset().top - 100
+}, 750);
+})
+
+
+$('#existinguser').click(function () {
+$( "#faq" ).removeClass('hide');
+
+$( "div[questiontype|='E']" ).removeClass('hide');
+$( "div[questiontype|='NE']" ).removeClass('hide');
+if (!$( "div[questiontype|='N']" ).hasClass('hide')) {
+$( "div[questiontype|='N']" ).addClass('hide');
+}
+
+$('html, body').animate({
+scrollTop: $("#faq").offset().top - 100
+}, 750);
+})
+
+});
+</script></div>
+
+</body></html>

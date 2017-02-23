@@ -17,7 +17,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 
 
 		if (frm.doc.status_quarto=="Ocupado" && frm.doc.horas >=0){
-			show_alert("aaaa")
+			//show_alert("aaaa")
 			cur_frm.toggle_enable("numero_quarto",false)
 			cur_frm.toggle_enable("horas",false)
 			cur_frm.toggle_enable("hora_entrada",false)
@@ -30,7 +30,7 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.toggle_enable("conta_corrente_status",false)
 
 		}else if (frm.doc.status_quarto=="Ocupado" && frm.doc.horas ==undefined){
-			show_alert("bbbbbbb")
+			//show_alert("bbbbbbb")
 			cur_frm.toggle_enable("status_quarto",false)	
 			cur_frm.set_df_property("reserva_numero","hidden",true)
 			cur_frm.set_df_property("servico_pago_por","hidden",true)
@@ -460,7 +460,7 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
 
 //	alert("Apos pagamento dos Serviços o Quarto estará livre.");
 	show_alert("Apos pagamento dos Serviços o Quarto estará livre.",2)
-	show_alert(cur_frm.doc.docstatus)
+	//show_alert(cur_frm.doc.docstatus)
 	if (cur_frm.doc.hora_diaria_noite =="Noite"){
 		//disable Horas and set 1; disable hora_entrada and calculate as from now until 
 //		frappe.model.set_value(cdt,cdn,'horas',1);

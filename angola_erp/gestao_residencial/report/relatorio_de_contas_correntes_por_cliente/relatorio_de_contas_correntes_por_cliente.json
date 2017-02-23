@@ -1,0 +1,19 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2017-01-30 15:26:37.492131", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2017-01-30 15:30:41.202466", 
+ "modified_by": "Administrator", 
+ "module": "Gestao Residencial", 
+ "name": "Relatorio de Contas-Correntes por Cliente", 
+ "owner": "Administrator", 
+ "query": "SELECT `tabGestao de Quartos`.conta_corrente as 'Cliente:data:100',\n`tabGestao de Quartos`.numero_quarto as 'Quarto Numero:data:100', \n`tabGestao de Quartos`.hora_entrada as 'Hora Atendida:datetime:100', \n`tabGestao de Quartos`.usuario_quarto as 'Operador:data:100',\n`tabGestao de Quartos`.total as 'Total:Currency:120',\n`tabGestao de Quartos`.total_servicos as 'Total dos Servicos:Currency:120'\nFROM `tabGestao de Quartos` INNER JOIN tabCustomer ON `tabGestao de Quartos`.conta_corrente = tabCustomer.customer_name;", 
+ "ref_doctype": "Gestao de Quartos", 
+ "report_name": "Relatorio de Contas-Correntes por Cliente", 
+ "report_type": "Query Report"
+}

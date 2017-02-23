@@ -29,6 +29,7 @@ def caixa_movimentos_in(start,caixa,fecho):
 		total_tpa = 0
 		total_ccorrente = 0
 		total_caixa = 0
+		recalcula = False
 		for d in  frappe.db.sql("""select hora_atendimento, name,total_servicos,pagamento_por, status_atendimento, bar_tender, company from `tabAtendimento Bar` where status_atendimento ='Fechado' and hora_atendimento >= %(start)s and hora_atendimento <= %(end)s """, {"start": start,"end": frappe.utils.now()	}, as_dict=True):
 			
 			print "MOVIMENTOS BAR RESTAURANTE +++++++++++++++++++++++++++++++"
@@ -41,20 +42,43 @@ def caixa_movimentos_in(start,caixa,fecho):
 				
 				if (d.pagamento_por == "Conta-Corrente"):
 					total_ccorrente = d.total_servicos+total_ccorrente
+			else:
+				#Recalcula o Caixa ....
+				recalcula = True
+				total_caixa = d.total_servicos+total_caixa
+				if (d.pagamento_por == "TPA"):
+					total_tpa = d.total_servicos+total_tpa
+				
+				if (d.pagamento_por == "Conta-Corrente"):
+					total_ccorrente = d.total_servicos+total_ccorrente
+
 		print "Abre Caixa"
 		print total_caixa
 		reser = frappe.get_doc("Caixa de Registo",caixa)
 		if (total_caixa > 1) and (reser.amount_caixa == 0):
-			reser.amount_caixa = total_caixa+reser.amount_caixa
-			reser.amount_tpa = total_tpa+reser.amount_tpa
-			reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
+			if (recalcula == False):
+				reser.amount_caixa = total_caixa+reser.amount_caixa
+				reser.amount_tpa = total_tpa+reser.amount_tpa
+				reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
+			else:
+				reser.amount_caixa = total_caixa
+				reser.amount_tpa = total_tpa
+				reser.amount_conta_corrente = total_ccorrente
+
 			reser.status_caixa='Em Curso'
 			reser.save()
 		elif (total_caixa > 1) and (reser.amount_caixa >= 0):
-			reser.amount_caixa = total_caixa+reser.amount_caixa
-			reser.amount_tpa = total_tpa+reser.amount_tpa
-			reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
+			if (recalcula == False):
+				reser.amount_caixa = total_caixa+reser.amount_caixa
+				reser.amount_tpa = total_tpa+reser.amount_tpa
+				reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
+			else:
+				reser.amount_caixa = total_caixa
+				reser.amount_tpa = total_tpa
+				reser.amount_conta_corrente = total_ccorrente
+
 			reser.save()
+
 		print fecho
 		print reser.status_caixa
 		if (fecho==2):
@@ -76,6 +100,14 @@ def get_taxa_ipc():
 	print j	
 	return j
 
+@frappe.whitelist()
+def get_taxa_retencao():
+	#locate account 34120000
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where description like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA TAXA RETENCAO conta 3413"
+	print j	
+	return j
 
 @frappe.whitelist()
 def get_lista_retencoes():

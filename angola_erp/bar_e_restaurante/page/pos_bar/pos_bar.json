@@ -1,0 +1,44 @@
+{
+ "content": null, 
+ "creation": "2017-02-02 06:56:09.326197", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "icon": "icon-th", 
+ "idx": 0, 
+ "modified": "2017-02-02 06:56:09.326197", 
+ "modified_by": "Administrator", 
+ "module": "Bar e Restaurante", 
+ "name": "pos-bar", 
+ "owner": "Administrator", 
+ "page_name": "pos-bar", 
+ "roles": [
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Sales User"
+  }, 
+  {
+   "role": "Purchase User"
+  }, 
+  {
+   "role": "Purchase User"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Bar e Restaurante User"
+  }, 
+  {
+   "role": "Bar e Restaurante Manager"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "POS-Bar"
+}

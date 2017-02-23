@@ -1,0 +1,19 @@
+{
+ "add_total_row": 0, 
+ "apply_user_permissions": 1, 
+ "creation": "2017-01-30 13:20:08.287442", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2017-01-30 13:20:38.046938", 
+ "modified_by": "Administrator", 
+ "module": "Gestao Residencial", 
+ "name": "Reservas", 
+ "owner": "Administrator", 
+ "query": "SELECT name as \"N. Reserva:data:100\",booked_by as \"Feita por:data:150\",check_in as \"Data Entrada:datime:120\",check_out as \"Data Saida:datetime:120\",numero_quarto as \"Quarto N.:data:120\", numero_cliente as \"Nome do Cliente:data:100\", reservation_status as \"Status:data:100\", pay_advance as \"Pago em Avanco\" FROM tabReservas WHERE(reservation_status LIKE \"Fechada\" );", 
+ "ref_doctype": "Reservas", 
+ "report_name": "Reservas", 
+ "report_type": "Query Report"
+}

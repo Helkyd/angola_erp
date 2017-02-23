@@ -1,0 +1,19 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2017-01-30 15:16:17.781365", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2017-01-30 15:17:36.467061", 
+ "modified_by": "Administrator", 
+ "module": "Bar e Restaurante", 
+ "name": "Mesas Ocupadas", 
+ "owner": "Administrator", 
+ "query": "SELECT \nnome_mesa as \"Mesa N:data:200\",\nhora_atendimento as \"Hora atendida:datetime:200\",\nstatus_atendimento as \"Status:data:200\",\ntotal_servicos as \"Total:Currency:120\",\nnome_cliente as \"Cliente:data:150\"\nFROM `tabAtendimento Bar` WHERE status_atendimento ='Ocupado' ORDER BY nome_mesa;\n\n\n", 
+ "ref_doctype": "Atendimento Bar", 
+ "report_name": "Mesas Ocupadas", 
+ "report_type": "Query Report"
+}

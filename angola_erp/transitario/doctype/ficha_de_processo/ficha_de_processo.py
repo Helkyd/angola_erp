@@ -1,0 +1,135 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2015, Helio de Jesus and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.model.naming import make_autoname
+from datetime import datetime, timedelta
+from frappe.utils import cstr, get_datetime, getdate, cint, get_datetime_str
+
+
+class FichadeProcesso(Document):
+
+	def autoname(self):
+
+		self.name = make_autoname(self.process_number + '-' + '.###')
+		#self.usuario= frappe.session.user
+
+
+	def validate(self):
+		print "tamanho ", len(self.servicos_processo)
+		
+		if len(self.servicos_processo) == 0:
+			validation = False
+			frappe.msgprint("Inserir pelo menos um Servico", raise_exception = 1)
+	
+		#if self.docstatus == 2:
+		#	self.status_process = "Cancelado"
+
+		#elif self.servicos_processo[0].servico_ficha_processo == None:
+		#	validation = False
+		#	frappe.msgprint("Inserir pelo menos um Servico", raise_exception = 1)
+		if self.docstatus == 1 and self.status_process == 'Aberto' or self.status_process == 'Em Curso'  :
+			print " criarProjeto ", self.status_process
+			self.status_process = 'Em Curso'
+			self.criar_projecto()
+			self.criar_salesorder()		
+
+#		if self.docstatus == 0 and self.status_process =='Em Curso':
+#			print " criarProjeto "
+#			self.criar_projecto()
+
+
+	def criar_projecto(self):
+
+		print "Verifica o Project ...."
+		criarprojeto = False
+		if frappe.db.sql("""select name from `tabProject` WHERE name =%s """,(self.name), as_dict=False) ==():
+			criarprojeto = True
+		if criarprojeto == True: 
+			print "Criar Projeto ...."
+
+			projecto = frappe.get_doc({
+				"doctype": "Project",
+				"project_name": self.name,
+				"priority": "Medium",
+				"status": "Open",
+				"percent_complete_method": "Task Completion",
+				"expected_start_date": get_datetime(frappe.utils.now()) + timedelta(days=1) ,
+				"expected_end_date": get_datetime(frappe.utils.now()) + timedelta(days=5),  #self.et_delivery_process ,
+				"is_active": "Yes",
+				"project_type": "Internal",
+				"customer": self.customer_reference
+			})
+			projecto.insert()
+			frappe.msgprint('{0}{1}'.format("Ficha de Processo criado como Projeto ", self.name))
+			#create the Tasks
+
+			for num_servicos in frappe.get_all("Servicos_Ficha_Processo",filters={'Parent':self.name},fields=['Parent','servico_ficha_processo','descricao_ficha_processo']):
+#frappe.get_all("Servicos_Ficha_Processo",filters=[["Parent","like",self.process_number + "%"]],fields=["Parent","servico_ficha_processo","descricao_ficha_processo"]):
+
+
+				print "Criar Tarefas...."
+				if num_servicos.servico_ficha_processo:
+		#			for num_avarias in fo_avarias:
+					tarefas = frappe.get_doc({
+						"doctype": "Task",
+						"project": self.name,
+						"subject": cstr(num_servicos.servico_ficha_processo) + ':' + cstr(num_servicos.descricao_ficha_processo),
+						"status": "Open",
+						"description": "Tarefa adicionada pelo Sistema",
+						"exp_start_date": get_datetime(frappe.utils.now()) + timedelta(days=1),
+						"exp_end_date": get_datetime(frappe.utils.now()) + timedelta(days=4), #self.et_delivery_process
+						#"task_weight": 1
+
+					})
+					tarefas.insert()
+					frappe.msgprint('{0}{1}'.format(num_servicos.servico_ficha_processo, " Criado como tarefa no Projecto ", self.name))
+
+
+	def criar_salesorder(self):
+
+		print "Verifica a Sale ...."
+		criarprojeto = False
+		if frappe.db.sql("""select name from `tabSales Order` WHERE name =%s """,(self.name), as_dict=False) ==():
+			criarprojeto = True
+		if criarprojeto == True: 
+			print "Criar Sales Order ...."
+
+			projecto = frappe.get_doc({
+				"doctype": "Sales Order",
+				"delivery_date": get_datetime(frappe.utils.now()) + timedelta(days=2) ,
+				"customer": self.customer_reference,
+				"project":self.name
+			})
+			for num_servicos in frappe.get_all("Servicos_Ficha_Processo",filters={'Parent':self.name},fields=['Parent','servico_ficha_processo','descricao_ficha_processo','preco_ficha_processo']):
+				projecto.append('items',{
+					"item_code": num_servicos.servico_ficha_processo,
+					"item_name": num_servicos.descricao_ficha_processo,
+					"description": num_servicos.descricao_ficha_processo,
+					"rate":num_servicos.preco_ficha_processo,					
+					"qty": 1
+				})
+
+						
+			projecto.insert()
+			frappe.msgprint('{0}{1}'.format("Ficha de Processo criado como Ordem de Venda ", self.name))
+			#create the Tasks
+
+
+
+@frappe.whitelist()
+def get_projecto_status(prj):
+	print frappe.db.sql("""select name, status from `tabProject` WHERE status = 'Completed' and name =%s """,(prj), as_dict=False)
+	return frappe.db.sql("""select name,status from `tabProject` WHERE name =%s """,(prj), as_dict=False)
+
+
+@frappe.whitelist()
+def get_projecto_status_completed():
+	print frappe.db.sql("""select name, status from `tabProject` WHERE status = 'Completed' """, as_dict=False)
+	return frappe.db.sql("""select name from `tabProject` WHERE status = 'Completed' """, as_dict=False)
+
+

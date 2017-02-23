@@ -23,7 +23,7 @@ def cambios(fonte):
 			page=requests.get('http://www.bna.ao/Servicos/cambios_table.aspx?idl=1')
 		except Exception, e:
 			if frappe.message_log: frappe.message_log.pop()
-			return
+			return 0,0
 
 		#print page
 		if page.status_code == 200:
@@ -45,6 +45,8 @@ def cambios(fonte):
 			print moeda
 			print moedacompra
 			print moedavenda
+			
+			return moedacompra, moedavenda
 	
 
 	if fonte == 'BFA':
@@ -52,7 +54,7 @@ def cambios(fonte):
 			page= requests.get('http://www.bfa.ao/Servicos/Cambios/Divisas.aspx?idl=1')
 		except Exception, e:
 			if frappe.message_log: frappe.message_log.pop()
-			return
+			return 0,0
 
 		if page.status_code == 200:
 
@@ -69,6 +71,6 @@ def cambios(fonte):
 			print moedacompra
 			print moedavenda
 
-	return moedacompra, moedavenda
+			return moedacompra, moedavenda
 
 

@@ -1,23 +1,5 @@
-<div class="pos_bar">
+<div class="pos">
     <div class="row">
-
-    	<div class="col-sm-7 pos-mesas-section">
-            <div class="row pos-mesa-toolbar">
-
-            	<div class="search-mesa col-xs-12"></div>
-            </div>
-
-    		<div class="mesa-list-area">
-				<div class="app-listing mesa-list"></ul>
-    		</div>
-    	</div>
-
-
-
-
-    </div>	
-    <div class="row">
-
     	<div class="col-sm-5 pos-bill-wrapper">
             <div class="pos-bill-toolbar row">
                 <div class="party-area col-xs-12"></div>
@@ -67,25 +49,17 @@
     			</div>
     		</div>
     	</div>
-
-    </div>
     	<div class="col-sm-7 pos-items-section">
 			<div class="row pos-item-area">
 
 			</div>
 			<span id="customer-results" style="color:#68a;"></span>
             <div class="row pos-item-toolbar">
-
             	<div class="search-area col-xs-12"></div>
             </div>
     		<div class="item-list-area">
 				<div class="app-listing item-list"></ul>
     		</div>
     	</div>
-
-
-
-
-
-
+    </div>
 </div>

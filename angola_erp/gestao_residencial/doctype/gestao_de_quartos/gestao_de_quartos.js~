@@ -240,7 +240,8 @@ frappe.ui.form.on('Gestao de Quartos','tipo_quarto',function(frm,cdt,cdn){
 
 	}
 	frappe.model.set_value(cdt,cdn,'usuario_quarto',frappe.session.user)
-	cur_frm.doc.status_quarto=="Ocupado"
+	frappe.model.set_value(cdt,cdn,'status_quarto','Ocupado')
+//	cur_frm.doc.status_quarto=="Ocupado"
 	cur_frm.refresh_fields();
 
 

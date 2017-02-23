@@ -1,0 +1,29 @@
+// Copyright (c) 2016, Helio de Jesus and contributors
+// For license information, please see license.txt
+
+// render
+frappe.listview_settings['Ficha de Processo'] = {
+	add_fields: ["status_process"],
+
+	get_indicator: function(doc) {
+
+		if (doc.status_process== "Aberto" ) {
+			return [__("Aberto" ), "green"]
+		} else if (doc.status_process== "Em Curso" ) {
+			return [__("Em Curso" ), "red"]
+		} else if (doc.status_process== "Fechado" ) {
+			return [__("Fechado" ), "orange"]
+		
+		}
+	},
+	colwidths: {"subject": 4, "status_process": 2,"Nome do Cliente": 2},
+
+	onload: function(listview){
+		frappe.route_options = {
+			"status_process":['in','Aberto,Em Curso']
+		};
+	},	
+	
+};
+
+

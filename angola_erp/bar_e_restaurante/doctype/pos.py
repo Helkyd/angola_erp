@@ -12,13 +12,26 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 from frappe.utils import cstr, get_datetime, getdate, cint, get_datetime_str
 
+
+
+def as_unicode(text, encoding='utf-8'):
+ 	#Convert to unicode if required
+	print ("AS UNICODE DEF")
+	if text and not isinstance(text, unicode):
+		if isinstance(text, unicode):
+			return text
+		elif text==None:
+			return ''
+		elif isinstance(text, basestring):
+	 		return unicode(text, encoding)
+	 	else:
+			return text or ''
+			return unicode(text)
+
+
 @frappe.whitelist()
 def get_pos_data():
-
-	print ("Get POS DATA ")	
-	print ("Get POS DATA ")	
-	print ("Get POS DATA ")	
-
+	
 	doc = frappe.new_doc('Sales Invoice')
 	doc.is_pos = 1;
 	pos_profile = get_pos_profile(doc.company) or {}
@@ -34,20 +47,13 @@ def get_pos_data():
 	default_print_format = pos_profile.get('print_format') or "Point of Sale"
 	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
 
-	#TO DELETE
-	print("Doc ", doc)
-	
-	print("default_customer ", pos_profile.get('customer'))
-	#print("items ", get_items_list(pos_profile))
-	print("customers ", get_customers_list(pos_profile))
-	print("serial_no_data ", get_serial_no_data(pos_profile, doc.company))
-	print("batch_no_data ", get_batch_no_data())
-	print("tax_data ", get_item_tax_data())
-	print("price_list_data ", get_price_list_data(doc.selling_price_list))
-	print ("bin_data ", get_bin_data(pos_profile))
-	print("pricing_rules ", get_pricing_rule_data(doc))
-	print("print_template ", print_template)
-	print("pos_profile ", pos_profile)
+	# Atendimento Bar e Mesas 
+	atendbar = frappe.new_doc('Atendimento Bar')
+	atendbar.is_pos = 1;
+	atendbar.company = doc.company
+	atendbar.hora_atendimento = frappe.utils.now()
+	atendbar.bar_tender = frappe.session.user
+
 
 	return {
 		'doc': doc,
@@ -62,6 +68,12 @@ def get_pos_data():
 		'pricing_rules': get_pricing_rule_data(doc),
 		'print_template': print_template,
 		'pos_profile': pos_profile,
+
+
+		#Atendimento Bar
+		'atendbar':atendbar,
+		'mesas': get_mesas_list(),
+
 		'meta': get_meta()
 	}
 
@@ -270,10 +282,15 @@ def get_pricing_rule_data(doc):
 	return pricing_rules
 
 @frappe.whitelist()
-def make_invoice(doc_list):
+def make_invoice(doc_list,atendbar_list):
 	if isinstance(doc_list, basestring):
 		doc_list = json.loads(doc_list)
 
+	#Atendimento Bar
+	if isinstance(atendbar_list, basestring):
+		atendbar_list = json.loads(atendbar_list)
+		print ("atendbar_list")
+		print (atendbar_list)
 	name_list = []
 
 	for docs in doc_list:
@@ -284,6 +301,24 @@ def make_invoice(doc_list):
 				si_doc.offline_pos_name = name
 				si_doc.update(doc)
 				submit_invoice(si_doc, name)
+				name_list.append(name)
+			else:
+				name_list.append(name)
+
+	#Atendimento Bar
+	for docs in atendbar_list:
+		for name, doc in docs.items():
+			print ("make ATENDIMENTO ")
+			print (name)
+			print (doc)
+			if not frappe.db.exists('Atendimento Bar',
+				{'offline_pos_name': name, 'docstatus': ("<", "2")}):
+				#validate_records(doc)
+				at_bar = frappe.new_doc('Atendimento Bar')
+				at_bar.name = 'AtendBar-' + name
+				at_bar.offline_pos_name = name
+				at_bar.update(doc)
+				submit_atendimento(at_bar, name)
 				name_list.append(name)
 			else:
 				name_list.append(name)
@@ -336,7 +371,7 @@ def save_invoice(e, si_doc, name):
 		si_doc.insert()
 
 
-#Atendimento Bar
+
 def get_mesas_list():
 
 	print "mesas "
@@ -364,22 +399,6 @@ def save_atendimento(e, si_doc, name):
 		si_doc.docstatus = 0
 		si_doc.flags.ignore_mandatory = True
 		si_doc.insert()
-
-
-
-def as_unicode(text, encoding='utf-8'):
- 	#Convert to unicode if required
-	print ("AS UNICODE DEF")
-	if text and not isinstance(text, unicode):
-		if isinstance(text, unicode):
-			return text
-		elif text==None:
-			return ''
-		elif isinstance(text, basestring):
-	 		return unicode(text, encoding)
-	 	else:
-			return text or ''
-			return unicode(text)
 
 
 
