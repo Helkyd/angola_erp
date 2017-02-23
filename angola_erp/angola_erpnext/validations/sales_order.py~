@@ -68,7 +68,6 @@ def validate(doc,method):
 			if ai.calcula_despesas:
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
-					print ("RECALCULA")
 					percentagem=ai.rate 
 					for aii in doc.get("items"):
 						if aii.parent == doc.name:
@@ -97,7 +96,6 @@ def validate(doc,method):
 
 
 				else:
-					print ("CALCULA DESPESAS")
 					despesas = (ai.rate * totaldespesas_noretencaofonte)/100
 
 					ai.charge_type = "Actual"
