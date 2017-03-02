@@ -161,6 +161,36 @@ frappe.ui.form.on("Ficha de Processo","funds_request_currency",function(frm,cdt,
 	}
 });
 
+frappe.ui.form.on("Ficha de Processo","taxa_cambio_company",function(frm,cdt,cdn){
+	if (!isNumber(cur_frm.doc.broker_request_customs)){
+		alert("Somente numeros")
+	}
+});
+
+frappe.ui.form.on("Ficha de Processo","invoice_currency_roe",function(frm,cdt,cdn){
+	if (!isNumber(cur_frm.doc.broker_request_customs)){
+		alert("Somente numeros")
+	}
+});
+
+frappe.ui.form.on("Ficha de Processo","credit_customer_value",function(frm,cdt,cdn){
+	if (!isNumber(cur_frm.doc.broker_request_customs)){
+		alert("Somente numeros")
+	}
+});
+
+frappe.ui.form.on("Ficha de Processo","broker_funds",function(frm,cdt,cdn){
+	if (!isNumber(cur_frm.doc.broker_request_customs)){
+		alert("Somente numeros")
+	}
+});
+
+frappe.ui.form.on("Ficha de Processo","broker_request_customs",function(frm,cdt,cdn){
+	if (!isNumber(cur_frm.doc.broker_request_customs)){
+		alert("Somente numeros")
+	}
+});
+
 cur_frm.add_fetch('servico_ficha_processo','standard_rate','preco_ficha_processo')	
 cur_frm.add_fetch('servico_ficha_processo','item_name','descricao_ficha_processo')
 
@@ -236,3 +266,6 @@ var servicos_ = function(frm,cdt,cdn){
 
 }
 
+function isNumber(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+}

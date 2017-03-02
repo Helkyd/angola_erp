@@ -87,6 +87,11 @@ doc_events = {
 		"validate": "angola_erp.angola_erpnext.validations.employee.validate",
 
 	},
+	"Sales Order": {
+		"validate": "angola_erp.angola_erpnext.validations.sales_order.validate",
+
+	},
+
 }
 
 # Scheduled Tasks
