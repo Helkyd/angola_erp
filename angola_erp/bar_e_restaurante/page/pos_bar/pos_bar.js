@@ -148,6 +148,7 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 
 		this.removed_items = [];
+		this.removed_produtos = [];	//Atendimento Bar
 		$(this.list_body).empty();
 
 		$(this.list_body).append('<div class="row list-row list-row-head pos-invoice-list">\
@@ -1565,10 +1566,13 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 				//me.add_to_cart();
 				oldmesaSelected = mesaSelected;
 				mesaSelected = me.get_mesas($(this).attr("data-nome-mesa"))[0].nome_mesa;
-				show_alert(mesaSelected,1);
-				me.mesas_campo.setvalue = mesaSelected
-				//me.frm.atendbar.nome_mesa = mesaSelected
 
+				me.mesas_campo.setvalue = mesaSelected
+				show_alert(mesaSelected,1);
+				//me.frm.atendbar.nome_mesa = mesaSelected
+				if (me.si_docs == undefined || me.si_docs.length == 0){
+					me.si_docs = me.get_doc_from_localstorage();
+				}
 
 				mesaSelectedstatus = "Livre";
 				$.each(me.si_docs, function(index, data){

@@ -16,12 +16,12 @@ fixtures = ["Custom Field","Custom Script","IRT","INSS"]
 # ------------------
 
 # include js, css files in header of desk.html
-app_include_css = "/assets/angola_erp/css/angola_erp.css"
-app_include_js = "/assets/js/angola_erp.min.js"
+app_include_css = "assets/angola_erp/css/angola_erp.css"
+app_include_js = "assets/js/angola_erp.min.js"
 
 # include js, css files in header of web template
-web_include_css = "/assets/angola_erp/css/angola_erp.css"
-web_include_js = "/assets/js/angola_erp-web.min.js"
+web_include_css = "assets/angola_erp/css/angola_erp.css"
+web_include_js = "assets/js/angola_erp-web.min.js"
 
 
 

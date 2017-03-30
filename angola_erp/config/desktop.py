@@ -25,7 +25,15 @@ def get_data():
 			"icon": "octicon octicon-file-directory",
 			"type": "module",
 			"label": _("Bar e Restaurante")
+		},
+		{
+			"module_name": "Transitario",
+			"color": "grey",
+			"icon": "octicon octicon-file-directory",
+			"type": "module",
+			"label": _("Transitario")
 		}
+
 
 
 	]

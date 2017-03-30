@@ -91,6 +91,10 @@ doc_events = {
 		"validate": "angola_erp.angola_erpnext.validations.sales_order.validate",
 
 	},
+	"Sales Invoice": {
+		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
+
+	},
 
 }
 
