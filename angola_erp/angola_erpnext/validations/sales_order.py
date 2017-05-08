@@ -29,7 +29,13 @@ def validate(doc,method):
 	totaldespesas_noretencaofonte =0
 
 	
-	
+	#Taxa de Cambio
+	print "SALES ORDER CAMBIO"	
+	print taxavenda[1]	
+	if (taxavenda[1] !=0 and doc.taxa_cambio == 0):
+		doc.taxa_cambio = taxavenda[1]
+				
+
 	ii=0
 
 	for x in lista_retencoes:
@@ -38,7 +44,7 @@ def validate(doc,method):
 			retencaopercentagem = x.percentagem
 
 	for i in doc.get("items"):			
-		print (i.item_code)
+		#print (i.item_code)
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")

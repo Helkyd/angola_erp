@@ -3,7 +3,7 @@
 		"public/css/angola_erp.css"
 	],
 
-	"js/erpnext-web.min.js": [
+	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
 		"public/js/shopping_cart.js"
 	],

@@ -13,6 +13,8 @@
 		"public/js/pos_bar/pos_bar_item.html",
 		"public/js/pos_bar/pos_bar_mesas.html",
 		"public/js/pos_bar/pos_bar_tax_row.html",
-		"public/js/pos_bar/pos_bar_invoice_list.html"
+		"public/js/pos_bar/pos_bar_invoice_list.html",
+		"public/js/pos_bar/pos_bar_selected_item.html",
+		"public/js/pos_bar/customer_toolbar.html"
 	]
 }

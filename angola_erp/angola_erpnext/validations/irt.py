@@ -9,6 +9,7 @@ from frappe.utils import cstr, flt, getdate
 from frappe.model.document import Document
 import frappe.model
 import frappe.utils
+import datetime
 
 
 
@@ -23,7 +24,8 @@ def get_lista_retencoes():
 
 
 @frappe.whitelist()
-def set_faltas(mes,ano,empresa):
+#TO BE REMOVED IF Client ERPNEXT v8
+def set_faltas1(mes,ano,empresa):
 	print " DADOS ATTENDANCE"
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
@@ -37,6 +39,24 @@ def set_faltas(mes,ano,empresa):
 		j1 = frappe.get_doc("Employee",tra.name)
 		j1.numer_faltas = j[0][0]
 		j1.save()
+	return j
+
+@frappe.whitelist()
+def set_faltas(mes,ano,empresa):
+	print " DADOS ATTENDANCE"
+	print  mes, ' ', ano
+	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
+		print empresa, ' ', tra.name
+		j= frappe.db.sql(""" SELECT count(status)
+		from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
+		print " ATTENDANCE"
+		print j[0][0]
+		if j[0][0] > 0 :	
+			#save on Employee record
+			j1 = frappe.get_doc("Employee",tra.name)
+			j1.numer_faltas = j[0][0]
+			j1.save()
 	return j
 
 

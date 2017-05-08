@@ -1,16 +1,4 @@
-<div class="pos_bar">
-    <div class="row">
-   	<div class="col-sm-7 pos-mesas-section">
-            <div class="row pos-mesa-toolbar">
-
-            	<div class="search-mesa col-xs-12"></div>
-            </div>
-
-    		<div class="mesa-list-area">
-				<div class="app-listing mesa-list"></ul>
-    		</div>
-    	</div>
-   </div>	
+<div class="pos">
 	<div class="row">
 		<div class="col-sm-5 pos-bill-wrapper">
 			<div class="col-sm-12"><h6 class="form-section-heading uppercase">{{ __("Item Cart") }}</h6></div>

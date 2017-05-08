@@ -77,6 +77,56 @@ def get_pos_data():
 		'meta': get_meta()
 	}
 
+@frappe.whitelist()
+def get_pos_data():
+	doc = frappe.new_doc('Sales Invoice')
+	doc.is_pos = 1;
+	pos_profile = get_pos_profile(doc.company) or {}
+	if not doc.company: doc.company = pos_profile.get('company')
+	doc.update_stock = pos_profile.get('update_stock')
+
+	if pos_profile.get('name'):
+		pos_profile = frappe.get_doc('POS Profile', pos_profile.get('name'))
+
+
+	company_data = get_company_data(doc.company)
+	update_pos_profile_data(doc, pos_profile, company_data)
+	update_multi_mode_option(doc, pos_profile)
+	default_print_format = pos_profile.get('print_format') or "Point of Sale"
+	print_template = frappe.db.get_value('Print Format', default_print_format, 'html')
+	customers = get_customers_list(pos_profile)
+
+	# Atendimento Bar e Mesas 
+	atendbar = frappe.new_doc('Atendimento Bar')
+	atendbar.is_pos = 1;
+	atendbar.company = doc.company
+	atendbar.hora_atendimento = frappe.utils.now()
+	atendbar.bar_tender = frappe.session.user
+
+
+	return {
+		'doc': doc,
+		'default_customer': pos_profile.get('customer'),
+		'items': get_items_list(pos_profile),
+		'item_groups': get_item_group(pos_profile),
+		'customers': customers,
+		'address': get_customers_address(customers),
+		'serial_no_data': get_serial_no_data(pos_profile, doc.company),
+		'batch_no_data': get_batch_no_data(),
+		'tax_data': get_item_tax_data(),
+		'price_list_data': get_price_list_data(doc.selling_price_list),
+		'bin_data': get_bin_data(pos_profile),
+		'pricing_rules': get_pricing_rule_data(doc),
+		'print_template': print_template,
+		'pos_profile': pos_profile,
+
+		#Atendimento Bar
+		'atendbar':atendbar,
+		'mesas': get_mesas_list(),
+
+		'meta': get_meta()
+	}
+
 def get_meta():
 	doctype_meta = {
 		'customer': frappe.get_meta('Customer'),
@@ -174,6 +224,38 @@ def get_items_list(pos_profile):
 		where
 			disabled = 0 and has_variants = 0 and is_sales_item = 1 and {cond}
 		""".format(cond=cond), tuple(item_groups), as_dict=1)
+
+def get_customers_address(customers):
+	customer_address = {}
+	if isinstance(customers, basestring):
+		customers = [frappe._dict({'name': customers})]
+
+	for data in customers:
+		address = frappe.db.sql(""" select name, address_line1, address_line2, city, state,
+			email_id, phone, fax, pincode from `tabAddress` where is_primary_address =1 and name in
+			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
+			and parenttype = 'Address')""", data.name, as_dict=1)
+		if address:
+			address_data = address[0]
+			address_data.update({'full_name': data.customer_name})
+			customer_address[data.name] = address_data
+
+	return customer_address
+
+def get_child_nodes(group_type, root):
+	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+	return frappe.db.sql_list(""" Select name from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt}""".format(tab=group_type, lft=lft, rgt=rgt))
+
+def get_item_group(pos_profile):
+	if pos_profile.get('item_groups'):
+		item_groups = []
+		for d in pos_profile.get('item_groups'):
+			item_groups.extend(get_child_nodes('Item Group', d.item_group))
+		return item_groups
+	else:
+		return frappe.db.sql_list("""Select name from `tabItem Group` order by name""")
+
 
 def get_customers_list(pos_profile):
 	cond = "1=1"
@@ -371,7 +453,7 @@ def save_invoice(e, si_doc, name):
 		si_doc.insert()
 
 
-#Atendimento Bar
+
 def get_mesas_list():
 
 	print "mesas "

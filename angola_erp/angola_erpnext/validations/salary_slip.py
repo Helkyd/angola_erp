@@ -3,9 +3,11 @@ from __future__ import unicode_literals
 import frappe
 import math
 import datetime
+import erpnext
 from frappe import msgprint
 from frappe.utils import money_in_words, flt
-from erpnext.setup.utils import get_company_currency
+from frappe.utils import cstr, getdate
+## from erpnext.setup.utils import get_company_currency
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
@@ -16,11 +18,12 @@ def validate(doc,method):
 	net_pay = 0
 	tot_ded = 0
 	tot_cont = 0
+	mes_startdate = doc.start_date
 
 	#Salva Payment Days e recalcula o IRT, INSS
 	print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-
-	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(doc.employee,doc.month,doc.fiscal_year), as_dict=True)
+	print doc.name , " + ", doc.employee, " + ", doc.start_date
+	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
 	print doc.name , " + ", doc.employee
 	print doc.payment_days - j[0]['count(status)']
 	
@@ -56,7 +59,7 @@ def validate(doc,method):
 
 	return
 
-	m = get_month_details(doc.fiscal_year, doc.month)
+	m = get_month_details(mes_startdate.year, mes_startdate.month)
 	msd = m.month_start_date
 	med = m.month_end_date
 	emp = frappe.get_doc("Employee", doc.employee)
@@ -75,12 +78,12 @@ def validate(doc,method):
 	wd = twd - holidays #total working days
 	doc.total_days_in_month = tdim
 	att = frappe.db.sql("""SELECT sum(overtime), count(name) FROM `tabAttendance` 
-		WHERE employee = '%s' AND att_date >= '%s' AND att_date <= '%s' 
+		WHERE employee = '%s' AND attendance_date >= '%s' AND attendance_date <= '%s' 
 		AND status = 'Present' AND docstatus=1""" \
 		%(doc.employee, msd, med),as_list=1)
 
 	half_day = frappe.db.sql("""SELECT count(name) FROM `tabAttendance` 
-		WHERE employee = '%s' AND att_date >= '%s' AND att_date <= '%s' 
+		WHERE employee = '%s' AND attendance_date >= '%s' AND attendance_date <= '%s' 
 		AND status = 'Half Day' AND docstatus=1""" \
 		%(doc.employee, msd, med),as_list=1)
 	
@@ -193,7 +196,7 @@ def validate(doc,method):
 	doc.net_pay = doc.gross_pay - doc.total_deduction
 	doc.rounded_total = myround(doc.net_pay, 10)
 		
-	company_currency = get_company_currency(doc.company)
+	company_currency = erpnext.get_company_currency(doc.company)
 	doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 	doc.total_ctc = doc.gross_pay + tot_cont
 
