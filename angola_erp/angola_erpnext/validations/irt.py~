@@ -48,7 +48,7 @@ def set_faltas(mes,ano,empresa):
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
 		print empresa, ' ', tra.name
 		j= frappe.db.sql(""" SELECT count(status)
-		from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes.month,ano.year), as_dict=False)
+		from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
 		print " ATTENDANCE"
 		print j[0][0]
@@ -57,6 +57,23 @@ def set_faltas(mes,ano,empresa):
 			j1 = frappe.get_doc("Employee",tra.name)
 			j1.numer_faltas = j[0][0]
 			j1.save()
+
+		j2 = frappe.db.sql(""" SELECT count(status)
+		from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,tra.name), as_dict=False)
+
+		print " LEAVE APPLICATION"
+		if j2[0][0] > 0:
+			#save on Employee record
+			j1 = frappe.get_doc("Employee",tra.name)
+			j1.subsidio_de_ferias = 1
+			j1.save()
+		else:
+			#save on Employee record
+			j1 = frappe.get_doc("Employee",tra.name)
+			j1.subsidio_de_ferias = 0
+			j1.save()
+
+
 	return j
 
 
