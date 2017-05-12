@@ -1,0 +1,26 @@
+[
+ {
+  "descricao": "Retencao na Fonte", 
+  "docstatus": 0, 
+  "doctype": "Retencoes", 
+  "modified": "2016-12-01 18:00:43.983953", 
+  "name": "Retencao na Fonte", 
+  "percentagem": 6.5
+ }, 
+ {
+  "descricao": "Outras Retencoes", 
+  "docstatus": 0, 
+  "doctype": "Retencoes", 
+  "modified": "2016-12-01 18:00:53.928474", 
+  "name": "Outras Retencoes", 
+  "percentagem": 8.0
+ }, 
+ {
+  "descricao": "Imposto de Selo", 
+  "docstatus": 0, 
+  "doctype": "Retencoes", 
+  "modified": "2017-02-12 14:40:20.038035", 
+  "name": "Imposto de Selo", 
+  "percentagem": 1.0
+ }
+]

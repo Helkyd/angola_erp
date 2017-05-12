@@ -1,0 +1,18 @@
+[
+ {
+  "descricao": "Subsidio de Ferias", 
+  "docstatus": 0, 
+  "doctype": "Subsidios", 
+  "modified": "2017-05-10 06:11:35.149820", 
+  "name": "3ef7664c73", 
+  "percentagem": 50.0
+ }, 
+ {
+  "descricao": "Subsidio de Natal", 
+  "docstatus": 0, 
+  "doctype": "Subsidios", 
+  "modified": "2017-05-10 06:12:23.162664", 
+  "name": "99175ad508", 
+  "percentagem": 100.0
+ }
+]
