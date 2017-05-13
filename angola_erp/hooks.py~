@@ -10,7 +10,7 @@ app_icon = "octicon octicon-file-directory"
 app_color = "grey"
 app_email = "hcesar@gmail.com"
 app_license = "MIT"
-fixtures = ["Custom Field","Custom Script","IRT","INSS"]
+fixtures = ["Custom Field","Custom Script","IRT","INSS","Subsidios","Retencoes","Salary Component"]
 
 # Includes in <head>
 # ------------------
@@ -132,4 +132,8 @@ scheduler_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "angola_erp.event.get_events"
 # }
+
+override_whitelisted_methods = {
+	"erpnext.setup.doctype.sms_settings.sms_settings.send_sms": "angola_erp.angola_erpnext.validations.sms_settings.sms_settings.send_sms"
+}
 

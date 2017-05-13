@@ -133,3 +133,7 @@ scheduler_events = {
 # 	"frappe.desk.doctype.event.event.get_events": "angola_erp.event.get_events"
 # }
 
+override_whitelisted_methods = {
+	"erpnext.setup.doctype.sms_settings.sms_settings.send_sms": "angola_erp.angola_erpnext.validations.sms_settings.send_sms"
+}
+
