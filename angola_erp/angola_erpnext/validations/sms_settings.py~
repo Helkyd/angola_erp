@@ -53,6 +53,9 @@ def get_contact_number(contact_name, ref_doctype, ref_name):
 @frappe.whitelist()
 def send_sms(receiver_list, msg, sender_name = '', success_msg = True):
 
+	#Test to see if works
+	receiver_list = get_receiver_nos(receiver_list)
+
 	import json
 	if isinstance(receiver_list, basestring):
 		print "Lista para enviar "
@@ -148,7 +151,7 @@ def get_receiver_nos(arg):
 	return receiver_nos
 
 @frappe.whitelist()
-def send_sms1(receiver_list1, msg, sender_name = ''):
+def send_sms1(receiver_list1, msg):
 	receiver_list = []
 	if not msg:
 		msgprint(_("Please enter message before sending"))

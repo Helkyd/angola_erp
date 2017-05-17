@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 
+from frappe.utils import cstr
+
 from frappe import _, throw, msgprint
 from frappe.utils import nowdate
 
@@ -52,6 +54,9 @@ def get_contact_number(contact_name, ref_doctype, ref_name):
 
 @frappe.whitelist()
 def send_sms(receiver_list, msg, sender_name = '', success_msg = True):
+
+	#Test to see if works
+	receiver_list = get_receiver_nos(receiver_list)
 
 	import json
 	if isinstance(receiver_list, basestring):
