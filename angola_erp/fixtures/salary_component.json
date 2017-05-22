@@ -1,10 +1,15 @@
 [
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": "Salario Base", 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2016-11-15 16:40:12.784127", 
+  "modified": "2017-05-17 00:15:24.850040", 
   "name": "Salario Base", 
   "percentagem": 0.0, 
   "salary_component": "Salario Base", 
@@ -12,11 +17,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:11:36.647921", 
+  "modified": "2017-05-17 00:18:22.879755", 
   "name": "Imposto Sobre o Rendimento do Trabalho", 
   "percentagem": 0.0, 
   "salary_component": "Imposto Sobre o Rendimento do Trabalho", 
@@ -24,11 +34,16 @@
   "type": "Deduction"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": "INSS", 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:12:11.338583", 
+  "modified": "2017-05-17 00:18:12.364129", 
   "name": "Seguranca Social", 
   "percentagem": 0.0, 
   "salary_component": "Seguranca Social", 
@@ -36,11 +51,16 @@
   "type": "Deduction"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:10:47.362026", 
+  "modified": "2017-05-17 00:16:52.330082", 
   "name": "Abono de Familia", 
   "percentagem": 0.0, 
   "salary_component": "Abono de Familia", 
@@ -48,11 +68,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:12:50.368041", 
+  "modified": "2017-05-17 00:19:56.124398", 
   "name": "Faltas Injustificadas", 
   "percentagem": 0.0, 
   "salary_component": "Faltas Injustificadas", 
@@ -60,11 +85,16 @@
   "type": "Deduction"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:10:10.061063", 
+  "modified": "2017-05-17 00:18:45.221086", 
   "name": "Subsidio de Ferias", 
   "percentagem": 50.0, 
   "salary_component": "Subsidio de Ferias", 
@@ -72,11 +102,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:09:41.881143", 
+  "modified": "2017-05-17 00:19:46.972225", 
   "name": "Subsidio de Natal", 
   "percentagem": 50.0, 
   "salary_component": "Subsidio de Natal", 
@@ -84,11 +119,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:13:01.571360", 
+  "modified": "2017-05-17 00:17:51.325005", 
   "name": "Falta Injustificadas 1", 
   "percentagem": 0.0, 
   "salary_component": "Falta Injustificadas 1", 
@@ -96,11 +136,16 @@
   "type": "Deduction"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 06:09:35.402528", 
+  "modified": "2017-05-17 00:18:55.231443", 
   "name": "Isen\u00e7\u00e3o de Hor\u00e1rio de Trabalho", 
   "percentagem": 0.0, 
   "salary_component": "Isen\u00e7\u00e3o de Hor\u00e1rio de Trabalho", 
@@ -108,11 +153,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 06:37:33.898370", 
+  "modified": "2017-05-17 00:19:08.621067", 
   "name": "Salario Hora", 
   "percentagem": 0.0, 
   "salary_component": "Salario Hora", 
@@ -120,11 +170,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:08:34.318140", 
+  "modified": "2017-05-17 00:19:17.839858", 
   "name": "Faltas", 
   "percentagem": 0.0, 
   "salary_component": "Faltas", 
@@ -132,11 +187,16 @@
   "type": "Deduction"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:08:56.864427", 
+  "modified": "2017-05-17 00:19:27.614244", 
   "name": "Subsidio de Alimentacao", 
   "percentagem": 0.0, 
   "salary_component": "Subsidio de Alimentacao", 
@@ -144,11 +204,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:09:23.258419", 
+  "modified": "2017-05-17 00:19:36.653146", 
   "name": "Subsidio de Transporte", 
   "percentagem": 0.0, 
   "salary_component": "Subsidio de Transporte", 
@@ -156,11 +221,16 @@
   "type": "Earning"
  }, 
  {
-  "accounts": [], 
+  "accounts": [
+   {
+    "company": "AngolaERP", 
+    "default_account": "72210000 - Ordenados e Salarios - CF"
+   }
+  ], 
   "description": null, 
   "docstatus": 0, 
   "doctype": "Salary Component", 
-  "modified": "2017-05-12 11:10:29.387969", 
+  "modified": "2017-05-17 00:18:34.560489", 
   "name": "Descontos Diversos", 
   "percentagem": 0.0, 
   "salary_component": "Descontos Diversos", 
