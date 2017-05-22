@@ -35,7 +35,7 @@ def get_data():
 		},
 		{
 			"module_name": "Advogados",
-			"color": "blue:,
+			"color": "blue",
 			"icon": "octicon octicon-file-directory",
 			"type": "module",
 			"label": _("Advogados")
