@@ -32,6 +32,13 @@ def get_data():
 			"icon": "octicon octicon-file-directory",
 			"type": "module",
 			"label": _("Transitario")
+		},
+		{
+			"module_name": "Advogados",
+			"color": "blue:,
+			"icon": "octicon octicon-file-directory",
+			"type": "module",
+			"label": _("Advogados")
 		}
 
 
