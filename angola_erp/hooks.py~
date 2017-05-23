@@ -6,7 +6,7 @@ app_name = "angola_erp"
 app_title = "Angola ERPNext"
 app_publisher = "Helio de Jesus"
 app_description = "Angola ERPNEXT extensao"
-app_icon = "octicon octicon-file-directory"
+app_icon = "/assets/angola_erp/images/angolaerp.svg"
 app_color = "grey"
 app_email = "hcesar@gmail.com"
 app_license = "MIT"
@@ -23,7 +23,10 @@ app_include_js = "assets/js/angola_erp.min.js"
 web_include_css = "assets/angola_erp/css/angola_erp.css"
 web_include_js = "assets/js/angola_erp-web.min.js"
 
-
+website_context = {
+	"favicon": 	"/assets/angola_erp/images/angolaerp.svg",
+	"splash_image": "/assets/angola_erp/images/angolaerp.svg"
+}
 
 # Home Pages
 # ----------
@@ -134,6 +137,6 @@ scheduler_events = {
 # }
 
 override_whitelisted_methods = {
-	"erpnext.setup.doctype.sms_settings.sms_settings.send_sms": "angola_erp.angola_erpnext.validations.sms_settings.sms_settings.send_sms"
+	"erpnext.setup.doctype.sms_settings.sms_settings.send_sms": "angola_erp.angola_erpnext.validations.sms_settings.send_sms"
 }
 

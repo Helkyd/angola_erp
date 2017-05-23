@@ -6,7 +6,7 @@ app_name = "angola_erp"
 app_title = "Angola ERPNext"
 app_publisher = "Helio de Jesus"
 app_description = "Angola ERPNEXT extensao"
-app_icon = "octicon octicon-file-directory"
+app_icon = "/assets/angola_erp/images/angolaerp.svg"
 app_color = "grey"
 app_email = "hcesar@gmail.com"
 app_license = "MIT"
@@ -23,7 +23,10 @@ app_include_js = "assets/js/angola_erp.min.js"
 web_include_css = "assets/angola_erp/css/angola_erp.css"
 web_include_js = "assets/js/angola_erp-web.min.js"
 
-
+website_context = {
+	"favicon": 	"/assets/angola_erp/images/angolaerp.ico",
+	"splash_image": "/assets/angola_erp/images/angolaerp.svg"
+}
 
 # Home Pages
 # ----------

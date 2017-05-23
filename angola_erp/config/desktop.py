@@ -7,7 +7,7 @@ def get_data():
 		{
 			"module_name": "Angola ERPNext",
 			"color": "grey",
-			"icon": "octicon octicon-file-directory",
+			"icon": "/assets/angola_erp/images/angolaerp.svg",
 			"type": "module",
 			"label": _("Angola ERPNext")
 		},
@@ -15,14 +15,14 @@ def get_data():
 		{
 			"module_name": "Gestao Residencial",
 			"color": "grey",
-			"icon": "octicon octicon-file-directory",
+			"icon": "/assets/angola_erp/images/hotel.svg",
 			"type": "module",
 			"label": _("Gestao Residencial")
 		},
 		{
 			"module_name": "Bar e Restaurante",
 			"color": "grey",
-			"icon": "octicon octicon-file-directory",
+			"icon": "/assets/angola_erp/images/rest1.svg",
 			"type": "module",
 			"label": _("Bar e Restaurante")
 		},
@@ -36,7 +36,7 @@ def get_data():
 		{
 			"module_name": "Advogados",
 			"color": "blue",
-			"icon": "octicon octicon-file-directory",
+			"icon": "octicon octicon-letter-A",
 			"type": "module",
 			"label": _("Advogados")
 		}
