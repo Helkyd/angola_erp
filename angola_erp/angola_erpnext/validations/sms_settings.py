@@ -100,21 +100,29 @@ def send_via_gateway(arg):
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
 		print " ENVIAR PARA "
+		if not d.isnumeric():
+			msgprint(_("Digite Numeros somente!!!"))
+#			return
 
 		if len(d) < 9:
 			msgprint(_("Numero do Movel Incompleto!!!"))
 			return
 
+		if d[0:2] == '["':
+			d = d[2:len(d)-2]
 		if d[0:3] !=244:
-			d = "244" + d
+			print d[0:3]
+			d = '244' + d
 			print d
-			
+			print "vermoe"
+			print args[ss.receiver_parameter]
 		
 
 		# http://10.192.8.104/cgi/WebCGI?11401=account=admin&password=helio&port=1&destination=
 		paraquem = d #arg.get('receiver_list')[0]
 		paraquem += "&content="
 		paraquem += arg.get('message')
+		print "PARA QUEM"
 		print paraquem
 		print ss.sms_gateway_url
 
