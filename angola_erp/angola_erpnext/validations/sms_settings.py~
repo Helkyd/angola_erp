@@ -108,10 +108,12 @@ def send_via_gateway(arg):
 			msgprint(_("Numero do Movel Incompleto!!!"))
 			return
 
+		if d[0:2] == '["':
+			d = d[2:len(d)-2]
 		if d[0:3] !=244:
 			print d[0:3]
 			d = '244' + d
-			print d.pop()
+			print d
 			print "vermoe"
 			print args[ss.receiver_parameter]
 		

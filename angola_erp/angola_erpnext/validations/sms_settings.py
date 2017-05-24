@@ -102,7 +102,7 @@ def send_via_gateway(arg):
 		print " ENVIAR PARA "
 		if not d.isnumeric():
 			msgprint(_("Digite Numeros somente!!!"))
-#			return
+			return
 
 		if len(d) < 9:
 			msgprint(_("Numero do Movel Incompleto!!!"))
