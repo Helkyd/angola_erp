@@ -100,16 +100,18 @@ def send_via_gateway(arg):
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
 		print " ENVIAR PARA "
+
+		if d[0:2] == '["':
+			d = d[2:len(d)-2]
+
 		if not d.isnumeric():
 			msgprint(_("Digite Numeros somente!!!"))
 			return
 
 		if len(d) < 9:
-			msgprint(_("Numero do Movel Incompleto!!!"))
+			msgprint(_("Numero de Telemovel Incompleto!!!"))
 			return
 
-		if d[0:2] == '["':
-			d = d[2:len(d)-2]
 		if d[0:3] !=244:
 			print d[0:3]
 			d = '244' + d
