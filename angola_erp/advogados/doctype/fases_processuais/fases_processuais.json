@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "beta": 0, 
  "creation": "2017-05-18 10:41:02.417744", 
@@ -53,7 +53,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-05-24 15:55:18.103743", 
+ "modified": "2017-05-25 06:21:40.349234", 
  "modified_by": "Administrator", 
  "module": "Advogados", 
  "name": "Fases Processuais", 
@@ -104,9 +104,11 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "search_fields": "descricao", 
  "show_name_in_global_search": 0, 
- "sort_field": "modified", 
+ "sort_field": "descricao", 
  "sort_order": "DESC", 
+ "title_field": "descricao", 
  "track_changes": 1, 
  "track_seen": 0
 }

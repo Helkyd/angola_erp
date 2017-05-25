@@ -15,28 +15,28 @@ def get_data():
 		{
 			"module_name": "Gestao Residencial",
 			"color": "grey",
-			"icon": "/assets/angola_erp/images/hotel.svg",
+			"icon": "/assets/angola_erp/images/hotel1.svg",
 			"type": "module",
 			"label": _("Gestao Residencial")
 		},
 		{
 			"module_name": "Bar e Restaurante",
 			"color": "grey",
-			"icon": "/assets/angola_erp/images/rest1.svg",
+			"icon": "/assets/angola_erp/images/rest.svg",
 			"type": "module",
 			"label": _("Bar e Restaurante")
 		},
 		{
 			"module_name": "Transitario",
 			"color": "grey",
-			"icon": "octicon octicon-file-directory",
+			"icon": "octicon octicon-checklist",
 			"type": "module",
 			"label": _("Transitario")
 		},
 		{
 			"module_name": "Advogados",
 			"color": "blue",
-			"icon": "octicon octicon-letter-A",
+			"icon": "octicon octicon-law",
 			"type": "module",
 			"label": _("Advogados")
 		}
