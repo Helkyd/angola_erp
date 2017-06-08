@@ -57,6 +57,11 @@ def set_faltas(mes,ano,empresa):
 			j1 = frappe.get_doc("Employee",tra.name)
 			j1.numer_faltas = j[0][0]
 			j1.save()
+		else:		
+			#save on Employee record
+			j1 = frappe.get_doc("Employee",tra.name)
+			j1.numer_faltas = 0
+			j1.save()
 
 		j2 = frappe.db.sql(""" SELECT count(status)
 		from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,tra.name), as_dict=False)

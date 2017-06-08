@@ -98,7 +98,7 @@ def get_faltas(emp,mes,ano, empresa):
 	print " DADOS ATTENDANCE"
 	print emp, ' ', mes, ' ', ano
 	j= frappe.db.sql(""" SELECT count(status)
-	from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and company = %s and docstatus=1 """,(emp,mes,ano, empresa), as_dict=False)
+	from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and company = %s and docstatus=1 """,(emp,mes,ano, empresa), as_dict=False)
 
 	print " ATTENDANCE"
 	print j[0][0]	
