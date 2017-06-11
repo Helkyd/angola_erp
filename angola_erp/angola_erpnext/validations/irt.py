@@ -43,7 +43,7 @@ def set_faltas1(mes,ano,empresa):
 
 @frappe.whitelist()
 def set_faltas(mes,ano,empresa):
-	print " DADOS ATTENDANCE"
+	print " DADOS ATTENDANCE - SET FALTAS"
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
 		print empresa, ' ', tra.name
@@ -154,4 +154,10 @@ def set_ded(ded,d_val):
 	return jj
 
 
+
+
+@frappe.whitelist()
+def seguranca_social(jv_entry):
+
+	#Read values from the JV created and get 72221 account value to calculate 8% and deposit on 7252 (Deb) and 3461 (Cre)
 

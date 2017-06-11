@@ -24,7 +24,7 @@ web_include_css = "assets/angola_erp/css/angola_erp.css"
 web_include_js = "assets/js/angola_erp-web.min.js"
 
 website_context = {
-	"favicon": 	"/assets/angola_erp/images/angolaerp.svg",
+	"favicon": 	"/assets/angola_erp/images/angolaerp.ico",
 	"splash_image": "/assets/angola_erp/images/angolaerp.svg"
 }
 
@@ -96,6 +96,10 @@ doc_events = {
 	},
 	"Sales Invoice": {
 		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
+
+	},
+	"Process Payroll": {
+		"validate": "angola_erp.angola_erpnext.validations.process_payroll.validate",
 
 	},
 
