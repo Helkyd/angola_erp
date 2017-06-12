@@ -160,4 +160,5 @@ def set_ded(ded,d_val):
 def seguranca_social(jv_entry):
 
 	#Read values from the JV created and get 72221 account value to calculate 8% and deposit on 7252 (Deb) and 3461 (Cre)
+	print "ALGUMA COISA ...."
 

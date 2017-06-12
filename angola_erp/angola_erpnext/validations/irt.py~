@@ -129,7 +129,7 @@ def get_irt(start):
 	print  j
 	return j
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_lista_irt():
 	j= frappe.db.sql(""" SELECT valor_inicio, valor_fim, valor_percentual,parcela_fixa
 	from `tabIRT` """,as_dict=True)
@@ -154,4 +154,11 @@ def set_ded(ded,d_val):
 	return jj
 
 
+
+
+@frappe.whitelist()
+def seguranca_social(jv_entry):
+
+	#Read values from the JV created and get 72221 account value to calculate 8% and deposit on 7252 (Deb) and 3461 (Cre)
+	print "ALGUMA COISA ...."
 
