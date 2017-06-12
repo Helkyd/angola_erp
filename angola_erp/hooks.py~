@@ -98,10 +98,7 @@ doc_events = {
 		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
 
 	},
-	"Process Payroll": {
-		"validate": "angola_erp.angola_erpnext.validations.process_payroll.validate",
 
-	},
 
 }
 
