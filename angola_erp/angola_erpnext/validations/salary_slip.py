@@ -45,6 +45,7 @@ def validate(doc,method):
 #		print "BUSCA SALARY STRUCTURE com LEAVE"
 #		doc.get_leave_details(lwp = doc.leave_without_pay)
 
+
 	print "MEU TESTE"
 	print "MEU TESTE"
 	print "MEU TESTE"
@@ -515,3 +516,33 @@ def valida_sub_ferias(doc):
 
 			#if (datetime.date(datetime.datetime.today().year,12,31) - emp.date_of_joining) < 12:
 			#	print "A Menos de um Ano na Empresa"
+
+@frappe.whitelist()
+def proc_salario_iliquido(mes,ano,empresa):
+
+	print "Processa o Salario Iliquido ..."
+	print "Processa o Salario Iliquido ..."
+	print "Processa o Salario Iliquido ..."
+	print "Processa o Salario Iliquido ..."
+	print "Processa o Salario Iliquido ..."
+	salario_iliquido =0;
+	#Processa o Salario Iliquido ...
+	#for salslip in frappe.db.sql(""" select name from `tabSalary Slip` where 
+	for salslip in frappe.db.sql(""" SELECT name,status from `tabSalary Slip` where month(start_date) = %s and year(start_date) = %s and  company = %s """,(mes,ano,empresa), as_dict=True):
+		#SI = (SB + HE - PA + PP) - (FTJSS - FI )
+		print salslip
+		salario_iliquido =0;
+		tab_detalhes = frappe.db.sql(""" select parent,abbr,amount from `tabSalary Detail` where abbr in ('SB','HE','PA','PP','FTJSS','FI') and parent= %s""",(salslip.name),as_dict=True)
+
+		print tab_detalhes
+
+		for r in tab_detalhes:
+			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') :
+				salario_iliquido = salario_iliquido + flt(r.amount)
+			elif (r.abbr == 'FTJSS') or (r.abbr == 'FI'):
+				salario_iliquido = salario_iliquido - flt(r.amount)
+		ss_doc1 = frappe.get_doc("Salary Slip", salslip)
+		print ss_doc1
+
+		frappe.db.set_value("Salary Slip", ss_doc1.name, "salario_iliquido", salario_iliquido)
+

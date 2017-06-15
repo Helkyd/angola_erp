@@ -9,10 +9,8 @@ from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 import frappe.model
 import frappe.utils
-
-
-
 from frappe.model.document import Document
+
 
 contasal_cent = '';
 contasal_prj = '';
@@ -93,8 +91,10 @@ def submit_salary_slips(doc):
 #	doc.check_permission('write')	#need to check how to enable ....
 	jv_name = ""
 	ss_list = get_sal_slip_list(doc,ss_status=0)
+
 	print "ss LIST " 
 	print ss_list
+
 	submitted_ss = []
 	not_submitted_ss = []
 	for ss in ss_list:
@@ -108,7 +108,9 @@ def submit_salary_slips(doc):
 		
 		print "TRABALHADORRRRRRRRR"
 		print ss_obj.name
-	
+		print ss_obj.salario_iliquido
+
+
 		if ss_obj.net_pay<0:
 			not_submitted_ss.append(ss_dict)
 		else:
@@ -255,8 +257,6 @@ def get_sal_slip_list(self, ss_status, as_dict=False):
 		Returns list of salary slips based on selected criteria
 	"""
 
-	print "get sal sli list"
-	print self
 	cond = get_filter_condition(self)
 
 	ss_list = frappe.db.sql("""
@@ -362,6 +362,7 @@ def get_default_payroll_payable_account(self):
 
 
 def make_accural_jv_entry(self):
+
 #	self.check_permission('write')	#for now ... disabled.
 	earnings = get_salary_component_total(self,component_type = "earnings") or {}
 	deductions = get_salary_component_total(self,component_type = "deductions") or {}
@@ -384,14 +385,28 @@ def make_accural_jv_entry(self):
 		empresa = frappe.get_doc('Company',self['company'])
 
 		contaseg_soc = frappe.db.sql(""" SELECT name from `tabAccount` where company = %s and name like '7252%%'  """,(empresa.name),as_dict=False)
-		print contaseg_soc
+#		print contaseg_soc
 
-#		print ss_obj.employee_name
+
+		ss_list = get_sal_slip_list(self,ss_status=1)
+		print "POOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
+		print "POOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
+		print "POOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
+		print "POOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"
+		print ss_list
+		saliliquido = 0
+		for x in ss_list:
+			print x
+			ss_obj = frappe.get_doc("Salary Slip",x[0])
+			print ss_obj.salario_iliquido				
+			saliliquido = saliliquido + flt(ss_obj.salario_iliquido)
+
+
 
 		for acc, amt in earnings.items():
 			adjustment_amt = adjustment_amt+amt
 			account_amt_list.append({
-					"account": contaseg_soc[0][0],
+					"account": acc,
 					"debit_in_account_currency": amt,
 					"cost_center": self['cost_center'], # contasal_cent,
 					"project": contasal_prj 
@@ -399,7 +414,7 @@ def make_accural_jv_entry(self):
 			conta = acc;
 			if (conta.find('72210000') !=-1):
 				contasal = acc
-				contasal_amt = round(amt * 0.08)
+				contasal_amt = round(saliliquido * 0.08) # round(amt * 0.08)
 #				contasal_prj = self['project'] 
 				print "CONTA 72210000"
 				print contaseg_soc[0][0]
@@ -421,7 +436,7 @@ def make_accural_jv_entry(self):
 			print "ADIICINAEIIII o DEBITO "
 			print  contasal_amt
 			account_amt_list.append({
-					"account": contasal,
+					"account": contaseg_soc[0][0],
 					"debit_in_account_currency": contasal_amt,
 					"cost_center": segsocial[0][0], #contasal_cent, # segsocial[0][0],
 					"project": contasal_prj
