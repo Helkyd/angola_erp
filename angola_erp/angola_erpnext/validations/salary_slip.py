@@ -18,17 +18,27 @@ def validate(doc,method):
 	net_pay = 0
 	tot_ded = 0
 	tot_cont = 0
-	mes_startdate = doc.start_date
+
+
+	if type(doc.start_date) == unicode:
+		mes_startdate = datetime.datetime.strptime(doc.start_date,'%Y-%m-%d')
+	else:
+		mes_startdate = doc.start_date
 
 	#Salva Payment Days e recalcula o IRT, INSS
 	print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+
 	print doc.name , " + ", doc.employee, " + ", doc.start_date
+
+#	if not doc.salary_slip_based_on_timesheet:
 	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
-	print doc.name , " + ", doc.employee
-	print doc.payment_days - j[0]['count(status)']
-	
+
 	doc.numero_de_faltas = j[0]['count(status)']
 	doc.payment_days = doc.payment_days - j[0]['count(status)']
+
+#	print doc.name , " + ", doc.employee
+#	print doc.payment_days - j[0]['count(status)']
+	
 
 #	for desconto in frappe.db.sql(""" SELECT * from `tabSalary Detail` where parent = %s """,doc.name, as_dict=True):
 #		dd = frappe.get_doc("Salary Detail",desconto.name)
@@ -480,7 +490,7 @@ def valida_sub_ferias(doc):
 		if frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr") == "SB":
 			#Salary Base
 			salariobase = d.amount
-		if d.salary_component == "Subsidio de Ferias":
+		if (d.salary_component == "Subsidio de Ferias") or (d.abbr == "SF"):
 			
 			print emp.date_of_joining
 			print datetime.date(datetime.datetime.today().year,12,31) - emp.date_of_joining 		
