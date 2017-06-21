@@ -14,6 +14,8 @@ from frappe.model.naming import make_autoname
 import frappe.async
 from frappe.utils import cstr
 from frappe import _
+from frappe.model.naming import make_autoname
+import frappe.async
 
 from frappe.model.document import Document
 
@@ -260,6 +262,31 @@ def update_cambios_(fonte):
 #			return moedacompra, moedavenda
 
 
+@frappe.whitelist()
+def atualizar_cambios():
+	#This will run every day to update Cambios
+	qnd_correrfonte = frappe.get_value('Atualizacao Cambios',None,'fonte_do_cambio')
+	qnd_correr = frappe.get_value('Atualizacao Cambios',None,'atualizar_quando')
+	qnd_correrdia = frappe.get_value('Atualizacao Cambios',None,'actualizar_dia_mes')
+
+	if (qnd_correrfonte == 'BNA') or (qnd_correrfonte == 'BFA'):
+		print qnd_correrfonte, " selecionando"
+		print qnd_correr
+		print qnd_correrdia
+		if qnd_correr == 'Todos os Dias':
+			#executa o update
+			update_cambios(qnd_correrfonte)
+		elif qnd_correr == 'Inicio de cada Mes':
+			#verifica o dia ...
+			if qnd_correrdia == frappe.utils.nowdate():
+				#executa o update
+				update_cambios(qnd_correrfonte)
+			
+
+	elif qnd_correrfonte == 'BIC':	
+		frappe.throw("Ainda nao esta ativa esta fonte...")
+	
+
 
 @frappe.whitelist()
 def update_cambios(fonte):
@@ -304,9 +331,10 @@ def update_cambios(fonte):
 		bfa_i = 1
 		if bna_bfa==0:
 			print "Banco para Cambiais BNA" 
+			fontecambio = "BNA"
 		else:
 			print "Banco para Cambiais BFA" 
-
+			fontecambio = "BFA"
 
 		for tr in tree.xpath("//tr"):
 			#BNA
@@ -389,12 +417,23 @@ def update_cambios(fonte):
 								"to_currency": "KZ",
 								"exchange_rate": moedavenda,
 								"date": frappe.utils.nowdate()
+								
+								
+
 	#										"name":'{0}-{1}-{2}'.format(formatdate(get_datetime_str(frappe.utils.nowdate()), "yyyy-MM-dd"),"USD", "KZ")
 
 
 							})
 
 							cambios_novo.insert()
+							ddd = make_autoname(cambios_novo.name + '.###')
+							frappe.db.sql("INSERT into tabCommunication  (name,docstatus,seen,unread_notification_sent,subject,reference_name,reference_doctype,sent_or_received,content,communication_type,creation,modified) values (%s,0,0,0,'Atualizacao do Cambio ',%s,'Currency Exchange','Sent', %s  ,'Comment',%s,%s) ",(ddd,cambios_novo.name,str(fontecambio),frappe.utils.now(),frappe.utils.now()))
+
+							cambios_novo._comments = str(fontecambio) 
+
+							cambios_novo.save()
+
 							mensagemretorno= moeda + " Actualizacao feita hoje .... " + '\r' + '\n ' + mensagemretorno
+							
 
 	return mensagemretorno		
