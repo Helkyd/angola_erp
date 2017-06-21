@@ -269,6 +269,8 @@ def atualizar_cambios():
 	qnd_correr = frappe.get_value('Atualizacao Cambios',None,'atualizar_quando')
 	qnd_correrdia = frappe.get_value('Atualizacao Cambios',None,'actualizar_dia_mes')
 
+	diahoje = datetime.datetime.today()
+	
 	if (qnd_correrfonte == 'BNA') or (qnd_correrfonte == 'BFA'):
 		print qnd_correrfonte, " selecionando"
 		print qnd_correr
@@ -278,7 +280,7 @@ def atualizar_cambios():
 			update_cambios(qnd_correrfonte)
 		elif qnd_correr == 'Inicio de cada Mes':
 			#verifica o dia ...
-			if qnd_correrdia == frappe.utils.nowdate():
+			if qnd_correrdia == diahoje.day():
 				#executa o update
 				update_cambios(qnd_correrfonte)
 			

@@ -416,8 +416,8 @@ def update_cambios(fonte):
 								"from_currency": str(moeda),
 								"to_currency": "KZ",
 								"exchange_rate": moedavenda,
-								"date": frappe.utils.nowdate(),
-								"_comments": str(fontecambio) + " " + str(moeda) + " Actualizacao feita hoje .... " 
+								"date": frappe.utils.nowdate()
+								
 								
 
 	#										"name":'{0}-{1}-{2}'.format(formatdate(get_datetime_str(frappe.utils.nowdate()), "yyyy-MM-dd"),"USD", "KZ")
@@ -429,7 +429,8 @@ def update_cambios(fonte):
 							ddd = make_autoname(cambios_novo.name + '.###')
 							frappe.db.sql("INSERT into tabCommunication  (name,docstatus,seen,unread_notification_sent,subject,reference_name,reference_doctype,sent_or_received,content,communication_type,creation,modified) values (%s,0,0,0,'Atualizacao do Cambio ',%s,'Currency Exchange','Sent', %s  ,'Comment',%s,%s) ",(ddd,cambios_novo.name,str(fontecambio),frappe.utils.now(),frappe.utils.now()))
 
-							cambios_novo._comments = str(fontecambio) + " " + str(moeda) + " Actualizacao feita hoje .... " 
+							cambios_novo._comments = str(fontecambio) 
+
 							cambios_novo.save()
 
 							mensagemretorno= moeda + " Actualizacao feita hoje .... " + '\r' + '\n ' + mensagemretorno
