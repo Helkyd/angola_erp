@@ -20,6 +20,9 @@ from frappe.model.document import Document
 from lxml import html
 import requests
 
+global actualizarqnd	#Should be everyday or Once per month
+global actualizardia	#Select the day to update
+global fontecambio	#BNA (default) or BFA	
 
 @frappe.whitelist()
 def cambios(fonte):
@@ -265,6 +268,7 @@ def update_cambios(fonte):
 	#Get the list of rates from BNA / BFA
 	#Get list of Currency; if listed updates the rate
 	tree=""
+	mensagemretorno= ""
 	bna_bfa=0 # for BNA and 1 for BFA	
 
 	if not fonte:
@@ -367,6 +371,8 @@ def update_cambios(fonte):
 				if formatdate(cambios_[0]['max(date)'],"YYYY-MM-dd") == formatdate(get_datetime_str(frappe.utils.nowdate()),"YYY-MM-dd"):
 				#if (cambios_[-0].date == frappe.utils.nowdate()):
 					print "Ja foi atualizado hoje ...."
+					mensagemretorno= moeda + " Nao tem atualizacao hoje .... " + '\r' + '\n ' + mensagemretorno
+
 				else:
 					print "Tem cambios ", cambios_
 					#Just add or should check if value changed...!!!
@@ -389,4 +395,6 @@ def update_cambios(fonte):
 							})
 
 							cambios_novo.insert()
+							mensagemretorno= moeda + " Actualizacao feita hoje .... " + '\r' + '\n ' + mensagemretorno
 
+	return mensagemretorno		

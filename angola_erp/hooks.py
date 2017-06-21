@@ -100,6 +100,10 @@ doc_events = {
 
 	},
 
+	"Quotation": {
+		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",
+
+	},
 
 }
 

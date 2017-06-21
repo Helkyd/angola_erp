@@ -1,5 +1,6 @@
 {
  "allow_copy": 0, 
+ "allow_guest_to_view": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
  "beta": 0, 
@@ -7,11 +8,12 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Document", 
+ "document_type": "Setup", 
  "editable_grid": 1, 
  "engine": "InnoDB", 
  "fields": [
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -23,7 +25,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Alerta PBX", 
    "length": 0, 
    "no_copy": 0, 
@@ -40,6 +44,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -52,7 +57,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "PBX Asterisk?", 
    "length": 0, 
    "no_copy": 0, 
@@ -69,6 +76,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -81,7 +89,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "IP do PBX", 
    "length": 0, 
    "no_copy": 0, 
@@ -98,6 +108,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -110,7 +121,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Alerta Rece\u00e7\u00e3o?", 
    "length": 0, 
    "no_copy": 0, 
@@ -127,6 +140,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -139,7 +153,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 1, 
+   "in_standard_filter": 0, 
    "label": "Alerta Quartos?", 
    "length": 0, 
    "no_copy": 0, 
@@ -156,6 +172,7 @@
    "unique": 0
   }, 
   {
+   "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
@@ -168,7 +185,9 @@
    "ignore_user_permissions": 0, 
    "ignore_xss_filter": 0, 
    "in_filter": 0, 
+   "in_global_search": 0, 
    "in_list_view": 0, 
+   "in_standard_filter": 0, 
    "label": "Numero da Rece\u00e7\u00e3o?", 
    "length": 0, 
    "no_copy": 0, 
@@ -185,17 +204,17 @@
    "unique": 0
   }
  ], 
+ "has_web_view": 0, 
  "hide_heading": 0, 
  "hide_toolbar": 0, 
  "idx": 0, 
  "image_view": 0, 
  "in_create": 0, 
- "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-01-08 23:59:53.662510", 
+ "modified": "2017-06-20 07:50:56.600555", 
  "modified_by": "Administrator", 
  "module": "Gestao Residencial", 
  "name": "Alerta PBX", 
@@ -212,7 +231,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -233,7 +251,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -254,7 +271,6 @@
    "export": 1, 
    "if_owner": 0, 
    "import": 0, 
-   "is_custom": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
@@ -269,7 +285,9 @@
  "quick_entry": 1, 
  "read_only": 0, 
  "read_only_onload": 0, 
+ "show_name_in_global_search": 0, 
  "sort_field": "modified", 
  "sort_order": "DESC", 
+ "track_changes": 1, 
  "track_seen": 0
 }
