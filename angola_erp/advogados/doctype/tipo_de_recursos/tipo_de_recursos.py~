@@ -13,5 +13,6 @@ class TipodeRecursos(Document):
 
 	def autoname(self):
 
-		self.name = self.descricao
+		self.name = make_autoname(self.descricao + '.#####')
+
 

@@ -19,7 +19,7 @@ frappe.ui.form.on('Cadastro de Processo', {
 
 			frm.add_custom_button(__("Projecto"), function() {
 				cur_frm.reload_doc()
-				frappe.route_options = {"project_name": cur_frm.doc.name, "customer":cur_frm.doc.nome_autor}
+				frappe.route_options = {"project_name": cur_frm.doc.name, "customer":cur_frm.doc.nome_do_autor}
 				frappe.set_route("List", "Project");
 			}, "Criar", true);
 

@@ -11,7 +11,5 @@ from frappe.model.naming import make_autoname
 
 class FasesProcessuais(Document):
 
-	def autoname(self):
-
-		self.name = self.descricao
+	pass
 

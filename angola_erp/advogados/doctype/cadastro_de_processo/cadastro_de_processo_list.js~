@@ -6,15 +6,7 @@
 frappe.listview_settings['Cadastro de Processo'] = {
 	add_fields: ["status_ou_fase"],
 
-	get_indicator: function(doc) {
 
-		if (doc.status_ou_fase== "Inicial" ) {
-			return [__("Inicial" ), "green"]
-		} else if (doc.status_ou_fase== "Em Curso" ) {
-			return [__("Em Curso" ), "red"]
-		
-		}
-	},
 	colwidths: {"subject": 3, "indicator": 3.1,"Nome do Autor (Cliente)": 2},
 
 	onload: function(listview){

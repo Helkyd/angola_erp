@@ -11,6 +11,4 @@ from frappe.model.naming import make_autoname
 
 class TipodeProcesso(Document):
 
-	def autoname(self):
-
-		self.name = make_autoname(self.tipo_de_processo + '.#####')
+	pass

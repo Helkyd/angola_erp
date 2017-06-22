@@ -11,10 +11,10 @@ from frappe.model.naming import make_autoname
 
 class CadastrodeProcesso(Document):
 
-	def autoname(self):
+#	def autoname(self):
 
 		#self.numero_obra = make_autoname('FO/' + '.YYYY./.#####')
-		self.name = make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
+#		self.name = make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
 
 
 	def validate(self):
@@ -30,9 +30,9 @@ class CadastrodeProcesso(Document):
 		#elif self.servicos_processo[0].servico_ficha_processo == None:
 		#	validation = False
 		#	frappe.msgprint("Inserir pelo menos um Servico", raise_exception = 1)
-		if self.docstatus == 1 and self.status_ou_fase == 'Inicial' or self.status_ou_fase == 'Em Curso'  :
+		if self.docstatus == 1 and self.estado == 'Inicial' or self.estado == 'Em Curso'  :
 #			print " criarProjeto ", self.status_process
-			self.status_ou_fase = 'Em Curso'
+			self.estado = 'Em Curso'
 #			self.criar_projecto()
 #			self.criar_salesorder()		
 

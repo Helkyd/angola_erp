@@ -13,5 +13,4 @@ class TipodeProcesso(Document):
 
 	def autoname(self):
 
-		self.name = self.tipo_de_processo
-
+		self.name = make_autoname(self.tipo_de_processo + '.#####')

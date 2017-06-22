@@ -15,7 +15,7 @@ frappe.ui.form.on('Cadastro de Processo', {
 
 	refresh: function(frm) {
 
-		if (cur_frm.doc.status_ou_fase == 'Em Curso' && !cur_frm.doc.__islocal || cur_frm.doc.status_ou_fase == 'Terminado' ){
+		if (cur_frm.doc.estado == 'Em Curso' && !cur_frm.doc.__islocal || cur_frm.doc.estado == 'Concluido' ){
 
 			frm.add_custom_button(__("Projecto"), function() {
 				cur_frm.reload_doc()

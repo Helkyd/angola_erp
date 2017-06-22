@@ -11,7 +11,4 @@ from frappe.model.naming import make_autoname
 
 class TipodeAcoes(Document):
 
-	def autoname(self):
-
-		self.name = self.descricao
-
+	pass

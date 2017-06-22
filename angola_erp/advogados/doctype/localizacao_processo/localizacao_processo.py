@@ -4,14 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-from frappe.utils import cstr, flt, getdate
 from frappe.model.document import Document
-from frappe.model.naming import make_autoname
 
-class TipodeAcoes(Document):
-
-	def autoname(self):
-
-		self.name = self.descricao
-
+class LocalizacaoProcesso(Document):
+	pass
