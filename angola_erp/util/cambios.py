@@ -172,7 +172,7 @@ def atualizar_cambios():
 				#executa o update
 				mensagem = update_cambios(qnd_correrfonte)
 			
-	return mensagem
+	#return mensagem
 
 
 @frappe.whitelist()

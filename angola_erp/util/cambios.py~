@@ -165,14 +165,14 @@ def atualizar_cambios():
 		print qnd_correrdia
 		if qnd_correr == 'Todos os Dias':
 			#executa o update
-			update_cambios(qnd_correrfonte)
+			mensagem = update_cambios(qnd_correrfonte)
 		elif qnd_correr == 'Inicio de cada Mes':
 			#verifica o dia ...
 			if qnd_correrdia == diahoje.day():
 				#executa o update
-				update_cambios(qnd_correrfonte)
+				mensagem = update_cambios(qnd_correrfonte)
 			
-	
+	return mensagem
 
 
 @frappe.whitelist()
