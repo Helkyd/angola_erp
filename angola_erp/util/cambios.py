@@ -168,7 +168,8 @@ def atualizar_cambios():
 			mensagem = update_cambios(qnd_correrfonte)
 		elif qnd_correr == 'Inicio de cada Mes':
 			#verifica o dia ...
-			if qnd_correrdia == diahoje.day():
+
+			if qnd_correrdia == diahoje.day:
 				#executa o update
 				mensagem = update_cambios(qnd_correrfonte)
 			
