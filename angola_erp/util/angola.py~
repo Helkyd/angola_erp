@@ -94,7 +94,7 @@ def caixa_movimentos_in(start,caixa,fecho):
 @frappe.whitelist()
 def get_taxa_ipc():
 	#locate account 34210000
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where description like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
 	print " LISTA TAXE IPC conta 3421"
 	print j	
@@ -102,8 +102,8 @@ def get_taxa_ipc():
 
 @frappe.whitelist()
 def get_taxa_retencao():
-	#locate account 34120000
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where description like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+	#locate account 34130000
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
 	print " LISTA TAXA RETENCAO conta 3413"
 	print j	

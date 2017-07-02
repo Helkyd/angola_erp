@@ -1,0 +1,19 @@
+{
+ "content": null, 
+ "creation": "2017-06-30 09:44:46.171388", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2017-06-30 10:05:08.349737", 
+ "modified_by": "Administrator", 
+ "module": "Angola ERPNext", 
+ "name": "jobcard", 
+ "owner": "Administrator", 
+ "page_name": "jobcard", 
+ "roles": [], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "Job Card Example"
+}

@@ -24,8 +24,12 @@ frappe.query_reports["Salary Review"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		}
 	]
-},
+}
 
-frappe.ui.form.PrintPreview = Class.extend({
-	alert("TESTE")
+$.extend(true, window, {
+   Slick: {
+     Controls: {
+       ColumnPicker: SlickColumnPicker
+     }
+   }
 });

@@ -1,11 +1,15 @@
 {
 	"css/angola_erp.css": [
-		"public/css/angola_erp.css"
+		"public/css/angola_erp.css",
+		"public/js/lib/slickgrid_extended/slickgrid_extended.css",
+		"public/js/lib/flot/jquery-ui.css"
+
 	],
 
 	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
 		"public/js/shopping_cart.js"
+
 	],
 	"js/angola_erp.min.js": [
 		"public/js/pos_bar/pos_bar.html",
@@ -13,6 +17,17 @@
 		"public/js/pos_bar/pos_bar_item.html",
 		"public/js/pos_bar/pos_bar_mesas.html",
 		"public/js/pos_bar/pos_bar_tax_row.html",
-		"public/js/pos_bar/pos_bar_invoice_list.html"
+		"public/js/pos_bar/pos_bar_invoice_list.html",
+		"public/js/pos_bar/pos_bar_selected_item.html",
+		"public/js/pos_bar/customer_toolbar.html",
+		"public/js/lib/slickgrid_extended/slickgrid_extended.js",
+		"public/js/lib/slickgrid_extended/plot_diagram.js",
+		"public/js/lib/flot/jquery.flot.js",
+		"public/js/lib/flot/jquery.flot.resize.js",
+		"public/js/lib/flot/jquery.flot.crosshair.js",
+		"public/js/lib/flot/jquery.flot.time.js",
+		"public/js/lib/flot/jquery.contextmenu.js",
+		"public/js/testgrid/testgrid.html"
+
 	]
 }

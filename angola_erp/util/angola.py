@@ -102,7 +102,7 @@ def get_taxa_ipc():
 
 @frappe.whitelist()
 def get_taxa_retencao():
-	#locate account 34120000
+	#locate account 34130000
 	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
 	print " LISTA TAXA RETENCAO conta 3413"
@@ -190,3 +190,7 @@ def in_words_pt(integer, in_million=True):
 
 	return psn(n, known, psn) 
 
+@frappe.whitelist()
+def get_sample_data():
+
+	return frappe.db.sql("""select * from `tabJournal Entry` """, as_dict=False)
