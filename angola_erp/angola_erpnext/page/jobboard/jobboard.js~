@@ -29,6 +29,7 @@ frappe.require("assets/angola_erp/js/lib/slickgrid_extended/slickgrid_extended.j
 frappe.require("assets/angola_erp/js/lib/slickgrid_extended/plot_diagram.js");
 frappe.require("assets/angola_erp/js/lib/slickgrid_extended/slickgrid_extended.css");
 
+frappe.require("assets/angola_erp/js/lib/flot/jquery-ui.js");
 frappe.require("assets/angola_erp/js/lib/flot/jquery-ui.css");
 frappe.require("assets/angola_erp/js/lib/flot/jquery.flot.js");
 frappe.require("assets/angola_erp/js/lib/flot/jquery.flot.resize.js");

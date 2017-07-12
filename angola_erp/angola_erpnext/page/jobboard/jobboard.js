@@ -2,7 +2,9 @@
 //frappe.provide('angola_erp.testgrid');
 frappe.provide('frappe.pages');
 frappe.provide('frappe.views');
+frappe.provide('angola_erp')
 
+frappe.require ("assets/js/angola_erp.min.js");
 
 frappe.require("assets/frappe/js/lib/slickgrid/slick.grid.js");
 frappe.require("assets/frappe/js/lib/slickgrid/slick.grid.css");
@@ -51,14 +53,14 @@ var columns = [{ id: 'col0', name: 'Time',      toolTip: 'Date/Time',   sort_typ
                    { id: 'col1', name: 'Value 1',   toolTip: 'Value 1',     sort_type: 'float',     style: 'text-align: right;'},
                    { id: 'col2', name: 'Value 2',   toolTip: 'Value 2',     sort_type: 'float',     style: 'text-align: right;'},
                    { id: 'col3', name: 'Value 3',   toolTip: 'Value 3',     sort_type: 'float',     style: 'text-align: right;'},
-    ];                                                                                                                      
-                                                                                                                            
-    var options = { caption:            'Time line with diagram',                 
-                    width:              '100%',                                                                             
-                    maxHeight:          '100',                                                                              
+    ];
+
+    var options = { caption:            'Time line with diagram',
+                    width:              '100%',
+                    maxHeight:          '100',
                     locale:              'en',
-    };                                                                                                                      
-                                                                                                                            
+    };
+
     var data = [{ col0: '2013/10/01 14:05', col1: '66,20', col2: '12124', col3: '12' },
                 { col0: '2013/10/01 14:10', col1: '22,10', col2: '23344', col3: '22' },
                 { col0: '2013/10/01 14:20', col1: '33,40', col2: '65472', col3: '55' },
@@ -68,7 +70,7 @@ var columns = [{ id: 'col0', name: 'Time',      toolTip: 'Date/Time',   sort_typ
                 { col0: '2013/10/01 15:00', col1: '88,20', col2: '36333', col3: '65' },
                 { col0: '2013/10/01 15:20', col1: '45,30', col2: '23355', col3: '14' },
                 { col0: '2013/10/01 15:40', col1: '55,40', col2: '23566', col3: '23' },
-    ];                                                                                                                      
+    ];
 
 	$("<table width='100%>\
 	  <tr>\
@@ -77,10 +79,10 @@ var columns = [{ id: 'col0', name: 'Time',      toolTip: 'Date/Time',   sort_typ
 	    </td>\
 	  </tr>\
 	</table>").appendTo($(wrapper).find('.layout-main-section'));
-                                                                                                                            
-    var additional_menu_entries = [{ label: 'Additional entry', hint: 'Additional entry just for fun', action: function(t){alert('Just for fun');} }];   
-                                                                                                                            
-    createSlickGridExtended('demo_div', data, columns, options, additional_menu_entries);                                                            
+
+    var additional_menu_entries = [{ label: 'Additional entry', hint: 'Additional entry just for fun', action: function(t){alert('Just for fun');} }];
+
+    createSlickGridExtended('demo_div', data, columns, options, additional_menu_entries);
 
 
 }

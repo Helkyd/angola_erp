@@ -2,24 +2,34 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 
+from frappe.model.document import Document
+import frappe.model
+import frappe
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
 from frappe.utils import formatdate
+from frappe.model.naming import make_autoname
 
-def execute(filters=None):
+
+@frappe.whitelist()
+def execute(filters=None,filters1=None):
 	if not filters: filters = {}
-	salary_slips = get_salary_slips(filters)
+	if not filters1: filters1 = {}
+	print filters
+	print filters1
+	salary_slips = get_salary_slips(filters, filters1)
 	columns, earning_types, ded_types = get_columns(salary_slips)
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
 
+	print "AAAAAAA"
+	print columns
 
 	data = []
 	for ss in salary_slips:
-		row = [ss.name, ss.employee, ss.employee_name, ss.department, ss.designation,
-			ss.company, ss.start_date.month, ss.leave_withut_pay, ss.payment_days]
+		row = [ss.name, ss.employee, ss.employee_name, ss.branch, ss.department, ss.designation,
+			ss.company, ss.start_date, ss.end_date, ss.leave_withut_pay, ss.payment_days]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -33,13 +43,15 @@ def execute(filters=None):
 
 		data.append(row)
 
+	print "dadaddadada"
+	print data
 	return columns, data
 
 def get_columns(salary_slips):
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", 
+		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch") + ":Link/Branch:120",
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		_("Company") + ":Link/Company:120", _("Start Date") + "::10",  _("Leave Without Pay") + ":Float:130",
+		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80", _("Leave Without Pay") + ":Float:130",
 		_("Payment Days") + ":Float:120"
 	]
 
@@ -57,11 +69,17 @@ def get_columns(salary_slips):
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
-def get_salary_slips(filters):
-	filters.update({"from_date": filters.get("date_range")[0], "to_date":filters.get("date_range")[1]})
+def get_salary_slips(filters,filters1):
+
+#	filters.update({"from_date": filters.get("date_range")[0], "to_date":filters.get("date_range")[1]})
+	filters=({"from_date": filters, "to_date":filters1})
+
 	conditions, filters = get_conditions(filters)
 	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where docstatus = 0 %s
 		order by employee""" % conditions, filters, as_dict=1)
+
+	print 'slips'
+	print salary_slips
 
 	if not salary_slips:
 		frappe.throw(_("No salary slip found between {0} and {1}").format(

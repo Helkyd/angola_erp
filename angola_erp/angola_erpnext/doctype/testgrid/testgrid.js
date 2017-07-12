@@ -5,7 +5,7 @@
 
 frappe.provide('frappe.pages');
 frappe.provide('frappe.views');
-frappe.provide('sample_register');
+//frappe.provide('sample_register');
 frappe.require("assets/frappe/js/lib/slickgrid/slick.grid.js");
 frappe.require("assets/frappe/js/lib/slickgrid/slick.grid.css");
 frappe.require("assets/frappe/js/lib/slickgrid/slick.core.js");
@@ -23,8 +23,12 @@ frappe.require("assets/frappe/js/lib/slickgrid/plugins/slick.rowselectionmodel.j
 frappe.require("assets/frappe/js/lib/slickgrid/plugins/slick.cellselectionmodel.js");
 
 frappe.ui.form.on('TestGRID', {
+	onload: function(frm){
+		alert("adafsdafas")
+	},
 	refresh: function(frm) {
-		frappe.pages['jobcard'].on_page_load()
+		//frappe.pages['jobcard'].on_page_load()
+		alert("adafsdafas")
 	}
 });
 

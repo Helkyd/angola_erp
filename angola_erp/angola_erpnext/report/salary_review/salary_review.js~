@@ -26,10 +26,3 @@ frappe.query_reports["Salary Review"] = {
 	]
 }
 
-$.extend(true, window, {
-   Slick: {
-     Controls: {
-       ColumnPicker: SlickColumnPicker
-     }
-   }
-});

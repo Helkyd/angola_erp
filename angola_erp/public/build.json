@@ -1,8 +1,8 @@
 {
 	"css/angola_erp.css": [
 		"public/css/angola_erp.css",
-		"public/js/lib/slickgrid_extended/slickgrid_extended.css",
-		"public/js/lib/flot/jquery-ui.css"
+		"public/js/lib/slickgrid_extended/slickgrid_extended.css"
+
 
 	],
 
@@ -22,13 +22,13 @@
 		"public/js/pos_bar/customer_toolbar.html",
 		"public/js/lib/slickgrid_extended/slickgrid_extended.js",
 		"public/js/lib/slickgrid_extended/plot_diagram.js",
-		"public/js/lib/flot/jquery-ui.js",
+		"public/js/lib/flot/jquery.contextmenu.js",
 		"public/js/lib/flot/jquery.flot.js",
+		"public/js/lib/flot/jquery.flot.time.js",
 		"public/js/lib/flot/jquery.flot.resize.js",
 		"public/js/lib/flot/jquery.flot.crosshair.js",
-		"public/js/lib/flot/jquery.flot.time.js",
-		"public/js/lib/flot/jquery.contextmenu.js",
-		"public/js/testgrid/testgrid.html"
+		"public/js/testgrid/testgrid.html",
+		"public/js/lib/jquery-ui-1.12.1.custom/jquery-ui.js"
 
 	]
 }
