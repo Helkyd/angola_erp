@@ -15,7 +15,7 @@ def get_data():
 		{
 			"module_name": "Gestao Residencial",
 			"color": "grey",
-			"icon": "/assets/angola_erp/images/hotel.svg",
+			"icon": "/assets/angola_erp/images/hotel1.svg",
 			"type": "module",
 			"label": _("Gestao Residencial")
 		},
