@@ -10,6 +10,7 @@ from frappe.utils import cstr, getdate, date_diff
 ## from erpnext.setup.utils import get_company_currency
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from num2words import num2words
 
 
 def validate(doc,method):
@@ -62,7 +63,15 @@ def validate(doc,method):
 	print "MEU TESTE"
 	print "MEU TESTE"
 	print "MEU TESTE"
-	print "MEU TESTE"
+	print "VALOR POR EXTENSO"
+
+	company_currency = erpnext.get_company_currency(doc.company)
+	print company_currency
+	if (company_currency =='KZ'):
+		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR')	
+	else:
+		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
+
 	print "MEU TESTE"
 	print "MEU TESTE"
 	print "MEU TESTE"
@@ -485,7 +494,7 @@ def valida_sub_ferias(doc):
 
 	emp = frappe.get_doc("Employee", doc.employee)
 	for d in doc.earnings:
-		print d.salary_component 
+		#print d.salary_component 
 		print frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr")
 		if frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr") == "SB":
 			#Salary Base

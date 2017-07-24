@@ -194,3 +194,12 @@ def in_words_pt(integer, in_million=True):
 def get_sample_data():
 
 	return frappe.db.sql("""select * from `tabJournal Entry` """, as_dict=False)
+
+@frappe.whitelist()
+def get_escola_ginasio():
+
+	#print frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	print frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	return frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	#return frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+
