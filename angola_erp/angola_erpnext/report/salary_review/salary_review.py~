@@ -39,7 +39,7 @@ def get_columns(salary_slips):
 	columns = [
 		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", 
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		_("Company") + ":Link/Company:120", _("Start Date") + "::8",  _("Leave Without Pay") + ":Float:130",
+		_("Company") + ":Link/Company:120", _("Start Date") + "::10",  _("Leave Without Pay") + ":Float:130",
 		_("Payment Days") + ":Float:120"
 	]
 
