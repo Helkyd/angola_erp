@@ -9,6 +9,12 @@ from frappe import throw, _
 from frappe.utils import formatdate
 
 def execute(filters=None):
+	print "FILTROS"
+	print filters
+	print "FILTROS"
+	print "FILTROS"
+
+
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
 	columns, earning_types, ded_types = get_columns(salary_slips)

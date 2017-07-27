@@ -27,7 +27,7 @@ def execute(filters=None):
 	data = []
 	for ss in salary_slips:
 		row = [ss.name, ss.employee_name, 
-			ss.company, ss.start_date, ss.end_date, ss.leave_withut_pay, ss.payment_days]
+			ss.company, ss.start_date, ss.end_date]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))

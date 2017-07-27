@@ -34,6 +34,9 @@ def execute(filters=None):
 
 			if (ss_earning_map1.get(ss.name, {}).get(e) == 'SB'):
 			#SI = (SB + HE - PA + PP) - (FTJSS - FI )
+			#('SB','HE','PA','PP','FTJSS','FI','IH','SDF','DU','ST','ABF','SA')
+			#(SB + HE + PA + PP + IH + SDF + DU + ST) - (FTJSS - FTI1)
+
 				encargo_inss = flt(ss_earning_map.get(ss.name, {}).get(e))
 
 				sb_status = 0
@@ -42,6 +45,30 @@ def execute(filters=None):
 				fi_status = 0
 				pa_status = 0
 				pp_status = 0
+				ih_status = 0
+				du_status = 0
+				st_status = 0
+				sdf_status = 0 
+
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'SDF') and (sdf_status ==0):
+			#SI = SB + HE - FTJSS - FI 
+				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
+				sdf_status  = 1
+
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'ST') and (st_status ==0):
+			#SI = SB + HE - FTJSS - FI 
+				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
+				st_status  = 1
+
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'DU') and (du_status ==0):
+			#SI = SB + HE - FTJSS - FI 
+				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
+				du_status  = 1
+
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'IH') and (ih_status ==0):
+			#SI = SB + HE - FTJSS - FI 
+				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
+				ih_status  = 1
 
 			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'HE') and (he_status ==0):
 			#SI = SB + HE - FTJSS - FI 

@@ -551,15 +551,23 @@ def proc_salario_iliquido(mes,ano,empresa):
 		#SI = (SB + HE - PA + PP) - (FTJSS - FI )
 		print salslip
 		salario_iliquido =0;
-		tab_detalhes = frappe.db.sql(""" select parent,abbr,amount from `tabSalary Detail` where abbr in ('SB','HE','PA','PP','FTJSS','FI') and parent= %s""",(salslip.name),as_dict=True)
+		tab_detalhes = frappe.db.sql(""" select parent,abbr,amount from `tabSalary Detail` where abbr in ('SB','HE','PA','PP','FTJSS','FI','IH','SDF','DU','ST','ABF','SA') and parent= %s""",(salslip.name),as_dict=True)
+
+#(SB + HE + PA + PP + IH + SDF + DU + ST) - (FTJSS - FTI1)
 
 		print tab_detalhes
 
 		for r in tab_detalhes:
-			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') :
+			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') or (r.abbr == 'IH') or (r.abbr == 'SDF') or (r.abbr == 'DU') or (r.abbr == 'ST') :
 				salario_iliquido = salario_iliquido + flt(r.amount)
+#			elif (r.abbr == 'SA') or (r.abbr == 'ABF'):
+#				salario_iliquido = salario_iliquido - flt(r.amount)
+
 			elif (r.abbr == 'FTJSS') or (r.abbr == 'FI'):
 				salario_iliquido = salario_iliquido - flt(r.amount)
+
+			print "iliquido"
+			print salario_iliquido
 		ss_doc1 = frappe.get_doc("Salary Slip", salslip)
 		print ss_doc1
 
