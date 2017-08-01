@@ -15,27 +15,6 @@ def get_data():
 					"label": _("Alunos"),
 					"description": _("Alunos do Ginasio."),
 				},
-				{
-					"type": "doctype",
-					"name": "Physician",
-					"description": _("Physician."),
-				},
-				{
-					"type": "doctype",
-					"name": "Lab Procedure",
-					"description": _("Results"),
-					"icon": "octicon octicon-clippy",
-				},
-				{
-					"type": "doctype",
-					"name": "Sample Collection",
-					"description": _("Sample Collection."),
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Invoice",
-					"description": _("Invoice."),
-				},
 
 			]
 		},

@@ -12,7 +12,7 @@ def execute(filters=None):
 	print "FILTROS"
 	print filters
 	print "FILTROS"
-	print "FILTROS
+	print "FILTROS"
 
 
 	if not filters: filters = {}
