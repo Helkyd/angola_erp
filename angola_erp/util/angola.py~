@@ -198,6 +198,8 @@ def get_sample_data():
 @frappe.whitelist()
 def get_escola_ginasio():
 
-	print frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
-	return frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	#print frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	print frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	return frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
+	#return frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
 

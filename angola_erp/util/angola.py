@@ -98,6 +98,24 @@ def get_taxa_ipc():
 
 	print " LISTA TAXE IPC conta 3421"
 	print j	
+
+	return j
+
+@frappe.whitelist()
+def get_compras_taxa_retencao():
+	#locate account 34130000 or plano contif 2.80.20.20.30 - Ret Fonte a Pagar - Imposto Industrial
+
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabPurchase Taxes and Charges` where account_head like '3413%' and parenttype ='Purchase Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA COMPRA TAXA RETENCAO conta 3413"
+	print j	
+	if (j==[]):
+		#Plano CONTIF
+		j= frappe.db.sql(""" select name, description, account_head, parent  from `tabPurchase Taxes and Charges` where account_head like '2.80.20.20.30%' and parenttype ='Purchase Taxes and Charges Template' """,as_dict=True)
+
+		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
+		print j	
+
 	return j
 
 @frappe.whitelist()
@@ -107,6 +125,13 @@ def get_taxa_retencao():
 
 	print " LISTA TAXA RETENCAO conta 3413"
 	print j	
+	if (j==[]):
+		#Plano CONTIF
+		j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '2.80.20.20.30%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
+		print j	
+
 	return j
 
 @frappe.whitelist()
