@@ -1,7 +1,8 @@
 // Copyright (c) 2016, Helio de Jesus and contributors
 // For license information, please see license.txt
+/* eslint-disable */
 
-frappe.query_reports["Salary Review"] = {
+frappe.query_reports["Salary IRT"] = {
 	"filters": [
 		{
 			"fieldname":"date_range",

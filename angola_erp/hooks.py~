@@ -113,6 +113,7 @@ doc_events = {
 scheduler_events = {
  	"all": [
 # 		"angola_erp.tasks.all"
+		"angola_erp.util.cambios.atualizar_cambios",	#Exchange rates updates for AOA
 		"angola_erp.gestao_residencial.doctype.api.verifica_check_in",
 		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida" #Saida dos Quartos
 # 	],
