@@ -111,7 +111,7 @@ def get_contab_taxa_retencao(empresa):
 	print j	
 	if (j==[]):
 		#Plano CONTIF
-		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%' """,(empresa),as_dict=True)
+		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%' """,(empresa),as_dict=True)
 
 		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
 		print j	
