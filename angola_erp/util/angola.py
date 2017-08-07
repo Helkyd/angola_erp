@@ -107,13 +107,13 @@ def get_contab_taxa_retencao(empresa):
 	print (empresa)
 	j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%'  """,(empresa),as_dict=True)
 
-	print " LISTA COMPRA TAXA RETENCAO conta 3413"
+	print " LISTA CONTAB TAXA RETENCAO conta 3413"
 	print j	
 	if (j==[]):
 		#Plano CONTIF
 		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '2.80.20.20.30%%' """,(empresa),as_dict=True)
 
-		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
+		print " LISTA CONTAB TAXA RETENCAO conta 2.80.20.20.20"
 		print j	
 
 	return j
@@ -171,12 +171,21 @@ def get_lista_taxas_vendas():
 
 
 @frappe.whitelist()
-def get_supplier_retencao(fornecedor):
-	j= frappe.db.sql(""" select name,que_retencao,retencao_na_fonte from `tabSupplier` where retencao_na_fonte=1 and name = %s """,fornecedor,as_dict=True)
+def get_supplier_retencao(fornecedor,fornclien = 'Supplier'):
+	"""
+		Looks for Supplier otherwise for Customer
+	"""
+	if (fornclien == 'Supplier'):
+		j= frappe.db.sql(""" select name,que_retencao,retencao_na_fonte from `tabSupplier` where retencao_na_fonte=1 and name = %s """,fornecedor,as_dict=True)
+	else:
+		j= frappe.db.sql(""" select name,que_retencao,retencao_na_fonte from `tabCustomer` where retencao_na_fonte=1 and name = %s """,fornecedor,as_dict=True)
 
-	print " FORNECEDOR com RETENCAO"
+
+	print (fornclien," com RETENCAO")
 	print j	
 	return j
+
+
 
 
 
