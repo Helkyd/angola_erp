@@ -12,7 +12,6 @@ def execute():
 	frappe.db.sql("""update tabReport set disabled=1 
 		where name='TESTES_GRID' and module ='Angola ERPNext' """)
 
-	frappe.db.sql("""delete from `tabDocType` 
-		where name='TestGRID' and module ='Angola ERPNext' """)
+	frappe.delete_doc("DocType","TestGRID")
 
-
+	

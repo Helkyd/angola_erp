@@ -6,9 +6,14 @@ import frappe
 from frappe.utils import flt
 from frappe import _
 
+from frappe import translate
+
+import requests
+
 def execute(filters=None):
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
+	print 'COLUNAS'
 	columns, earning_types, ded_types = get_columns(salary_slips)
 	ss_earning_map, ss_earning_map1 = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
@@ -21,10 +26,32 @@ def execute(filters=None):
 	pp_status = 0
 
 
+	#url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + sourceText  
+	#gg = requests.get(url)
+
+
+	#gg1 = gg.text[gg.text.find('"')+1:gg.text.find(',')-1].strip()
+	mes_ = 0
+	mes2_ = 0
+
 	data = []
 	for ss in salary_slips:
-		row = [ss.name, ss.employee_name, 
-			ss.company, ss.start_date, ss.end_date]
+#		row = [ss.employee, ss.employee_name, 			ss.start_date.strftime("%B")]
+
+		if (frappe.translate.get_user_lang(frappe.session.user) == 'pt'):
+			if (ss.start_date.strftime("%B") != mes_):
+	#			print (requests.get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl="  + frappe.translate.get_user_lang(frappe.session.user)  + "&dt=t&q=" + ss.start_date.strftime("%B")).text)
+				mes1 = requests.get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl="  + frappe.translate.get_user_lang(frappe.session.user)  + "&dt=t&q=" + ss.start_date.strftime("%B"))
+			
+				mes2_ = mes1.text[mes1.text.find('"')+1:mes1.text.find(',')-1].strip()
+				mes_ = ss.start_date.strftime("%B")
+		else:
+			mes2_ = ss.start_date.strftime("%B")
+
+		print mes_
+		print mes2_
+		
+		row = [ss.employee, ss.employee_name, mes2_]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -104,7 +131,7 @@ def execute(filters=None):
 
 
 		encargo_inss = (encargo_inss * 0.08)		
-		row += [encargo_inss]
+		#row += [encargo_inss]
 
 		data.append(row)
 
@@ -112,22 +139,23 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150", _("Employee Name") + "::140",
-		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80" 
+		_("Employee") + ":Link/Employee:60", _("Employee Name") + "::100",
+		_("Month") + "::50"
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
-	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type
+	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type, sc.salary_component_abbr
 		from `tabSalary Detail` sd, `tabSalary Component` sc
-		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by sd.idx""" %
+		where sc.name=sd.salary_component and sd.amount != 0 and sc.salary_component_abbr in ('SB','INSS','IRT') and sd.parent in (%s) order by sd.idx""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
 		salary_components[_(component.type)].append(component.salary_component)
 
+	print 'COMPONENTESSSSSSSSSS'
 	print salary_components
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120",_("INSS %8") + ":Currency:120"]
+		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
