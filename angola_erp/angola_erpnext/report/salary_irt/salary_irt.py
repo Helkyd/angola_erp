@@ -6,6 +6,10 @@ import frappe
 from frappe.utils import flt
 from frappe import _
 
+from frappe import translate
+
+import requests
+
 def execute(filters=None):
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
@@ -22,10 +26,32 @@ def execute(filters=None):
 	pp_status = 0
 
 
+	#url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + sourceText  
+	#gg = requests.get(url)
+
+
+	#gg1 = gg.text[gg.text.find('"')+1:gg.text.find(',')-1].strip()
+	mes_ = 0
+	mes2_ = 0
+
 	data = []
 	for ss in salary_slips:
-		row = [ss.name, ss.employee_name, 
-			ss.company, ss.start_date, ss.end_date]
+#		row = [ss.employee, ss.employee_name, 			ss.start_date.strftime("%B")]
+
+		if (frappe.translate.get_user_lang(frappe.session.user) == 'pt'):
+			if (ss.start_date.strftime("%B") != mes_):
+	#			print (requests.get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl="  + frappe.translate.get_user_lang(frappe.session.user)  + "&dt=t&q=" + ss.start_date.strftime("%B")).text)
+				mes1 = requests.get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl="  + frappe.translate.get_user_lang(frappe.session.user)  + "&dt=t&q=" + ss.start_date.strftime("%B"))
+			
+				mes2_ = mes1.text[mes1.text.find('"')+1:mes1.text.find(',')-1].strip()
+				mes_ = ss.start_date.strftime("%B")
+		else:
+			mes2_ = ss.start_date.strftime("%B")
+
+		print mes_
+		print mes2_
+		
+		row = [ss.employee, ss.employee_name, mes2_]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -113,8 +139,8 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150", _("Employee Name") + "::140",
-		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80" 
+		_("Employee") + ":Link/Employee:60", _("Employee Name") + "::100",
+		_("Month") + "::50"
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
