@@ -9,6 +9,7 @@ from frappe import _
 def execute(filters=None):
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
+	print 'COLUNAS'
 	columns, earning_types, ded_types = get_columns(salary_slips)
 	ss_earning_map, ss_earning_map1 = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
@@ -104,7 +105,7 @@ def execute(filters=None):
 
 
 		encargo_inss = (encargo_inss * 0.08)		
-		row += [encargo_inss]
+		#row += [encargo_inss]
 
 		data.append(row)
 
@@ -118,16 +119,17 @@ def get_columns(salary_slips):
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
-	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type
+	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type, sc.salary_component_abbr
 		from `tabSalary Detail` sd, `tabSalary Component` sc
-		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by sd.idx""" %
+		where sc.name=sd.salary_component and sd.amount != 0 and sc.salary_component_abbr in ('SB','INSS','IRT') and sd.parent in (%s) order by sd.idx""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
 		salary_components[_(component.type)].append(component.salary_component)
 
+	print 'COMPONENTESSSSSSSSSS'
 	print salary_components
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120",_("INSS %8") + ":Currency:120"]
+		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
