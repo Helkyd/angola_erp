@@ -11,10 +11,13 @@ from frappe.model.naming import make_autoname
 
 class CadastrodeProcesso(Document):
 
-#	def autoname(self):
+	def autoname(self):
 
-		#self.numero_obra = make_autoname('FO/' + '.YYYY./.#####')
-#		self.name = make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
+		print(len(self.naming_series))
+		print(make_autoname(self.naming_series))
+		print(make_autoname(self.naming_series)[0:12])
+		self.numero_de_processo = self.numero_de_processo + make_autoname(self.naming_series)[0:12] # 'FO/' + '.YYYY./.#####')
+		self.name = self.numero_de_processo	#make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
 
 
 	def validate(self):
