@@ -40,7 +40,7 @@ def validate(doc,method):
 
 	for x in lista_retencoes:
 		if x.descricao =='Retencao na Fonte':
-			print ('pertagem ', x.percentagem)
+			#print ('pertagem ', x.percentagem)
 			retencaopercentagem = x.percentagem
 
 	for i in doc.get("items"):			

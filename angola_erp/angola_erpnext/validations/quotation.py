@@ -10,6 +10,14 @@ from angola_erp.util.angola import get_taxa_retencao
 from angola_erp.util.angola import get_taxa_ipc
 
 
+import erpnext
+
+from frappe.utils import money_in_words, flt
+from frappe.utils import cstr, getdate, date_diff
+## from erpnext.setup.utils import get_company_currency
+from num2words import num2words
+
+
 def validate(doc,method):
 
 	taxavenda= cambios("BNA")
@@ -119,4 +127,16 @@ def validate(doc,method):
 			if doc.customer != link[0][0]:
 				frappe.throw(("Customer {0} is not linked to Lead {1} hence cannot be set\
 				in the Quotation").format(doc.customer, doc.lead))
+
+
+	print "VALOR POR EXTENSO"
+
+	company_currency = erpnext.get_company_currency(doc.company)
+	print company_currency
+	if (company_currency =='KZ'):
+		doc.in_words = num2words(doc.rounded_total, lang='pt_BR')	
+	else:
+		doc.in_words = money_in_words(doc.rounded_total, company_currency)
+
+
 

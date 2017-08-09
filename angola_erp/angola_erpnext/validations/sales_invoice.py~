@@ -38,7 +38,7 @@ def validate(doc,method):
 			retencaopercentagem = x.percentagem
 
 	for i in doc.get("items"):			
-		print (i.item_code)
+
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
