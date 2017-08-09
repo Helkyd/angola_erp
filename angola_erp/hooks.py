@@ -109,6 +109,12 @@ doc_events = {
 
 	},
 
+	"Purchase Order": {
+		"validate": "angola_erp.angola_erpnext.validations.purchase_order.validate",
+
+	},
+
+
 
 }
 
