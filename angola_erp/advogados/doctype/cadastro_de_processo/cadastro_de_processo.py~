@@ -8,19 +8,46 @@ from frappe import _
 from frappe.utils import cstr, flt, getdate
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
+from frappe import msgprint, throw
 
 class CadastrodeProcesso(Document):
 
 	def autoname(self):
 
-		print(len(self.naming_series))
-		print(make_autoname(self.naming_series))
-		print(make_autoname(self.naming_series)[0:12])
-		self.numero_de_processo = make_autoname(self.numero_de_processo + self.naming_series) # 'FO/' + '.YYYY./.#####')
+		print(self.numero_de_processo)
+		print(len(self.serie_tipo))
+		print(make_autoname(self.serie_tipo))
+		print(make_autoname(self.serie_tipo)[0:12])
+		self.numero_de_processo = self.numero_de_processo + make_autoname(self.serie_tipo)[0:12] # 'FO/' + '.YYYY./.#####')
 		self.name = self.numero_de_processo	#make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
 
 
 	def validate(self):
+
+		print ('validaaaaaaaaaaaaaaar')
+		#Check numero processo is Number and 4 digits.
+		if len(self.numero_de_processo) < 4:
+			if len(self.numero_de_processo) == 1:
+				self.numero_de_processo = '000' + self.numero_de_processo
+			elif len(self.numero_de_processo) == 2:
+				self.numero_de_processo ='00' + self.numero_de_processo
+			elif len(self.numero_de_processo) == 3:
+				self.numero_de_processo ='0' + self.numero_de_processo
+	
+		elif len(self.numero_de_processo) > 4:
+			if len(self.numero_de_processo) != 16:
+				msgprint('Numero de Processo tem que ter somente 4 digitos')
+				self.numero_de_processo =None
+				frappe.validated = False
+
+		elif len(self.numero_de_processo) == '0000':
+			msgprint('Numero de Processo nao pode ser 0000')
+			self.numero_de_processo = None
+			frappe.validated = False
+
+
+		print('validar')
+
 #		print "tamanho ", len(self.servicos_processo)
 		
 #		if len(self.servicos_processo) == 0:
