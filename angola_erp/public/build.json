@@ -28,7 +28,15 @@
 		"public/js/lib/flot/jquery.flot.resize.js",
 		"public/js/lib/flot/jquery.flot.crosshair.js",
 		"public/js/testgrid/testgrid.html",
-		"public/js/lib/jquery-ui-1.12.1.custom/jquery-ui.js"
+		"public/js/lib/jquery-ui-1.12.1.custom/jquery-ui.js",
+		"public/js/pos_ago/pos_ago.html",
+		"public/js/pos_ago/pos_ago_bill_item.html",
+		"public/js/pos_ago/pos_ago_item.html",
+		"public/js/pos_ago/pos_ago_tax_row.html",
+		"public/js/pos_ago/pos_ago_invoice_list.html",
+		"public/js/pos_ago/pos_ago_selected_item.html",
+		"public/js/pos_ago/customer_toolbar.html"
+
 
 	]
 }
