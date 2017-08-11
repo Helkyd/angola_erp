@@ -24,6 +24,7 @@
 		"public/js/lib/slickgrid_extended/plot_diagram.js",
 		"public/js/lib/flot/jquery.contextmenu.js",
 		"public/js/lib/flot/jquery.flot.js",
+		"public/js/lib/flot/jquery.flot.time.js",
 		"public/js/lib/flot/jquery.flot.resize.js",
 		"public/js/lib/flot/jquery.flot.crosshair.js",
 		"public/js/testgrid/testgrid.html",

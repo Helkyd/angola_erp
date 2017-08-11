@@ -353,8 +353,6 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 			frappe.meta.sync(data)
 			locals["DocType"][data.name] = data;
 		})
-		console.log(this.letter_head.header)
-		console.log(this.letter_head.footer)
 
 		this.print_template_data = frappe.render_template("print_template", {
 			content: this.print_template,
