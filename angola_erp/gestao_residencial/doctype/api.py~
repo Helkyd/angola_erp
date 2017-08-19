@@ -77,52 +77,51 @@ def verifica_hora_saida():
 
 		for d in frappe.db.sql("""SELECT name,numero_quarto,hora_entrada,hora_saida,status_quarto FROM `tabGestao de Quartos` WHERE status_quarto = "Ocupado" or status_quarto = 'Ativo' and hora_saida <=%s """, frappe.utils.now(), as_dict=True):
 #			print "MINUTOS " + (frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_entrada)/60)
+			if d.numero_quarto:
+				if (frappe.utils.data.time_diff_in_hours(frappe.utils.now(),d.hora_saida) <= 1): 
+					# Avisa que passou do tempo...menos de 1 hora
+					print " Menos de 1 hora"
+					print str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida)/60)
+
+					#ASTERISK to call Quarto e mensagem Seu Tempo Terminou max 3 vezes
+					#alert_pbx field
+					get_alertapbx()
+					if alertapbx:
+						#main("Quarto",d.extensao_quarto)
+						print "Ligar para o Quarto avisar"
+
+					frappe.publish_realtime('msgprint','Este Quarto ' + d.numero_quarto + ' ja passou da hora. ' + str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida)/60) + ' minutos a mais.' , user=frappe.session.user)
 
 
-			if (frappe.utils.data.time_diff_in_hours(frappe.utils.now(),d.hora_saida) <= 1): 
-				# Avisa que passou do tempo...menos de 1 hora
-				print " Menos de 1 hora"
-				print str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida)/60)
+				elif (frappe.utils.data.time_diff_in_hours(frappe.utils.now(),d.hora_saida) > 1):
+					frappe.publish_realtime(event='msgprint',message='MENSAGEM QUARTOS')
+					print " MAIS de 1 hora " + d.name
+					print str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida))
+					reser = frappe.get_doc("Gestao de Quartos",d.name)
+					print reser.numero_quarto
+	#				dd= datetime.datetime.fromtimestamp(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),datetime.datetime(2016, 10, 15, 20, 34, 2))).strftime('%M:%S')
+					dd= datetime.datetime.fromtimestamp(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida)).strftime('%H:%M:%S')
+	# str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_entrada))
+					ddd = make_autoname(d.name +'AVISO/' + '.###')
+					frappe.db.sql("INSERT into tabCommunication  (name,docstatus,seen,unread_notification_sent,subject,reference_name,reference_doctype,sent_or_received,content,communication_type,creation,modified) values (%s,0,0,0,'HORA DE SAIDA Expirada ',%s,'Gestao de Quartos','Sent','HORA SAIDA Expirada  <!-- markdown -->','Comment',%s,%s) ",(ddd,d.name,frappe.utils.now(),frappe.utils.now()))
 
-				#ASTERISK to call Quarto e mensagem Seu Tempo Terminou max 3 vezes
-				#alert_pbx field
-				get_alertapbx()
-				if alertapbx:
-					#main("Quarto",d.extensao_quarto)
-					print "Ligar para o Quarto avisar"
+					reser._comments = "Hora de Saida por mais de " + dd + " Minutos/Horas"
+					print " AGORA " + frappe.utils.now()
+					print " hora_saida " + str(d.hora_saida)
+					print "QUARTO " + d.numero_quarto + " " + str(d.hora_saida) + " Cancelada por mais de " + dd + " horas"
+					print " USER " + frappe.session.user
+					reser.save()
 
-				frappe.publish_realtime('msgprint','Este Quarto ' + d.numero_quarto + ' ja passou da hora. ' + str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida)/60) + ' minutos a mais.' , user=frappe.session.user)
-
-
-			elif (frappe.utils.data.time_diff_in_hours(frappe.utils.now(),d.hora_saida) > 1):
-				frappe.publish_realtime(event='msgprint',message='MENSAGEM QUARTOS')
-				print " MAIS de 1 hora " + d.name
-				print str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida))
-				reser = frappe.get_doc("Gestao de Quartos",d.name)
-				print reser.numero_quarto
-#				dd= datetime.datetime.fromtimestamp(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),datetime.datetime(2016, 10, 15, 20, 34, 2))).strftime('%M:%S')
-				dd= datetime.datetime.fromtimestamp(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_saida)).strftime('%H:%M:%S')
-# str(frappe.utils.data.time_diff_in_seconds(frappe.utils.now(),d.hora_entrada))
-				ddd = make_autoname(d.name +'AVISO/' + '.###')
-				frappe.db.sql("INSERT into tabCommunication  (name,docstatus,seen,unread_notification_sent,subject,reference_name,reference_doctype,sent_or_received,content,communication_type,creation,modified) values (%s,0,0,0,'HORA DE SAIDA Expirada ',%s,'Gestao de Quartos','Sent','HORA SAIDA Expirada  <!-- markdown -->','Comment',%s,%s) ",(ddd,d.name,frappe.utils.now(),frappe.utils.now()))
-
-				reser._comments = "Hora de Saida por mais de " + dd + " Minutos/Horas"
-				print " AGORA " + frappe.utils.now()
-				print " hora_saida " + str(d.hora_saida)
-				print "QUARTO " + d.numero_quarto + " " + str(d.hora_saida) + " Cancelada por mais de " + dd + " horas"
-				print " USER " + frappe.session.user
-				reser.save()
-
-				#ASTERISK to call RECEPCAO e mensagem Seu Tempo Terminou max 3 vezes
-				#alert_pbx field
-				get_alertapbx()
-				print "Liga ou nao " + str(alertapbx)
-				if alertapbx:
-					#main("Rececao",numerorececao)
-					print "Ligar para Rececao avisar"
+					#ASTERISK to call RECEPCAO e mensagem Seu Tempo Terminou max 3 vezes
+					#alert_pbx field
+					get_alertapbx()
+					print "Liga ou nao " + str(alertapbx)
+					if alertapbx:
+						#main("Rececao",numerorececao)
+						print "Ligar para Rececao avisar"
 
 
-				frappe.publish_realtime(event='msgprint', message='QUARTO ' + d.numero_quarto + ' ' + str(d.hora_saida) + ' Cancelada por mais de ' + dd + ' Minutos/Minutos', user=frappe.session.user,doctype='Gestao de Quartos')
+					frappe.publish_realtime(event='msgprint', message='QUARTO ' + d.numero_quarto + ' ' + str(d.hora_saida) + ' Cancelada por mais de ' + dd + ' Minutos/Minutos', user=frappe.session.user,doctype='Gestao de Quartos')
 
 
 
