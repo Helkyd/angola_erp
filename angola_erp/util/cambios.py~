@@ -33,7 +33,7 @@ def cambios(fonte):
 		frappe.throw("A fonte tem que ser BNA, BFA ou BIC.")
 
 	#if no cambio on currency exchange continues otherwise use the already exchange rate
-	temcambio = frappe.db.sql(""" select name,from_currency,to_currency,max(date),exchange_rate from `tabCurrency Exchange` where to_currency='kz' and from_currency='sUSD' ;""",as_dict=True)
+	temcambio = frappe.db.sql(""" select name,from_currency,to_currency,max(date),exchange_rate from `tabCurrency Exchange` where to_currency='kz' and from_currency='USD' ;""",as_dict=True)
 
 	print temcambio
 	print temcambio[0]['exchange_rate']
@@ -201,6 +201,7 @@ def update_cambios(fonte):
 	if fonte.upper() == 'BNA':
 		bna_bfa=0
 		try:
+			print "BNA sites !!!"
 			page=requests.get('http://www.bna.ao/Servicos/cambios_table.aspx?idl=1')
 			if page.status_code == 200:
 				tree = html.fromstring(page.content)
@@ -212,6 +213,7 @@ def update_cambios(fonte):
 	if fonte.upper() == 'BFA':
 		bna_bfa=1
 		try:
+			print "BFA sites !!!"
 			page= requests.get('http://www.bfa.ao/Servicos/Cambios/Divisas.aspx?idl=1')
 			if page.status_code == 200:
 				tree = html.fromstring(page.content)
@@ -223,6 +225,7 @@ def update_cambios(fonte):
 	if fonte.upper() == 'BIC':
 		bna_bfa=2
 		try:
+			print "BIC sites !!!"
 			page= requests.get('http://www.bancobic.ao/Servicos/Cambios/Cambios.aspx?ctype=D')
 			if page.status_code == 200:
 				tree = html.fromstring(page.content)
@@ -232,7 +235,8 @@ def update_cambios(fonte):
 			return 0,0
 
 
-	#Espera resposta de dos dois sites...		
+	#Espera resposta de dos dois sites...	
+	print "Ja tem resposta dos sites !!!"	
 	if tree is not None: #page.status_code == 200:
 		#tree = html.fromstring(page.content)
 
