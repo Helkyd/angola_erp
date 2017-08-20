@@ -24,7 +24,7 @@ class CadastrodeProcesso(Document):
 
 	def validate(self):
 
-		print ('validaaaaaaaaaaaaaaar')
+
 		#Check numero processo is Number and 4 digits.
 		if len(self.numero_de_processo) < 4:
 			if len(self.numero_de_processo) == 1:
@@ -46,7 +46,6 @@ class CadastrodeProcesso(Document):
 			frappe.validated = False
 
 
-		print('validar')
 
 #		print "tamanho ", len(self.servicos_processo)
 		
@@ -70,8 +69,48 @@ class CadastrodeProcesso(Document):
 #			print " criarProjeto "
 #			self.criar_projecto()
 
+		if self.docstatus == 1 and self.estado == 'Em Curso'  :
+			self.criar_projecto()
 
 
+	def criar_projecto(self):
+		if self.estado == "Em Curso":
+			print "Verifica o Project ...."
+			criarprojeto = False
+			if frappe.db.sql("""select name from `tabProject` WHERE name =%s """,(self.numero_de_processo), as_dict=False) ==():
+				criarprojeto = True
+			if criarprojeto == True: #not frappe.get_doc("Project",self.numero_obra): 
+				print "Criar Projeto ...."
+				projecto = frappe.get_doc({
+					"doctype": "Project",
+					"project_name": self.numero_de_processo,
+					"priority": "Medium",
+					"status": "Open",
+					"expected_start_date": get_datetime(frappe.utils.now()), # + timedelta(days=1) ,
+#					"expected_end_date": self.data_previsao_saida ,
+					"is_active": "Yes",
+					"project_type": "External",
+					"customer": self.nome_do_autor
+				})
+				projecto.insert()
+				frappe.msgprint('{0}{1}'.format("Processo criado como Projeto ", self.numero_de_processo))
+				#create the Tasks
+
+				tarefas = frappe.get_doc({
+					"doctype": "Task",
+					"project": self.numero_de_processo,
+					"subject": "Ficha de Abertura do Processo",
+					"status": "Open",
+					"description": "Tarefa adicionada pelo Sistema",
+					"exp_start_date": get_datetime(frappe.utils.now()) # + timedelta(days=1),
+
+				})
+				tarefas.insert()
+#		elif self.fo_status == "Aberta":
+			#Set OR para Em Curso
+#			ordemreparacao = frappe.get_doc("Ordem de Reparacao",self.ordem_reparacao)			
+#			ordemreparacao.or_status = "Em Curso"
+#			ordemreparacao.save()
 
 @frappe.whitelist()
 def get_projecto_status(prj):
