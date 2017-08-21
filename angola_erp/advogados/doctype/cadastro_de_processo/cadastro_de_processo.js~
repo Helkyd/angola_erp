@@ -11,6 +11,16 @@ frappe.ui.form.on('Cadastro de Processo', {
 		cur_frm.toggle_enable("advogado",false)
 		cur_frm.toggle_enable("registado_por",false)
 
+		frm.fields_dict.nome_do_advogado.get_query = function(doc){
+			return{
+				filters:{
+					"designation":['like', 'advogado%']
+
+				},
+				
+			}
+		}
+
 	},
 
 	refresh: function(frm) {
@@ -31,7 +41,7 @@ frappe.ui.form.on('Cadastro de Processo', {
 
 
 		if (isNaN(cur_frm.doc.numero_de_processo)){
-			if (cur_frm.doc.numero_de_processo.length != 16){
+			if (cur_frm.doc.numero_de_processo.length != 17){
 				
 				//frappe.model.set_value(cdt,cdn,'numero_de_processo',null)
 				alert('Numero de Processo tem que ter somente digitos')
@@ -55,9 +65,9 @@ frappe.ui.form.on('Cadastro de Processo','numero_de_processo',function(frm,cdt,c
 			}
 		}
 		if (isNaN(cur_frm.doc.numero_de_processo)){
-			if (cur_frm.doc.numero_de_processo.length != 16){
+			if (cur_frm.doc.numero_de_processo.length != 17){
 				
-				frappe.model.set_value(cdt,cdn,'numero_de_processo',null)
+				frappe.model.set_value(cdt,cdn,'numero_de_processo',01)
 				alert('Numero de Processo tem que ter somente digitos')
 
 			}
