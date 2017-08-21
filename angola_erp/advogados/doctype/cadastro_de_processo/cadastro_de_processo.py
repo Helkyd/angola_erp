@@ -20,8 +20,8 @@ class CadastrodeProcesso(Document):
 		print(self.numero_de_processo)
 		print(len(self.serie_tipo))
 		print(make_autoname(self.serie_tipo))
-		print(make_autoname(self.serie_tipo)[0:12])
-		self.numero_de_processo = self.numero_de_processo + make_autoname(self.serie_tipo)[0:12] # 'FO/' + '.YYYY./.#####')
+		print(make_autoname(self.serie_tipo)[0:13])
+		self.numero_de_processo = self.numero_de_processo + make_autoname(self.serie_tipo)[0:13] # 'FO/' + '.YYYY./.#####')
 		self.name = self.numero_de_processo	#make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
 
 
@@ -38,7 +38,7 @@ class CadastrodeProcesso(Document):
 				self.numero_de_processo ='0' + self.numero_de_processo
 	
 		elif len(self.numero_de_processo) > 4:
-			if len(self.numero_de_processo) != 16:
+			if len(self.numero_de_processo) != 17:
 				msgprint('Numero de Processo tem que ter somente 4 digitos')
 				self.numero_de_processo =None
 				frappe.validated = False
