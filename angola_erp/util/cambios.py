@@ -62,8 +62,14 @@ def cambios(fonte):
 					#print tr.xpath(tr.xpath('//tr['+ str(i) +']/td[1]/text()')[0].strip()) == '  USD'
 					if tr.xpath('//tr['+ str(i) +']/td[1]/text()')[0] == 'USD': 
 						moeda= tr.xpath('//tr['+ str(i) +']/td[1]/text()')[0]     #moeda USD
-						moedacompra= tr.xpath('//tr['+ str(i) +']/td[2]/text()')[0]	#Compra
-						moedavenda= tr.xpath('//tr['+ str(i) +']/td[3]/text()')[0]    #Venda
+						if (tree.xpath('//tr['+ str(i) +']/td[2]/text()') != []):
+							moedacompra= tr.xpath('//tr['+ str(i) +']/td[2]/text()')[0]	#Compra
+						else:
+							moedacompra = 0
+						if (tree.xpath('//tr['+ str(i) +']/td[3]/text()') != []):
+							moedavenda= tr.xpath('//tr['+ str(i) +']/td[3]/text()')[0]    #Venda
+						else:
+							moedavenda = 0
 					i += 1
 
 			print moeda
@@ -260,9 +266,19 @@ def update_cambios(fonte):
 			if bna_bfa==0:
 				if tree.xpath('//tr['+ str(bna_i) + ']') != []:
 					print "moeda BNA ", tr.xpath('//tr['+ str(bna_i) +']/td[1]/text()')[0]
+
 					moeda= tr.xpath('//tr['+ str(bna_i) +']/td[1]/text()')[0]     #moeda 
-					moedacompra= tr.xpath('//tr['+ str(bna_i) +']/td[2]/text()')[0]	#Compra
-					moedavenda= tr.xpath('//tr['+ str(bna_i) +']/td[3]/text()')[0]    #Venda
+
+					if (tree.xpath('//tr['+ str(bna_i) +']/td[2]/text()') != []):
+						moedacompra= tr.xpath('//tr['+ str(bna_i) +']/td[2]/text()')[0]	#Compra
+					else:
+						moedacompra= 0
+
+					if (tree.xpath('//tr['+ str(bna_i) +']/td[3]/text()') != []):
+						moedavenda= tr.xpath('//tr['+ str(bna_i) +']/td[3]/text()')[0]    #Venda
+					else:
+						moedavenda = 0
+
 					
 				bna_i +=1
 
@@ -271,8 +287,15 @@ def update_cambios(fonte):
 				if tree.xpath('//tr['+ str(bic_i) + ']') != []:
 					print "moeda BIC ", tr.xpath('//tr['+ str(bic_i) +']/td[1]/text()')[0]
 					moeda= tr.xpath('//tr['+ str(bic_i) +']/td[1]/text()')[0]     #moeda 
-					moedacompra= tr.xpath('//tr['+ str(bic_i) +']/td[2]/text()')[0]	#Compra
-					moedavenda= tr.xpath('//tr['+ str(bic_i) +']/td[3]/text()')[0]    #Venda
+					if (tree.xpath('//tr['+ str(bic_i) +']/td[2]/text()') != []):
+						moedacompra= tr.xpath('//tr['+ str(bic_i) +']/td[2]/text()')[0]	#Compra
+					else:
+						moedacompra = 0
+
+					if (tree.xpath('//tr['+ str(bic_i) +']/td[3]/text()') != []):
+						moedavenda= tr.xpath('//tr['+ str(bic_i) +']/td[3]/text()')[0]    #Venda
+					else:
+						moedavenda = 0
 					
 				bic_i +=1
 
