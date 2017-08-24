@@ -260,6 +260,11 @@ def update_cambios(fonte):
 			if bna_bfa==0:
 				if tree.xpath('//tr['+ str(bna_i) + ']') != []:
 					print "moeda BNA ", tr.xpath('//tr['+ str(bna_i) +']/td[1]/text()')[0]
+					print tr.xpath('//tr['+ str(bna_i) +']') #/td[2]/text()')[0]
+					print tree.xpath('//tr['+ str(bna_i) +']/td[2]/text()')
+
+					print (tree.xpath('//tr['+ str(bna_i) +']/td[2]/text()') == [])
+
 					moeda= tr.xpath('//tr['+ str(bna_i) +']/td[1]/text()')[0]     #moeda 
 					moedacompra= tr.xpath('//tr['+ str(bna_i) +']/td[2]/text()')[0]	#Compra
 					moedavenda= tr.xpath('//tr['+ str(bna_i) +']/td[3]/text()')[0]    #Venda

@@ -19,6 +19,7 @@ frappe.pages['pos-ago'].refresh = function (wrapper) {
 
 angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 	init: function (wrapper) {
+		console.log('INICIO')
 		this.page_len = 20;
 		this.freeze = false;
 		this.page = wrapper.page;
@@ -72,6 +73,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	onload: function () {
 		var me = this;
+		console.log ('ONLOAD')
 		this.get_data_from_server(function () {
 			me.make_control();
 			me.create_new();
@@ -407,7 +409,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm.doc = this.doc
 		this.set_transaction_defaults("Customer");
 		this.frm.doc["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
-		this.wrapper.html(frappe.render_template("pos", this.frm.doc));
+		this.wrapper.html(frappe.render_template("pos_ago", this.frm.doc));
 		this.make_search();
 		this.make_customer();
 		this.make_list_customers();
@@ -619,7 +621,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		if(this.si_docs.length) {
 			this.si_docs.forEach(function (data, i) {
 				for (var key in data) {
-					html += frappe.render_template("pos_ago_invoice_list", {
+					html += frappe.render_template("pos_invoice_list", {
 						sr: i + 1,
 						name: key,
 						customer: data[key].customer,
@@ -1012,7 +1014,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
 				if(index < me.page_len) {
-					$(frappe.render_template("pos_ago_item", {
+					$(frappe.render_template("pos_item", {
 						item_code: obj.name,
 						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
@@ -1216,7 +1218,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		$(this.wrapper).find('.selected-item').empty();
 		if(this.child_doc.length) {
 			this.child_doc[0]["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
-			this.selected_row = $(frappe.render_template("pos_ago_selected_item", this.child_doc[0]))
+			this.selected_row = $(frappe.render_template("pos_selected_item", this.child_doc[0]))
 			$(this.wrapper).find('.selected-item').html(this.selected_row)
 		}
 
@@ -1412,7 +1414,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		$totals_area.toggle(this.frm.doc.items.length > 0);
 
 		$.each(this.frm.doc.items || [], function (i, d) {
-			$(frappe.render_template("pos_ago_bill_item_new", {
+			$(frappe.render_template("pos_bill_item_new", {
 				item_code: d.item_code,
 				item_name: (d.item_name === d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
@@ -1449,7 +1451,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		$.each(taxes, function (i, d) {
 			if (d.tax_amount && cint(d.included_in_print_rate) == 0) {
-				$(frappe.render_template("pos_ago_tax_row", {
+				$(frappe.render_template("pos_tax_row", {
 					description: d.description,
 					tax_amount: format_currency(flt(d.tax_amount_after_discount_amount),
 						me.frm.doc.currency)
