@@ -227,7 +227,7 @@ body[data-route="pos-ago"] .tax-area .pos-list-row {
   border: none;
 }
 body[data-route="pos-ago"] .item-cart-items {
-  height: calc(-426vh);
+  height: calc(100vh - 526px);
   overflow: auto;
   border: 1px solid #d1d8dd;
   border-top: none;
@@ -253,7 +253,7 @@ body[data-route="pos-ago"] .form-section-heading {
 body[data-route="pos-ago"] .item-list {
   border: 1px solid #d1d8dd;
   border-top: none;
-  max-height: calc(-90vh);
+  max-height: calc(100vh - 190px);
   overflow: auto;
 }
 @media (max-width: 767px) {

@@ -6,7 +6,29 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cstr, flt, getdate, new_line_sep
 from frappe.desk.reportview import get_match_cond
 
+import erpnext
+
+from frappe.utils import money_in_words, flt
+from frappe.utils import cstr, getdate, date_diff
+## from erpnext.setup.utils import get_company_currency
+from num2words import num2words
+
+
 def validate(doc,method):
+
+	print "VALOR POR EXTENSO"
+
+	company_currency = erpnext.get_company_currency(doc.company)
+	print company_currency
+	if (company_currency =='KZ'):
+		doc.in_words = num2words(doc.grand_total, lang='pt_BR')	
+	else:
+		doc.in_words = money_in_words(doc.grand_total, company_currency)
+
+
+
+
+def old_valiedat():
 	for d in doc.items:
 		if doc.is_subcontracting <> 1:
 			if d.subcontracted_item:

@@ -32,9 +32,9 @@ def validate(doc,method):
 	#Taxa de Cambio
 	print "SALES ORDER CAMBIO"	
 	print taxavenda[1]	
-	if (taxavenda[1] !=0 and doc.taxa_cambio == 0){
+	if (taxavenda[1] !=0 and doc.taxa_cambio == 0):
 		doc.taxa_cambio = taxavenda[1]
-	}			
+				
 
 	ii=0
 
@@ -110,3 +110,11 @@ def validate(doc,method):
 					ai.tax_amount = despesas
 
 
+		print "VALOR POR EXTENSO"
+
+	company_currency = erpnext.get_company_currency(doc.company)
+	print company_currency
+	if (company_currency =='KZ'):
+		doc.in_words = num2words(doc.rounded_total, lang='pt_BR').title()
+	else:
+		doc.in_words = money_in_words(doc.rounded_total, company_currency)
