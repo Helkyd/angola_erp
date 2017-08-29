@@ -505,7 +505,7 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.frm = {}
 		this.frm.doc = this.doc
 		this.set_transaction_defaults("Customer");
-		this.wrapper.html(frappe.render_template("pos_bar", this.frm.doc));
+		this.wrapper.html(frappe.render_template("pos", this.frm.doc));
 		this.make_search();
 		this.make_customer();
 		this.make_list_customers();
@@ -733,6 +733,7 @@ angola_erp.pos_bar.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.list_customers.find('.list-customers-table').html(html);
 
 		this.list_customers.on('click', '.customer-row', function () {
+			alert("aqui");
 			me.list_customers.hide();
 			me.numeric_keypad.show();
 			me.list_customers_btn.toggleClass("view_customer");

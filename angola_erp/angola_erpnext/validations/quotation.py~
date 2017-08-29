@@ -10,6 +10,14 @@ from angola_erp.util.angola import get_taxa_retencao
 from angola_erp.util.angola import get_taxa_ipc
 
 
+import erpnext
+
+from frappe.utils import money_in_words, flt
+from frappe.utils import cstr, getdate, date_diff
+## from erpnext.setup.utils import get_company_currency
+from num2words import num2words
+
+
 def validate(doc,method):
 
 	taxavenda= cambios("BNA")
