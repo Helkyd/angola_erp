@@ -264,3 +264,16 @@ def get_escola_ginasio():
 	return frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
 	#return frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
 
+
+@frappe.whitelist()
+def get_programa_enroll(aluno):
+
+	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno},fields=['name','student_name','program'])
+
+	print ('segundo ')
+
+	print frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=False)
+
+	return frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=True)
+
+
