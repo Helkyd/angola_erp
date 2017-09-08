@@ -280,6 +280,8 @@ def set_fee_pago(propina,fatura):
 	pago = frappe.get_doc('Fees',propina)
 	print 'propina paga'
 	print pago.outstanding_amount
+	
+	factura = frappe.get_doc('Salary Invoice',fatura) self.format_as_links(ss.name)[0]
 
 	if pago.outstanding_amount:
 		#PAID
