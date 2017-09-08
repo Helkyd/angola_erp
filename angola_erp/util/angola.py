@@ -266,6 +266,35 @@ def get_escola_ginasio():
 
 
 @frappe.whitelist()
+def get_escola_config():
+
+
+	print frappe.get_value("School Settings",None,"current_academic_year")
+	print frappe.get_value("School Settings",None,"current_academic_term")
+	return frappe.get_value("School Settings",None,"current_academic_year"), frappe.get_value("School Settings",None,"current_academic_term")
+
+
+@frappe.whitelist()
+def set_fee_pago(propina,fatura):
+
+	pago = frappe.get_doc('Fees',propina)
+	print 'propina paga'
+	print pago.outstanding_amount
+
+	if pago.outstanding_amount:
+		#PAID
+
+		frappe.db.set_value("Fees", propina, "paid_amount", pago.total_amount)
+		frappe.db.set_value("Fees", propina, "outstanding_amount", 0)
+		frappe.db.set_value("Fees", propina, "sales_invoice", fatura)
+#		pago.paid_amount = pago.total_amount
+#		pago.outstanding_amount = 0
+#		pago.save()
+
+
+
+
+@frappe.whitelist()
 def get_programa_enroll(aluno):
 
 	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno},fields=['name','student_name','program'])

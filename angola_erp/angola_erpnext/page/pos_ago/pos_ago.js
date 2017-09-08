@@ -1,6 +1,8 @@
 frappe.provide("angola_erp.pos_ago");
 {% include "erpnext/public/js/controllers/taxes_and_totals.js" %}
 
+var pesokg;
+
 frappe.pages['pos-ago'].on_page_load = function (wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -685,6 +687,9 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
+			if (this.frm.doc.customer){
+				this.party_field.$input[0].value = this.frm.doc.customer
+			}
 			this.serach_item.$input.focus();
 		} else {
 			this.party_field.$input.focus();
@@ -1071,6 +1076,35 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		search_status = true
 
 		if (key) {
+			console.log('continua procura')
+			if (key.length == 13){
+				//Codigo barras por KG
+				if (key.startsWith('280')){
+					//Talho especifico ... TO BE REVIEWED
+					// key.substr(3,4) Codigo do Produto Max 4 digitos
+					return $.grep(this.item_data, function (item) {
+						if (item.item_code == key.substr(3,4)) {
+							// guarda os kg para depois
+							pesokg1 = key.substr(13-6,5)
+							if (pesokg1.startsWith('0000')){
+								pesokg='0.' + pesokg1.substr(4)
+
+							}else if (pesokg1.startsWith('000')){
+								pesokg='0.' + pesokg1.substr(3)
+							}else if (pesokg1.startsWith('00')){
+								pesokg='0.' + pesokg1.substr(2)
+							}else if (pesokg1.startsWith('0')){
+								pesokg=pesokg1.substr(1,1) +'.' + pesokg1.substr(2,pesokg1.length)
+
+							}
+							search_status = false;
+							return true
+						}
+					})
+
+				}
+			}
+
 			return $.grep(this.items_list, function (item) {
 				if (search_status) {
 					if (in_list(me.batch_no_data[item.item_code], me.serach_item.$input.val())) {
