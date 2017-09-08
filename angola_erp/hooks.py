@@ -114,6 +114,10 @@ doc_events = {
 
 	},
 
+	"Fees": {
+		"validate": "angola_erp.angola_erpnext.validations.fees.validate",
+
+	},
 
 
 }

@@ -33,14 +33,15 @@ def cambios(fonte):
 		frappe.throw("A fonte tem que ser BNA, BFA ou BIC.")
 
 	#if no cambio on currency exchange continues otherwise use the already exchange rate
-	temcambio = frappe.db.sql(""" select name,from_currency,to_currency,max(date),exchange_rate from `tabCurrency Exchange` where to_currency='kz' and from_currency='USD' ;""",as_dict=True)
+	temcambio = frappe.db.sql(""" select name,from_currency,to_currency,date,exchange_rate from `tabCurrency Exchange` where to_currency='kz' and from_currency='USD' and date=(select max(date) from `tabCurrency Exchange`) ;""",as_dict=True)
 
-	print temcambio
-	print temcambio[0]['exchange_rate']
-	if not temcambio[0]['exchange_rate'] == None :
-		moedacompra = 0
-		moedavenda = temcambio[0]['exchange_rate']
-		return moedacompra, moedavenda
+	print temcambio == []
+	#print temcambio[0]['exchange_rate']
+	if not temcambio == []:
+		if not temcambio[0]['exchange_rate'] == None :
+			moedacompra = 0
+			moedavenda = temcambio[0]['exchange_rate']
+			return moedacompra, moedavenda
 
 	if fonte.upper() == 'BNA':
 		try:

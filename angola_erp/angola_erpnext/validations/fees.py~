@@ -1,0 +1,99 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2015, Frappe Technologies and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+from frappe.model.document import Document
+import frappe
+from frappe import _
+
+from frappe.utils import cstr, getdate, date_diff
+from datetime import datetime, timedelta
+from frappe.utils import get_datetime, cint, get_datetime_str
+from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
+
+
+def validate(doc,method):
+	doc.calculate_total()
+	print "propinas"
+	print doc.docstatus
+	if doc.docstatus == 1 and doc.outstanding_amount > 0:
+		criar_faturavenda(doc)
+
+
+def criar_faturavenda(doc):
+	if doc.outstanding_amount > 0:
+		print "Verifica Sales Invoice ...."
+		print frappe.get_value("Global Defaults",None,"default_company")
+		empresa = frappe.get_value("Global Defaults",None,"default_company")
+		empresa_abbr = frappe.get_value("Company",empresa,"abbr")
+
+		centrocusto = frappe.get_value("Company",empresa,"cost_center")
+
+		contalucro =  frappe.get_value("Company",empresa,"default_income_account")
+		contadespesas =   frappe.get_value("Company",empresa,"default_expense_account")
+
+		armazemdefault = frappe.get_value('Stock Settings',None,'default_warehouse')
+
+		accs = frappe.db.sql("""SELECT name from tabAccount where account_name like '31121000%%' and company = %s """,(empresa),as_dict=True)
+		acc = accs[0]['name']
+
+		criarprojeto = False
+		if frappe.db.sql("""select name from `tabSales Invoice` WHERE propina =%s """,(doc.name), as_dict=False) ==():
+			criarprojeto = True
+		if criarprojeto == True: 
+			print "Criar Sales Invoice ...."
+			print doc.components[0].fees_category
+			print type(doc.components[0].amount)
+			valor = flt(doc.components[0].amount)
+			print type(valor) #doc.round_floats_in(valor)
+
+			projecto = frappe.get_doc({
+				"doctype": "Sales Invoice",
+				"propina": doc.name,
+				"customer": doc.student_name,	
+				"posting_date": frappe.utils.nowdate(),
+				"due_date": frappe.utils.nowdate(),
+#				"payment_due_date": get_datetime(frappe.utils.now() + timedelta(days=3)) ,
+				"debit_to": acc,
+				"company": empresa,
+				"status": "Draft",
+				"base_grand_total": flt(valor),
+				"update_stock":0,
+				"items":[
+						{
+
+							'doctype': 'Sales Invoice Item',
+							'qty': 1,
+							'uom':'Unit',
+							'item_code': doc.components[0].fees_category,
+							'item_name': doc.components[0].fees_category,
+							'description': doc.components[0].fees_category.strip() + ' (' + doc.referente_ao_mes + ')',
+#							'rate': float(doc.components[0].amount),
+#							'price_list_rate': 17000.00, #float(doc.components[0].amount),
+#							'amount': 17000.00, #float(doc.components[0].amount),
+							'cost_center':centrocusto,
+							'income_account': contalucro,
+							'expense_account': contadespesas,
+							'warehouse': armazemdefault,
+						}
+					],
+
+
+			})
+			projecto.insert()
+
+			#for now disable; maybe client likes the idea of emailing ...
+#			projecto.docstatus = 1
+#			projecto.save()
+#			print (projecto.items[0].description)
+
+#			x = frappe.get_all('Sales Invoice Item', filters={'parent':doc.name}, fields=['parent','description'])
+#			x.item_description = "TTEadfsadfasdfasdfasdfas"
+#			projecto.save()
+
+
+#				frappe.msgprint('{0}{1}'.format("Processo criado como Projeto ", self.numero_de_processo))
+			#create the Tasks
+
+

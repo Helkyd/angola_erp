@@ -264,3 +264,47 @@ def get_escola_ginasio():
 	return frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
 	#return frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
 
+
+@frappe.whitelist()
+def get_escola_config():
+
+
+	print frappe.get_value("School Settings",None,"current_academic_year")
+	print frappe.get_value("School Settings",None,"current_academic_term")
+	return frappe.get_value("School Settings",None,"current_academic_year"), frappe.get_value("School Settings",None,"current_academic_term")
+
+
+@frappe.whitelist()
+def set_fee_pago(propina,fatura):
+
+	pago = frappe.get_doc('Fees',propina)
+	print 'propina paga'
+	print pago.outstanding_amount
+	
+	factura = frappe.get_doc('Salary Invoice',fatura) self.format_as_links(ss.name)[0]
+
+	if pago.outstanding_amount:
+		#PAID
+
+		frappe.db.set_value("Fees", propina, "paid_amount", pago.total_amount)
+		frappe.db.set_value("Fees", propina, "outstanding_amount", 0)
+		frappe.db.set_value("Fees", propina, "sales_invoice", fatura)
+#		pago.paid_amount = pago.total_amount
+#		pago.outstanding_amount = 0
+#		pago.save()
+
+
+
+
+@frappe.whitelist()
+def get_programa_enroll(aluno):
+
+	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno},fields=['name','student_name','program'])
+
+	print ('segundo ')
+
+	print frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=False)
+
+	return frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=True)
+
+
