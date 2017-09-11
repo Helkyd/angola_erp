@@ -273,6 +273,10 @@ def get_escola_config():
 	print frappe.get_value("School Settings",None,"current_academic_term")
 	return frappe.get_value("School Settings",None,"current_academic_year"), frappe.get_value("School Settings",None,"current_academic_term")
 
+@frappe.whitelist()
+def get_cursos(programa):
+	return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s''', (programa), as_dict=1)
+
 
 @frappe.whitelist()
 def set_fee_pago(propina,fatura):

@@ -273,6 +273,10 @@ def get_escola_config():
 	print frappe.get_value("School Settings",None,"current_academic_term")
 	return frappe.get_value("School Settings",None,"current_academic_year"), frappe.get_value("School Settings",None,"current_academic_term")
 
+@frappe.whitelist()
+def get_cursos(self):
+	return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s''', (self.program), as_dict=1)
+
 
 @frappe.whitelist()
 def set_fee_pago(propina,fatura):
@@ -281,7 +285,7 @@ def set_fee_pago(propina,fatura):
 	print 'propina paga'
 	print pago.outstanding_amount
 	
-	factura = frappe.get_doc('Salary Invoice',fatura) self.format_as_links(ss.name)[0]
+	factura = frappe.get_doc('Sales Invoice',fatura) #self.format_as_links(ss.name)[0]
 
 	if pago.outstanding_amount:
 		#PAID
