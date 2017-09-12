@@ -60,6 +60,9 @@ def get_columns(salary_slips):
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
 def get_salary_slips(filters):
+	print "DATAS"
+	print filters.get("date_range")[0]
+	print filters.get("date_range")[1]
 
 	filters.update({"from_date": filters.get("date_range")[0], "to_date":filters.get("date_range")[1]})
 	conditions, filters = get_conditions(filters)
