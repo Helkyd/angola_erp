@@ -39,7 +39,15 @@ def get_data():
 			"icon": "octicon octicon-law",
 			"type": "module",
 			"label": _("Advogados")
+		},
+		{
+			"module_name": "Ginasio",
+			"color": "red",
+			"icon": "octicon octicon-law",
+			"type": "module",
+			"label": _("Ginasio")
 		}
+
 
 
 

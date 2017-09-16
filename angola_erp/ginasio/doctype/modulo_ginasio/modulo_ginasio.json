@@ -8,7 +8,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Document", 
+ "document_type": "Setup", 
  "editable_grid": 1, 
  "engine": "InnoDB", 
  "fields": [
@@ -55,7 +55,7 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2017-09-11 12:13:12.663890", 
+ "modified": "2017-09-16 01:47:12.783211", 
  "modified_by": "Administrator", 
  "module": "Ginasio", 
  "name": "Modulo Ginasio", 
