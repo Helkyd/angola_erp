@@ -1,4 +1,4 @@
-{% if docstatus %}
+{% if docstatus = 2 %}
 <div>
 	<a href={{ route }}>{{ data_do_wod }} {{ titulo }}</a>
 </div>

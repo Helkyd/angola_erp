@@ -26,6 +26,9 @@ class WOD(WebsiteGenerator):
 		print 'Antes cancelar'
 		self.publish = 0
 
+	def on_cancel(self):
+		print 'cancelar'
+		#self.publish = 0
 
 	def get_context(self, context):
 		# show breadcrumbs

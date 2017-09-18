@@ -5,7 +5,6 @@
 {% endblock %}
 
 {% block header %}
-<h1>{{ data_do_wod }}</h1>
 <h1>{{ titulo }}</h1>
 {% endblock %}
 
