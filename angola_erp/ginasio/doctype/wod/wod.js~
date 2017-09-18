@@ -1,0 +1,27 @@
+// Copyright (c) 2017, Helio de Jesus and contributors
+// For license information, please see license.txt
+
+frappe.ui.form.on('WOD', {
+	refresh: function(frm) {
+
+	},
+	validate: function(frm){
+		console.log('Validar')
+		console.log (cur_frm.doc.docstatus)
+		console.log (cur_frm.doc.publish)
+	},
+
+	on_cancel: function(frm){
+		console.log('Cancelar')
+		console.log (cur_frm.doc.docstatus)
+		console.log (cur_frm.doc.publish)
+	
+	}
+});
+
+cur_frm.cscript.custom_before_cancel = function(doc){
+		console.log('Cancelar before')
+		console.log (cur_frm.doc.docstatus)
+		console.log (cur_frm.doc.publish)
+		frappe.model.set_value(doc,'publish',0)
+}

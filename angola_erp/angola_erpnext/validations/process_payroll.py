@@ -425,7 +425,8 @@ def make_accural_jv_entry(self):
 			# 72210000 or 5.10.80.10.10.20.90 
 			print "VEvervegtertasdfasfdsafsadf"
 			print "VEvervegtertasdfasfdsafsadf"
-			print "VEvervegtertasdfasfdsafsadf"
+			print "EARNINGS"
+			print acc
 			print conta.find('72210000')
 			print conta.find('5.10.80.10.10.20.10') 
 

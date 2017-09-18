@@ -17,6 +17,27 @@ def validate(doc,method):
 	doc.calculate_total()
 	print "propinas"
 	print doc.docstatus
+	
+	print doc.referente_ao_mes 
+	print _(frappe.utils.datetime.datetime.now().strftime("%B"))
+
+	if not doc.referente_ao_mes:
+		#acrescenta o mes corrente ....
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'January': doc.referente_ao_mes = 'Janeiro'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'February':doc.referente_ao_mes = 'Fevereiro'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'March':doc.referente_ao_mes = 'Marco'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'April':doc.referente_ao_mes = 'Abril'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'May':doc.referente_ao_mes = 'Maio'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'June':doc.referente_ao_mes = 'Junho'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'July':doc.referente_ao_mes = 'Julho'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'August':doc.referente_ao_mes = 'Agosto'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'September':doc.referente_ao_mes = 'Setembro'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'October':doc.referente_ao_mes = 'Outubro'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'November':doc.referente_ao_mes = 'Novembro'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'December':doc.referente_ao_mes = 'Dezembro'
+
+		# doc.referente_ao_mes = doc.referente_ao_mes[int(frappe.utils.formatdate(frappe.utils.nowdate(),'M'))]
+
 	if doc.docstatus == 1 and doc.outstanding_amount > 0:
 		criar_faturavenda(doc)
 

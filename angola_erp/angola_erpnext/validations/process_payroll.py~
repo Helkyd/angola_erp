@@ -427,7 +427,7 @@ def make_accural_jv_entry(self):
 			print "VEvervegtertasdfasfdsafsadf"
 			print "VEvervegtertasdfasfdsafsadf"
 			print conta.find('72210000')
-			print conta.find('5.10.80.10.10.20.90') 
+			print conta.find('5.10.80.10.10.20.10') 
 
 			if (conta.find('72210000') !=-1):
 				contasal = acc
@@ -439,11 +439,11 @@ def make_accural_jv_entry(self):
 				print contasal_amt
 				print adjustment_amt
 
-			elif (conta.find('5.10.80.10.10.20.90') !=-1):
+			elif (conta.find('5.10.80.10.10.20.10') !=-1):
 				contasal = acc
 				contasal_amt = round(saliliquido * 0.08) # round(amt * 0.08)
 #				contasal_prj = self['project'] 
-				print "CONTA 5.10.80.10.10.20.90"
+				print "CONTA 5.10.80.10.10.20.10"
 				print contaseg_soc[0][0]
 				print amt
 				print contasal_amt
@@ -483,7 +483,7 @@ def make_accural_jv_entry(self):
 					"project": contasal_prj 
 				})
 			conta = acc;
-			# 34610000 or 2.80.40.20 
+			# 34610000 or 2.80.40.20 2.80.20.20.20
 			if (conta.find('34610000') !=-1):
 				contasal = acc
 				#contasal_amt = round(amt * 0.08)
@@ -496,13 +496,13 @@ def make_accural_jv_entry(self):
 				print contasal_amt
 				print adjustment_amt
 
-			elif (conta.find('2.80.40.20') !=-1):
+			elif (conta.find('2.80.20.20.20') !=-1):
 				contasal = acc
 				#contasal_amt = round(amt * 0.08)
 #				contasal_cent = self['cost_center'] 
 #				contasal_prj = self['project'] 
 
-				print "CONTA 2.80.40.20"
+				print "CONTA 2.80.20.20.20"
 				print acc
 				print amt
 				print contasal_amt
