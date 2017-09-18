@@ -5,11 +5,7 @@ frappe.ui.form.on('WOD', {
 	refresh: function(frm) {
 
 	},
-	validate: function(frm){
-		console.log('Validar')
-		console.log (cur_frm.doc.docstatus)
-		console.log (cur_frm.doc.publish)
-	},
+
 
 });
 

@@ -10,10 +10,12 @@ from frappe import _
 
 class WOD(WebsiteGenerator):
 	website = frappe._dict(
-		template = "templates/generators/wod.html",
+		template = "wod/templates/generators/wod.html",
 		condition_field = "publish",
 		page_title_field = "titulo",
 	)
+	print website
+
 
 	def validate(self):
 		print self.docstatus

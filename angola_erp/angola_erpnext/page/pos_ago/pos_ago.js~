@@ -688,7 +688,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
 			if (this.frm.doc.customer){
-				this.party_field.$input[0]value = this.frm.doc.customer
+				this.party_field.$input[0].value = this.frm.doc.customer
 			}
 			this.serach_item.$input.focus();
 		} else {
@@ -1362,7 +1362,14 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 			$.each(this.frm.doc["items"] || [], function (i, d) {
 				if (d.item_code == me.items[0].item_code) {
 					caught = true;
-					d.qty += 1;
+					if (pesokg) {
+						d.qty = pesokg;
+						pesokg =0;
+					}else{
+						d.qty += 1;
+					}
+
+
 					d.amount = flt(d.rate) * flt(d.qty);
 					if (me.item_serial_no[d.item_code]) {
 						d.serial_no += '\n' + me.item_serial_no[d.item_code][0]
@@ -1393,7 +1400,12 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.brand = this.items[0].brand;
 		this.child.description = this.items[0].description || this.items[0].item_name;
 		this.child.discount_percentage = 0.0;
-		this.child.qty = 1;
+		if (pesokg) {
+			this.child.qty = pesokg;
+			pesokg =0;
+		}else{
+			this.child.qty = 1;
+		}
 		this.child.item_group = this.items[0].item_group;
 		this.child.cost_center = this.pos_profile_data['cost_center'] || this.items[0].cost_center;
 		this.child.income_account = this.pos_profile_data['income_account'] || this.items[0].income_account;

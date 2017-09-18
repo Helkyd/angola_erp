@@ -42,7 +42,7 @@ def get_data():
 		},
 		{
 			"module_name": "Ginasio",
-			"color": "blue",
+			"color": "#7578f6",
 			"icon": "/assets/angola_erp/images/gym.svg",
 			"type": "module",
 			"label": _("Ginasio")

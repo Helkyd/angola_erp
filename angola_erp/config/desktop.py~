@@ -42,8 +42,8 @@ def get_data():
 		},
 		{
 			"module_name": "Ginasio",
-			"color": "red",
-			"icon": "octicon octicon-law",
+			"color": "blue",
+			"icon": "/assets/angola_erp/images/gym.svg",
 			"type": "module",
 			"label": _("Ginasio")
 		}
