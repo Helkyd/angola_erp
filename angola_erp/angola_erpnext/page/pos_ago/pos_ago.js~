@@ -688,6 +688,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 	set_focus: function () {
 		if (this.default_customer || this.frm.doc.customer) {
 			if (this.frm.doc.customer){
+				//cliente digitado ...
 				this.party_field.$input[0].value = this.frm.doc.customer
 			}
 			this.serach_item.$input.focus();
@@ -1363,7 +1364,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 				if (d.item_code == me.items[0].item_code) {
 					caught = true;
 					if (pesokg) {
-						d.qty = pesokg;
+						d.qty += Number(pesokg);
 						pesokg =0;
 					}else{
 						d.qty += 1;
@@ -1401,7 +1402,7 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.description = this.items[0].description || this.items[0].item_name;
 		this.child.discount_percentage = 0.0;
 		if (pesokg) {
-			this.child.qty = pesokg;
+			this.child.qty += Number(pesokg);
 			pesokg =0;
 		}else{
 			this.child.qty = 1;

@@ -141,6 +141,12 @@ def send_via_gateway(arg):
 
 
 def send_request(gateway_url, params):
+	print ' SMS SETTINGS - send request Angola_erp'
+	print ' SMS SETTINGS - send request Angola_erp'
+	print ' SMS SETTINGS - send request Angola_erp'
+	print gateway_url
+	print params
+
 	import requests
 	response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
 	response.raise_for_status()

@@ -47,7 +47,7 @@ website_context = {
 # ----------
 
 # automatically create page for each record of this doctype
-# website_generators = ["Web Page"]
+website_generators = ["WOD"]
 
 # Installation
 # ------------
@@ -119,6 +119,10 @@ doc_events = {
 
 	},
 
+#	"System Settings": {
+#		"validate": "angola_erp.angola_erpnext.validations.system_settings.validate",
+
+#	},
 
 }
 
