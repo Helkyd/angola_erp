@@ -1,3 +1,4 @@
+<h1>TTtttttttttttttttttttt</h1>
 {% extends "templates/web.html" %}
 
 {% block breadcrumbs %}
@@ -5,15 +6,16 @@
 {% endblock %}
 
 {% block header %}
-<h1>{{ title }}</h1>
+<h1>{{ data_do_wod }}</h1>
+<h1>{{ titulo }}</h1>
 {% endblock %}
 
 {% block page_content %}
-
-<div>{{ exercicios }}</div>
+<h1>{{ titulo }}</h1>
+<div>{{ data_do_wod }}</div>
 
 <a class='btn btn-primary'
-    href='/WOD?titulo={{ doc.titulo }}'>
+    href='/?titulo={{ doc.titulo }}'>
     {{ _("Apply Now") }}</a>
 
 {% endblock %}

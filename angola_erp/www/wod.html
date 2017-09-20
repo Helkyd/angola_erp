@@ -1,0 +1,33 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ titulo }} {% endblock %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block page_content %}
+{% from "erpnext/templates/includes/macros.html" import product_image %}
+<div class="item-content" style="margin-top:20px;">
+	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
+		<div class="row">
+			<div class="col-sm-6" style="padding-left:20px;">
+				 <h1 itemprop="name" style="margin-top: 0px;">{{ titulo }}</h1>
+
+				<p class="text-muted">
+					{{ "Data do WOD" }}: <span itemprop="datawod"><b>{{ doc.get_formatted("data_do_wod") }}</b></span></p>
+
+			</div>
+		</div>
+		<div class="row item-website-description" style="margin-top:30px; margin-bottom:20px">
+			<div class="col-md-12">
+		<div class="h2 text-uppercase text-center">{{ _("Exercicios") }}</div>
+		<div itemprop="description" class="item-desc">
+		{{ exercicios }}
+		</div>
+		</div>
+		</div>
+
+	</div>
+</div>
+{% endblock %}

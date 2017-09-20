@@ -47,8 +47,14 @@ website_context = {
 # ----------
 
 # automatically create page for each record of this doctype
-website_generators = ["WOD"]
+#website_generators = ["WOD"]
 
+
+website_route_rules = [
+
+	{"from_route": "/wods", "to_route": "WOD"},
+
+]
 # Installation
 # ------------
 

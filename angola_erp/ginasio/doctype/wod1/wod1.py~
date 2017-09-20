@@ -8,8 +8,7 @@ import frappe
 from frappe.website.website_generator import WebsiteGenerator
 from frappe import _
 
-class WOD(WebsiteGenerator):
-
+class WOD1(WebsiteGenerator):
 
 	website = frappe._dict(
 		page_title_field = "titulo",
@@ -38,11 +37,11 @@ class WOD(WebsiteGenerator):
 		print 'vim aqqqqqqqqqqqqqqqqqqqqqq'
 		print 'vim aqqqqqqqqqqqqqqqqqqqqqq'
 
-#		context.show_search=True
+		context.show_search=True
 
-		context.title = _("WODS")
+		context.title = _("WODS da Semana?")
 		#context.parents = get_parent_item_groups(self.item_group)
-		context.parents = [{'name': 'wods', 'title': _('All WODS') }]
+		#context.parents = [{'name': '/wods', 'title': _('All WODS') }]
 
 		print context
 		return context
@@ -50,7 +49,7 @@ class WOD(WebsiteGenerator):
 	def validate(self):
 		print self.docstatus
 		print self.publish
-		if not self.route:
+		if !self.route:
 			self.route = self.name
 
 		if self.docstatus == 2:
@@ -65,11 +64,9 @@ class WOD(WebsiteGenerator):
 
 
 def get_list_context(context):
-	context.title = _("Todos WODs")
-	context.show_search=True
-	context.search_link = '/?data_do_wod'
+	context.title = _("WODs")
 #	context.introduction = _('Current Job Openings!!')
-#	context.parents = [{'name': 'home', 'title': _('home') }]
+#	context.parents = [{'name': 'title', 'title': _('TODOS WODS') }]
 
 #	print 'get list context'
 #	print context
