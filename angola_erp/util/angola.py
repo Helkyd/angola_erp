@@ -328,7 +328,12 @@ def estudante_enroll(source_name):
 				"name": "student_applicant"
 			}
 		}}, ignore_permissions=True)
+
 	student.save()
+
+	frappe.db.set_value('Student',student.name,'_user_tags',student.title[0])
+	frappe.db.commit()
+
 
 	#Cria Customer	
 	cliente = get_mapped_doc("Student Applicant", source_name,
@@ -343,9 +348,12 @@ def estudante_enroll(source_name):
 	cliente.customer_group = 'Individual'
 	cliente.territory = 'Angola'
 	cliente.language = 'pt'
-	
-		
+
 	cliente.save()
+
+	frappe.db.set_value('Customer',cliente.name,'_user_tags',student.title[0])
+	frappe.db.commit()
+	
 
 	contacto = frappe.new_doc("Contact")
 	contacto.name = student.title

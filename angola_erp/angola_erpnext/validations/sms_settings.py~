@@ -8,10 +8,13 @@ import frappe
 from frappe.utils import cstr
 
 from frappe import _, throw, msgprint
-from frappe.utils import nowdate
+from frappe.utils import nowdate, encode
 
 from frappe.model.document import Document
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 def validate_receiver_nos(receiver_list):
 	validated_receiver_list = []
@@ -100,16 +103,18 @@ def send_via_gateway(arg):
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
 		print " ENVIAR PARA "
+
+		if d[0:2] == '["':
+			d = d[2:len(d)-2]
+
 		if not d.isnumeric():
 			msgprint(_("Digite Numeros somente!!!"))
 			return
 
 		if len(d) < 9:
-			msgprint(_("Numero do Movel Incompleto!!!"))
+			msgprint(_("Numero de Telemovel Incompleto!!!"))
 			return
 
-		if d[0:2] == '["':
-			d = d[2:len(d)-2]
 		if d[0:3] !=244:
 			print d[0:3]
 			d = '244' + d
@@ -117,6 +122,8 @@ def send_via_gateway(arg):
 			print "vermoe"
 			print args[ss.receiver_parameter]
 		
+
+		print arg.get('message')
 
 		# http://10.192.8.104/cgi/WebCGI?11401=account=admin&password=helio&port=1&destination=
 		paraquem = d #arg.get('receiver_list')[0]
@@ -139,6 +146,12 @@ def send_via_gateway(arg):
 
 
 def send_request(gateway_url, params):
+	print ' SMS SETTINGS - send request Angola_erp'
+	print ' SMS SETTINGS - send request Angola_erp'
+	print ' SMS SETTINGS - send request Angola_erp'
+	print gateway_url
+	print params
+
 	import requests
 	response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
 	response.raise_for_status()

@@ -8,10 +8,13 @@ import frappe
 from frappe.utils import cstr
 
 from frappe import _, throw, msgprint
-from frappe.utils import nowdate
+from frappe.utils import nowdate, encode
 
 from frappe.model.document import Document
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 def validate_receiver_nos(receiver_list):
 	validated_receiver_list = []
@@ -120,10 +123,13 @@ def send_via_gateway(arg):
 			print args[ss.receiver_parameter]
 		
 
+		print arg.get('message')
+
 		# http://10.192.8.104/cgi/WebCGI?11401=account=admin&password=helio&port=1&destination=
 		paraquem = d #arg.get('receiver_list')[0]
 		paraquem += "&content="
-		paraquem += arg.get('message')
+		paraquem += arg.get('message') 
+		paraquem += "\r\n\r\n"
 		print "PARA QUEM"
 		print paraquem
 		print ss.sms_gateway_url
@@ -141,6 +147,12 @@ def send_via_gateway(arg):
 
 
 def send_request(gateway_url, params):
+	print ' SMS SETTINGS - send request Angola_erp'
+	print ' SMS SETTINGS - send request Angola_erp'
+	print ' SMS SETTINGS - send request Angola_erp'
+	print gateway_url
+	print params
+
 	import requests
 	response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
 	response.raise_for_status()

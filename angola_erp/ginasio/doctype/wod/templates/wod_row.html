@@ -1,6 +1,7 @@
 {% if docstatus %}
 <div>
-	<a href={{ route }}>{{ data_do_wod }} {{ titulo }}</a>
+	<a href={{ route }}>{{ doc.get_formatted("data_do_wod") }} {{ titulo }}</a>
 </div>
 {% endif%}
+
 <!-- this is a sample default list template -->

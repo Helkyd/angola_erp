@@ -1,21 +1,7 @@
 {% extends "templates/web.html" %}
 
-{% block breadcrumbs %}
-    {% include "templates/includes/breadcrumbs.html" %}
-{% endblock %}
-
-{% block header %}
-<h1>{{ data_do_wod }}</h1>
-<h1>{{ titulo }}</h1>
-{% endblock %}
-
 {% block page_content %}
-
-<div>{{ data_do_wod }}</div>
-
-<a class='btn btn-primary'
-    href='/WOD?titulo={{ doc.titulo }}'>
-    {{ _("Apply Now") }}</a>
-
+<h1>{{ title }}</h1>
 {% endblock %}
+
 <!-- this is a sample default web page template -->
