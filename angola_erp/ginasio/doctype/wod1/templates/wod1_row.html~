@@ -1,4 +1,0 @@
-<div>
-	<a href={{ route }}>{{ doc.get_formatted("data_do_wod") }} {{ titulo }}</a>
-</div>
-<!-- this is a sample default list template -->
