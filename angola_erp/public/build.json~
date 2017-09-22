@@ -8,12 +8,14 @@
 
 	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
-		"public/js/shopping_cart.js"
+		"public/js/shopping_cart.js",
+		"public/js/product_list.js"
 
 	],
 	"js/angola_erp.min.js": [
 		"public/js/pos_bar/pos_bar.html",
 		"public/js/pos_bar/pos_bar_bill_item.html",
+		"public/js/pos_bar/pos_bar_bill_item_new.html",
 		"public/js/pos_bar/pos_bar_item.html",
 		"public/js/pos_bar/pos_bar_mesas.html",
 		"public/js/pos_bar/pos_bar_tax_row.html",

@@ -10,6 +10,7 @@
 		"public/js/website_utils.js",
 		"public/js/shopping_cart.js"
 
+
 	],
 	"js/angola_erp.min.js": [
 		"public/js/pos_bar/pos_bar.html",
