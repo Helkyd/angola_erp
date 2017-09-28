@@ -20,8 +20,8 @@ def execute(filters=None):
 
 	data = []
 	for ss in salary_slips:
-		row = [ss.name, ss.employee, ss.employee_name, ss.department, ss.designation,
-			ss.company, ss.start_date.month, ss.leave_withut_pay, ss.payment_days]
+		row = [ss.employee_name, ss.department, ss.designation
+			]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -39,17 +39,16 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", 
-		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		_("Company") + ":Link/Company:120", _("Start Date") + "::10",  _("Leave Without Pay") + ":Float:130",
-		_("Payment Days") + ":Float:120"
+		_("Employee Name") + "::180", 
+		_("Department") + ":Link/Department:110", _("Designation") + ":Link/Designation:110"
+		
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
 	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type
 		from `tabSalary Detail` sd, `tabSalary Component` sc
-		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s)""" %
+		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by idx, abbr """ %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
 		salary_components[_(component.type)].append(component.salary_component)
 
@@ -60,11 +59,14 @@ def get_columns(salary_slips):
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
 def get_salary_slips(filters):
+	print "DATAS"
+	print filters.get("date_range")[0]
+	print filters.get("date_range")[1]
 
 	filters.update({"from_date": filters.get("date_range")[0], "to_date":filters.get("date_range")[1]})
 	conditions, filters = get_conditions(filters)
 	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where docstatus = 0 and salario_iliquido !=0 %s
-		order by employee""" % conditions, filters, as_dict=1)
+		order by employee_name""" % conditions, filters, as_dict=1)
 
 	if not salary_slips:
 		frappe.throw(_("No salary slip found between {0} and {1}").format(
