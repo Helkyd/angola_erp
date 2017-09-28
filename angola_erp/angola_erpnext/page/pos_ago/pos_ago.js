@@ -1020,15 +1020,18 @@ angola_erp.pos_ago.PointOfSale = erpnext.taxes_and_totals.extend({
 		if (this.items.length > 0) {
 			$.each(this.items, function(index, obj) {
 				if(index < me.page_len) {
-					$(frappe.render_template("pos_item", {
-						item_code: obj.name,
-						item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
-						item_name: obj.name === obj.item_name ? "" : obj.item_name,
-						item_image: obj.image,
-						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
-						color: frappe.get_palette(obj.item_name),
-						abbr: frappe.get_abbr(obj.item_name)
-					})).tooltip().appendTo($wrap);
+					// HELKyds No price nao mostra
+					if (me.price_list_data[obj.name] != undefined && (me.price_list_data[obj.name]) != 0){
+						$(frappe.render_template("pos_item", {
+							item_code: obj.name,
+							item_price: format_currency(me.price_list_data[obj.name], me.frm.doc.currency),
+							item_name: obj.name === obj.item_name ? "" : obj.item_name,
+							item_image: obj.image,
+							item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
+							color: frappe.get_palette(obj.item_name),
+							abbr: frappe.get_abbr(obj.item_name)
+						})).tooltip().appendTo($wrap);
+					}
 				}
 			});
 

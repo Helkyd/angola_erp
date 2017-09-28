@@ -7,7 +7,7 @@ frappe.query_reports["Salary Review"] = {
 			"fieldname":"date_range",
 			"label": __("Date Range"),
 			"fieldtype": "DateRange",
-			"default": [frappe.datetime.add_months(get_today(),-1), frappe.datetime.get_today()],
+			"default": [frappe.datetime.add_months(frappe.datetime.get_today(),-1), frappe.datetime.get_today()],
 			"reqd": 1
 		},
 		{
@@ -80,7 +80,8 @@ frappe.ui.form.ControlDateRange = frappe.ui.form.ControlData.extend({
 		if (value1 && value2) {
 			value1 = frappe.datetime.str_to_user(value1);
 			value2 = frappe.datetime.str_to_user(value2);
-			return ("{0} to {1}").format([value1, value2]);
+//			return ("{0} to {1}").format([value1, value2]);
+			return ([value1, value2]);
 		}
 		return "";
 	}
