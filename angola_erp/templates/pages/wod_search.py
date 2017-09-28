@@ -17,7 +17,7 @@ def get_wod_list(search=None, start=0, limit=12):
 	# limit = 12 because we show 12 items in the grid view
 
 	# base query
-	query = """select name, titulo, data_do_wod, exercicios as website_description, route
+	query = """select name, titulo, data_do_wod, exercicios, route
 		from `tabWOD`
 		where publish = 1 and data_do_wod = %(today)s"""
 

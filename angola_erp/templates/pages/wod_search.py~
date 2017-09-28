@@ -38,8 +38,10 @@ def get_wod_list(search=None, start=0, limit=12):
 		"today": nowdate()
 	}, as_dict=1)
 
-	print 'get product list'
-	
+	print 'get WOD list'
+	print query
+	print 'Data'
+	print data
 	print [r for r in data]
 	return [r for r in data]
 #	return [get_item_for_list_in_html(r) for r in data]
