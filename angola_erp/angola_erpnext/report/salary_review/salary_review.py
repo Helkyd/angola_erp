@@ -20,7 +20,8 @@ def execute(filters=None):
 
 	data = []
 	for ss in salary_slips:
-		row = [ss.employee_name, ss.department, ss.designation
+		#Somente o primeiro e ultimo nome ....dd[dd.rfind(' '):len(dd)]
+		row = [ss.employee_name[0:ss.employee_name.find(' ')] + ' ' + ss.employee_name[ss.employee_name.rfind(' '):len(ss.employee_name)], ss.department, ss.designation
 			]
 
 		for e in earning_types:
@@ -39,7 +40,7 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Employee Name") + "::180", 
+		_("Employee Name") + ":Data:120", 
 		_("Department") + ":Link/Department:110", _("Designation") + ":Link/Designation:110"
 		
 	]
