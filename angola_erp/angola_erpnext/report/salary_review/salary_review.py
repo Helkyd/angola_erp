@@ -17,14 +17,27 @@ def execute(filters=None):
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
 
+	print 'colunas'
+	print columns
 
 	data = []
 	for ss in salary_slips:
-		row = [ss.employee_name, ss.department, ss.designation
+		#Somente o primeiro e ultimo nome ....dd[dd.rfind(' '):len(dd)]
+		row = [ss.employee_name[0:ss.employee_name.find(' ')] + ' ' + ss.employee_name[ss.employee_name.rfind(' '):len(ss.employee_name)], ss.department, ss.designation
 			]
+		if not ss.department == None:
+			#row += [ss.department]
 
+			columns[1] = columns[1].replace('-1','100')
+		if not ss.designation  == None:
+			#row += [ss.designation]
+			columns[2] = columns[2].replace('-1','100')
+
+		print 'ver colunas'
+		print columns
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
+			print 	ss_earning_map.get(ss.name, {}).get(e)
 
 		row += [ss.gross_pay]
 
@@ -39,8 +52,8 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Employee Name") + "::180", 
-		_("Department") + ":Link/Department:110", _("Designation") + ":Link/Designation:110"
+		_("Employee Name") + ":Data:120", 
+		_("Department") + ":Link/Department:-1", _("Designation") + ":Link/Designation:-1"
 		
 	]
 
@@ -52,6 +65,7 @@ def get_columns(salary_slips):
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
 		salary_components[_(component.type)].append(component.salary_component)
 
+	print salary_components
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
 		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]

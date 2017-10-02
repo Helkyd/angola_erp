@@ -30,7 +30,7 @@ th, td {
   </tr>
 </table>
 <div id="app">
-	Aqui
+	Aquivoçce
   {{ message }}
 </div>
 <div id="app-2">
