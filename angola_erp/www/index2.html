@@ -19,9 +19,10 @@
 		
 		<link type="text/css" rel="stylesheet" href="https://bootswatch.com/simplex/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="/website_theme.css">
-		<link type="text/css" rel="stylesheet" href="/assets/frappe/css/font/open-sans/open-sans.css">
-		<link type="text/css" rel="stylesheet" href="/assets/css/frappe-web.css">
+<!--		<link type="text/css" rel="stylesheet" href="/assets/frappe/css/fonts/open-sans/open-sans.css">  -->
 		<link type="text/css" rel="stylesheet" href="/assets/erpnext/css/website.css">
+		<link type="text/css" rel="stylesheet" href="/assets/frappe/css/bootstrap.css">
+		<link type="text/css" rel="stylesheet" href="/assets/angola_erp/css/angola_erp.css">
 <style>
 .page-header {
 	color: white;
@@ -76,16 +77,12 @@
 
 </style>
 <script>
-    window.frappe = {
-    	page_ready_events: {},
-    	ready: function(fn) {
-    		if (!frappe.page_ready_events[location.pathname]) {
-    			frappe.page_ready_events[location.pathname] = []
-    		}
-    		frappe.page_ready_events[location.pathname].push(fn);
-    	}
-    }
-    window.dev_server = 0;
+ 		window.frappe = {};
+		frappe.ready_events = [];
+		frappe.ready = function(fn) {
+			frappe.ready_events.push(fn);
+		}
+		window.dev_server = 0;
     </script>
 </head>
 <body data-path="">
@@ -98,15 +95,12 @@
 				<!-- <a class="navbar-brand ellipsis" href="/"> -->
 				<a class="navbar-brand ellipsis"
 					 href="/">
-					<span><img src="ficheiros/cilofer.png" style="max-height: 20px;"></span>
+					<span><img src="images/cilofer.png" style="max-height: 20px;"></span>
 				</a>
 				<!-- <a class="pull-right visible-xs navbar-toggle toggle-sidebar">
 					<i class="octicon octicon-three-bars"></i>
 				</a> -->
 				<div class="dropdown">
-					<button class="btn btn-default navbar-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-						<i class="octicon octicon-three-bars"></i>
-					</button>
 					<ul class="dropdown-menu dropdown-menu-right">
 <li data-label='Sobre Nós' >
 	<a href="/about"
@@ -120,19 +114,8 @@
 	<a href="/services"
 		
 		>
-	Serviços</a></li><li data-label='Blog' >
-	<a href="/blog"
-		
-		>
-	Blog</a></li><li data-label='Clientes' >
-	<a href="/clients"
-		
-		>
-	Clientes</a></li><li data-label='Vagas' >
-	<a href="/jobs"
-		
-		>
-	Vagas</a></li><li data-label='Contacto' >
+	Serviços</a></li>
+	<li data-label='Contacto' >
 	<a href="/contact"
 		
 		>
@@ -169,19 +152,7 @@
 	<a href="/services"
 		
 		>
-	Serviços</a></li><li data-label='Blog' >
-	<a href="/blog"
-		
-		>
-	Blog</a></li><li data-label='Clientes' >
-	<a href="/clients"
-		
-		>
-	Clientes</a></li><li data-label='Vaga' >
-	<a href="/jobs"
-		
-		>
-	Jobs</a></li>
+	Serviços</a></li>
 </ul>
 <ul class="nav navbar-nav navbar-right"><li data-label='Contact' >
 	<a href="/contact"
@@ -189,6 +160,7 @@
 		>
 	Contacto</a></li>
 
+	
 	
 	<!-- post login tools -->
 
@@ -207,7 +179,8 @@
 			><a href="/?cmd=web_logout" 
 					rel="nofollow">
 					Logout
-				</a></li></ul>
+				</a></li><li class='switch-to-desk hidden'><a href="/desk">Switch To Desk</a></li>
+	</ul>
 </li>
 
 <li class="btn-login-area"><a href="/login">Login</a></li>
@@ -248,7 +221,7 @@
 <div class="img-wrapper" style="background-color: #EFF1EF; width: 100%;">
      <h2>
 	<center><h1>Residencial Cilofer</h1>		
-    <center><a href=".." rel="nofollow"><img alt="Residencial Cilofer" style="font-size: 100px" class="img-responsive " src="files/cilofer_entry.png "></a></center>
+    <center><a href=".." rel="nofollow"><img alt="Residencial Cilofer" style="font-size: 100px" class="img-responsive " src="images/cilofer_entry.png "></a></center>
     </h2>
 
 </div>
@@ -264,27 +237,43 @@
 <div style="text-align: center;" class="row">
         <div class="six columns b0" style="width: 100%;">
             <div class="form-row field_select">
-</div></div></div><div class="row"><div class="six columns b0"><div class="form-row">
-  <div style="text-align: center;">  <label>Check-in:</label>
+
+			<div class="container text-center">
+</div>	
+</div></div></div>
+
+<div class="row">
+<div class="six columns b0">
+<div class="form-row">
+  <div style="text-align: center;">  <label>Check-in / Check-out</label>
                 </div>
+  
   <div style="text-align: center;" class="select-box2">
                				  
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-  
-  <script>
-  $(document).ready(function() {
-    $("#checkin").datepicker();
-  });
-  </script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css" rel="stylesheet">   
 
-<form>
-    <input id="checkin" size="12">
-</form></div>
+    <input type="text" id="checkin" size="12" class="from-control">
+	 <input type="text" id="checkout" size="12" class="from-control">
+	
+  <script type="text/javascript">
+  
+    $("#checkin").datepicker();
+  
+  </script>
+  
+  <script type="text/javascript">
+    $( "#checkout" ).datepicker();
+</script>
+
+
+
+</div>
 </div>
            
-            <div class="form-row field_select">
+<div class="form-row field_select">
   <div style="text-align: center;">
                 <label>Adultos:</label>
                 <span></span>&nbsp;
@@ -298,52 +287,40 @@
   </select>
   </div>
 
-            </div>
-                       
-            
-
-        </div>
-        <div class="six columns b0">
-  <div style="text-align: center;">           
-            </div>
-<div class="form-row field_select">
-  <div style="text-align: center;">
-                <label>Check-out:</label><br>
-  </div>
-  <div style="text-align: center;"><link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-  
-  <script>
-  $(document).ready(function() {
-    $("#checkout").datepicker();
-  });
-  </script>
-
-<form>
-    <input id="checkout" size="12">
-</form>
-                <label>Criancas:</label>
-                </div>
 </div>
-           
-            <div class="form-row field_select">
-  <div class="form-row field_submit mt20">
+                       
+                      
+  <div class="form-row field_select">
+  
   <div style="text-align: center;">
                     <span></span>&nbsp;
+					    <label>Criancas:</label>
   <select class="" name="children" id="children">
 
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
+						<option value="3">3</option>
   </select>
   </div>
-  <div style="text-align: center;"><input value="Faca a sua Reserva" id="reservation_submit" class="btn" type="submit"> <br>
+  <div class="form-row field_submit mt20">
+  <div style="text-align: center;"><input value="Faca a sua Reserva" id="reservation" class="btn" type="button" onclick="reservation_submit()"> <br>
   </div>
 <br><br>
+	<script>
+		function reservation_submit() {
+			alert('Fazer Reserva')
+			console.log('Fazer reserva')
+		}
+	</script>
   </div>
 
             </div>
+
+        </div>
+		
+
+ 
                       
             
         </div>
@@ -419,7 +396,7 @@
 frappe.ready(function() {
 	$("#footer-subscribe-button").click(function() {
 
-		if($("#footer-subscribe-email").val()) {
+		if($("#footer-subscribe-email").val() && valid_email($("#footer-subscribe-email").val())) {
 			$("#footer-subscribe-email").attr('disabled', true);
 			$("#footer-subscribe-button").html("Sending...")
 				.attr("disabled", true);
@@ -438,7 +415,7 @@ frappe.ready(function() {
 			});
 		}
 		else
-			frappe.msgprint(frappe._("Please enter email address"))
+			frappe.msgprint(frappe._("Please enter valid email address"))
 	});
 });
 </script>
@@ -470,10 +447,11 @@ frappe.ready(function() {
 		src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
 	<script type="text/javascript"
 		src="/assets/js/frappe-web.min.js"></script>
+	
 	<script type="text/javascript" src="/website_script.js"></script>
 	<script type="text/javascript" src="/assets/js/erpnext-web.min.js"></script>
-    <script></script>
+	<script type="text/javascript" src="/assets/js/angola_erp-web.min.js"></script>
 
 
-	<script>frappe.csrf_token = "None";</script></body>
+	<script>frappe.csrf_token = "6486fce74bfdbc73356a60f18d0e020b9e541c0cfcd17744eab315fe";</script></body>
 </html>
