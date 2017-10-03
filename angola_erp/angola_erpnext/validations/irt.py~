@@ -29,7 +29,7 @@ def set_faltas1(mes,ano,empresa):
 	print " DADOS ATTENDANCE"
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
-		print empresa, ' ', tra.name
+		#print empresa, ' ', tra.name
 		j= frappe.db.sql(""" SELECT count(status)
 		from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
@@ -129,7 +129,7 @@ def get_irt(start):
 	print  j
 	return j
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def get_lista_irt():
 	j= frappe.db.sql(""" SELECT valor_inicio, valor_fim, valor_percentual,parcela_fixa
 	from `tabIRT` """,as_dict=True)
