@@ -86,7 +86,7 @@ def get_columns(salary_slips):
 
 	columns = columns + [(frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component') + (":Currency:120" if e =='Salario Base' else ":Currency:-1")) for e in salary_components[_("Earning")]] + \
 		[_("Outras") + ":Currency:120"] + \
-		[_("Total Remuneracoes") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+		[_("T. Remuneracoes") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120") for d in salary_components[_("Deduction")]] + \
 		[_("Outros Descontos") + ":Currency:120"] + \
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
