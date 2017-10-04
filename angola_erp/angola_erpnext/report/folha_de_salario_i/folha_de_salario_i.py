@@ -23,11 +23,11 @@ def execute(filters=None):
 		#Somente o primeiro e ultimo nome ....dd[dd.rfind(' '):len(dd)]
 		row = [ss.employee_name[0:ss.employee_name.find(' ')] + ' ' + ss.employee_name[ss.employee_name.rfind(' '):len(ss.employee_name)], ss.department, ss.designation
 			]
-		if not ss.department == None:
+		if (not ss.department == None and not ss.department == ''):
 			#row += [ss.department]
 
 			columns[1] = columns[1].replace('-1','100')
-		if not ss.designation  == None:
+		if (not ss.designation  == None and not ss.designation  == '') :
 			#row += [ss.designation]
 			columns[2] = columns[2].replace('-1','100')
 
