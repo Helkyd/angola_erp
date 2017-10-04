@@ -5,12 +5,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt, getdate
+from frappe.utils import cstr, flt, getdate, encode
 from frappe.model.document import Document
 import frappe.model
 import frappe.utils
 import datetime
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 @frappe.whitelist()
@@ -29,7 +32,7 @@ def set_faltas1(mes,ano,empresa):
 	print " DADOS ATTENDANCE"
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
-		#print empresa, ' ', tra.name
+
 		j= frappe.db.sql(""" SELECT count(status)
 		from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
@@ -46,7 +49,7 @@ def set_faltas(mes,ano,empresa):
 	print " DADOS ATTENDANCE - SET FALTAS"
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
-		#print empresa, ' ', tra.name
+
 		j= frappe.db.sql(""" SELECT count(status)
 		from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 

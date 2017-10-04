@@ -1,7 +1,8 @@
 // Copyright (c) 2016, Helio de Jesus and contributors
 // For license information, please see license.txt
+/* eslint-disable */
 
-frappe.query_reports["Salary Review"] = {
+frappe.query_reports["Folha de Salario I"] = {
 	"filters": [
 		{
 			"fieldname":"date_range",
@@ -34,8 +35,6 @@ frappe.ui.form.ControlDateRange = frappe.ui.form.ControlData.extend({
 		this._super();
 		this.set_date_options();
 		this.set_datepicker();
-		console.log (this.report_name)
-
 		this.refresh();
 	},
 	set_date_options: function set_date_options() {
