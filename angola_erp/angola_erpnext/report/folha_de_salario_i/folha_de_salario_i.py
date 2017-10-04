@@ -31,17 +31,28 @@ def execute(filters=None):
 			#row += [ss.designation]
 			columns[2] = columns[2].replace('-1','100')
 
-		print 'ver colunas'
-
+#		print 'ver colunas'
+		outros_abonos = 0
+		print earning_types
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
+			print 'earning type ', e
 			print 	ss_earning_map.get(ss.name, {}).get(e)
+			if (ss_earning_map.get(ss.name, {}).get(e) != None and e !='Salario Base'):
+				outros_abonos += ss_earning_map.get(ss.name, {}).get(e)
 
+#		print 'OUTROS ', outros
+#		if outros:
+		row += [outros_abonos]	
 		row += [ss.gross_pay]
-
+		
+		outros_descontos = 0
 		for d in ded_types:
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
+			if (ss_ded_map.get(ss.name, {}).get(d) != None and (frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') !='INSS') and (frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') !='IRT')):
+				outros_descontos += ss_ded_map.get(ss.name, {}).get(d)
 
+		row += [outros_descontos]	
 		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
@@ -69,12 +80,14 @@ def get_columns(salary_slips):
 
 	print salary_components
 	print salary_components1
-	for e in salary_components[_("Deduction")]:
-		print frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr')
+#	for e in salary_components[_("Earning")]:
+#		print frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component')
 
 
-	columns = columns + [(frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr') + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+	columns = columns + [(frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component') + (":Currency:120" if e =='Salario Base' else ":Currency:-1")) for e in salary_components[_("Earning")]] + \
+		[_("Outras") + ":Currency:120"] + \
+		[_("Total Remuneracoes") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+		[_("Outros Descontos") + ":Currency:120"] + \
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	print 'COLUNAS'	
