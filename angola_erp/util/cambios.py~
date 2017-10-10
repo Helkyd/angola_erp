@@ -38,11 +38,10 @@ def cambios(fonte):
 	print temcambio == []
 	#print temcambio[0]['exchange_rate']
 	if not temcambio == []:
-		print 'nao tem cambios'
-	if not temcambio[0]['exchange_rate'] == None :
-		moedacompra = 0
-		moedavenda = temcambio[0]['exchange_rate']
-		return moedacompra, moedavenda
+		if not temcambio[0]['exchange_rate'] == None :
+			moedacompra = 0
+			moedavenda = temcambio[0]['exchange_rate']
+			return moedacompra, moedavenda
 
 	if fonte.upper() == 'BNA':
 		try:

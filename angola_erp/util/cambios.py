@@ -35,6 +35,7 @@ def cambios(fonte):
 	#if no cambio on currency exchange continues otherwise use the already exchange rate
 	temcambio = frappe.db.sql(""" select name,from_currency,to_currency,date,exchange_rate from `tabCurrency Exchange` where to_currency='kz' and from_currency='USD' and date=(select max(date) from `tabCurrency Exchange`) ;""",as_dict=True)
 
+	print "Cambios - Cambios"
 	print temcambio == []
 	#print temcambio[0]['exchange_rate']
 	if not temcambio == []:
