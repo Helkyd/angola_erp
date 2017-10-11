@@ -7,14 +7,14 @@ import frappe
 from frappe.utils import flt
 from frappe import _
 
-global encargo_inss
+global encargo_inss, inss_pessoal
 
 def execute(filters=None):
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
 	columns, earning_types, ded_types = get_columns(salary_slips)
 	ss_earning_map, ss_earning_map1 = get_ss_earning_map(salary_slips)
-	ss_ded_map = get_ss_ded_map(salary_slips)
+	ss_ded_map, ss_ded_map1 = get_ss_ded_map(salary_slips)
 
 	sb_status = 0
 	he_status = 0
@@ -22,15 +22,27 @@ def execute(filters=None):
 	fi_status = 0
 	pa_status = 0
 	pp_status = 0
+	inss_status = 0
+	
 
 
 	data = []
 	for ss in salary_slips:
-		row = [ss.name, ss.employee_name, 
-			ss.company, ss.start_date, ss.end_date]
+		row = [ss.employee_name[0:ss.employee_name.find(' ')] + ' ' + ss.employee_name[ss.employee_name.rfind(' '):len(ss.employee_name)], ss.department, ss.designation
+		]
+
+		if (not ss.designation  == None and not ss.designation  == '') :
+			#row += [ss.designation]
+			columns[2] = columns[2].replace('-1','80')
+
+		inss_pessoal = 0
 
 		for e in earning_types:
+#			if (ss_earning_map.get(ss.name, {}).get(e) != None and ss_earning_map.get(ss.name, {}).get(e) =='SB'):							
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
+
+			print 'Abono'
+			print ss_earning_map1.get(ss.name, {}).get(e)
 
 			if (ss_earning_map1.get(ss.name, {}).get(e) == 'SB'):
 			#SI = (SB + HE - PA + PP) - (FTJSS - FI )
@@ -49,6 +61,8 @@ def execute(filters=None):
 				du_status = 0
 				st_status = 0
 				sdf_status = 0 
+				
+				
 
 			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'SDF') and (sdf_status ==0):
 			#SI = SB + HE - FTJSS - FI 
@@ -96,18 +110,28 @@ def execute(filters=None):
 				pp_status = 1
 				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
 
-			
+
 
 		row += [ss.gross_pay]
 
 		for d in ded_types:
+#			if (ss_ded_map.get(ss.name, {}).get(d) != None and (frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') !='INSS')):			
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
+
+			inss_status = 0
+			print 'DEscontos'
+			print ss_ded_map1.get(ss.name, {}).get(d)
+			if (ss_ded_map1.get(ss.name, {}).get(d) == 'INSS') and (inss_status ==0):
+				inss_status = 1
+				inss_pessoal = inss_pessoal + flt(ss_ded_map.get(ss.name, {}).get(d))
 
 		row += [ss.total_deduction, ss.net_pay]
 
+		encargo_inss = (encargo_inss * 0.08)			
+		inss_pessoal = (inss_pessoal + encargo_inss)
 
-		encargo_inss = (encargo_inss * 0.08)		
 		row += [encargo_inss]
+		row += [inss_pessoal]
 
 		data.append(row)
 
@@ -115,22 +139,48 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150", _("Employee Name") + "::140",
-		_("Company") + ":Link/Company:120", _("Start Date") + "::80", _("End Date") + "::80" 
+		_("Employee Name") + "::140", 
+		_("Department") + ":Link/Department:-1", _("Designation") + ":Link/Designation:-1"		
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
+	salary_components1 = {_("Earning"): [], _("Deduction"): []}	
 
-	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type
+	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type, sc.salary_component_abbr
 		from `tabSalary Detail` sd, `tabSalary Component` sc
-		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by sd.idx""" %
+		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by sd.idx, sd.abbr""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
-		salary_components[_(component.type)].append(component.salary_component)
+		#salary_components[_(component.type)].append(component.salary_component)
 
+		print 'COMPONENT SALAR'
+		print component.salary_component
+		salary_components[_(component.type)].append(component.salary_component)
+		salary_components1[_(component.type)].append(component.salary_component_abbr)
+	
+	print 'Component salarial'
 	print salary_components
-	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120",_("INSS %8") + ":Currency:120"]
+	print salary_components1
+
+
+	#columns = columns + [('Rem. Adicional' if frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr') =='ST' else frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component') + (":Currency:120" if (e =='Salario Base' or frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr') == 'ST') else ":Currency:-1")) for e in salary_components[_("Earning")]] + \
+	columns = columns + [(frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component') + (":Currency:120" if (e =='Salario Base' or frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr') == 'ST') else ":Currency:-1")).replace('ST','Rem. Adicional') for e in salary_components[_("Earning")]] + \
+		[_("Gross Pay") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120" if frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') =='INSS' else ":Currency:-1") for d in salary_components[_("Deduction")]] + \
+		[_("Total Deduction") + ":Currency:-1", _("Net Pay") + ":Currency:120",_("INSS %8") + ":Currency:120", _("Total a Pagar") + ":Currency:120"   ]
+	"""
+
+	columns = columns + [(frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component') + (":Currency:120" if e =='Salario Base' else ":Currency:-1")) for e in salary_components[_("Earning")]] + \
+		[_("Outras") + ":Currency:120"] + \
+		[_("T. Remuneracoes") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+		[_("Outros Descontos") + ":Currency:120"] + \
+		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+	"""
+
+	print 'COLUNAS'	
+	print columns
+	print columns[3][1]
+
+
+
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
@@ -174,13 +224,18 @@ def get_ss_earning_map(salary_slips):
 	return ss_earning_map, ss_earning_map1
 
 def get_ss_ded_map(salary_slips):
-	ss_deductions = frappe.db.sql("""select parent, salary_component, amount
+	ss_deductions = frappe.db.sql("""select parent, abbr, salary_component, amount
 		from `tabSalary Detail` where parent in (%s) order by idx""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 
 	ss_ded_map = {}
+	ss_ded_map1 = {}
+
 	for d in ss_deductions:
 		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
 		ss_ded_map[d.parent][d.salary_component] = flt(d.amount)
 
-	return ss_ded_map
+		ss_ded_map1.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
+		ss_ded_map1[d.parent][d.salary_component] = d.abbr
+
+	return ss_ded_map, ss_ded_map1

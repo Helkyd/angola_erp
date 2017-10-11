@@ -2,7 +2,6 @@
 	{%= frappe.boot.letter_heads[filters.letter_head ] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-
 <h5 class="text-center">{{ __("From") }} {%= filters.date_range[0] %} {{ __("to") }} {%= filters.date_range[1] %}</h5>
 <hr>
 <h5 class="text-left"><b>{{ __("Company") }}</b> {{ filters.company }} </h5>
@@ -22,8 +21,7 @@
 			<tr>
 				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
 					<td class="text-right">
-						{% var fieldname = report.columns[i].field; %}
-						
+						{% var fieldname = report.columns[i].field; %}						
                         {% if (!isNaN(row[fieldname])) { %}
                             {%= format_currency(row[fieldname]) %}
                         {% } else { %}

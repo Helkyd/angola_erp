@@ -27,11 +27,11 @@ def execute(filters=None):
 			]
 		if not ss.department == None:
 			#row += [ss.department]
-			print 'mostra'
+
 			columns[1] = columns[1].replace('-1','100')
 		if not ss.designation  == None:
 			#row += [ss.designation]
-			columns[2].replace('-1','100')
+			columns[2] = columns[2].replace('-1','100')
 
 		print 'ver colunas'
 		print columns

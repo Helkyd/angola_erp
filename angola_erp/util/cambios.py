@@ -35,6 +35,7 @@ def cambios(fonte):
 	#if no cambio on currency exchange continues otherwise use the already exchange rate
 	temcambio = frappe.db.sql(""" select name,from_currency,to_currency,date,exchange_rate from `tabCurrency Exchange` where to_currency='kz' and from_currency='USD' and date=(select max(date) from `tabCurrency Exchange`) ;""",as_dict=True)
 
+	print "Cambios - Cambios"
 	print temcambio == []
 	#print temcambio[0]['exchange_rate']
 	if not temcambio == []:
@@ -306,24 +307,26 @@ def update_cambios(fonte):
 				moedacompra =0
 				moedavenda = 0
 				for tt in tr.xpath('//tr['+ str(bfa_i) +']//*[@headers]/text()'):
+					print 'BFA'
 					print (tt.strip())
 					if tt.strip()== 'USD':
 						moeda = tt.strip()
 					elif moeda== "":
+						print 'nao tem nada'
 						moeda = tt.strip()
 					else:
 						#Compra e Venda
 						if moedacompra == 0:
 							moedacompra = tt.strip()
-							if moeda =='USD':
-								moedacompraUSD = moedacompra
+							#if moeda =='USD':
+							moedacompraUSD = moedacompra
 								#print ("dolares")
 
 							print ("compra")
 						elif moedavenda == 0:
 							moedavenda = tt.strip()
-							if moeda =='USD':
-								moedavendaUSD = moedavenda
+							#if moeda =='USD':
+							moedavendaUSD = moedavenda
 								#print ("dolares")
 
 							print ("venda")
@@ -345,7 +348,19 @@ def update_cambios(fonte):
 				#BFA uses , instead of .
 				moedavenda = moedavenda.replace(",",".")
 				moedavenda = float(moedavenda)
-	
+			elif moedacompra ==0 and moedavenda == 0:
+				#BIC or others with ,	
+				print moedacompraUSD
+				print moedavendaUSD
+				moedavenda = moedavendaUSD
+				moedacompra = moedacompraUSD
+				print moedavenda, moedacompra
+				print type(moedavenda)	
+				moedavenda = moedavenda.replace(",",".")
+			else:
+				#something else
+				print 'what to do !!!'	
+
 			if (cambios_[0].to_currency != None):
 	#						print "NAO Tem cambios "
 

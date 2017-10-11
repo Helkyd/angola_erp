@@ -51,7 +51,7 @@ def execute(filters=None):
 		print mes_
 		print mes2_
 		
-		row = [ss.employee, ss.employee_name, mes2_]
+		row = [ss.employee_name, mes2_]
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -139,8 +139,8 @@ def execute(filters=None):
 
 def get_columns(salary_slips):
 	columns = [
-		_("Employee") + ":Link/Employee:60", _("Employee Name") + "::100",
-		_("Month") + "::50"
+		_("Employee Name") + "::100",
+		_("Month") + "::80"
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
@@ -153,9 +153,10 @@ def get_columns(salary_slips):
 
 	print 'COMPONENTESSSSSSSSSS'
 	print salary_components
-	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+	#columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
+	columns = columns + [(frappe.db.get_value('Salary Component',{'name':e},'salary_component_abbr' if e !='Salario Base' else 'salary_component') + (":Currency:-1")) for e in salary_components[_("Earning")]] + \
+		[_("Gross Pay") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120" if frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') != 'INSS' else ":Currency:-1").replace('IRT','IRT a Pagar') for d in salary_components[_("Deduction")]] + \
+		[_("Total Deduction") + ":Currency:-1", _("Net Pay") + ":Currency:-1"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 

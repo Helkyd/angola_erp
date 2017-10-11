@@ -78,7 +78,7 @@ frappe.ui.form.ControlDateRange = frappe.ui.form.ControlData.extend({
 		if (value1 && value2) {
 			value1 = frappe.datetime.str_to_user(value1);
 			value2 = frappe.datetime.str_to_user(value2);
-			return ("{0} to {1}").format([value1, value2]);
+			return ([value1, value2]);
 		}
 		return "";
 	}
