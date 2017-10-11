@@ -347,7 +347,9 @@ def update_cambios(fonte):
 				moedavenda = moedavenda.replace(",",".")
 				moedavenda = float(moedavenda)
 			else:
-				#BIC or others with ,
+				#BIC or others with ,	
+				print moedavenda, moedacompra
+				print type(moedavenda)	
 				moedavenda = moedavenda.replace(",",".")
 
 			if (cambios_[0].to_currency != None):

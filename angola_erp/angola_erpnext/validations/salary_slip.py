@@ -546,6 +546,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 	print "Processa o Salario Iliquido ..."
 	print "Processa o Salario Iliquido ..."
 	salario_iliquido =0;
+	print mes, ano, empresa	
 	#Processa o Salario Iliquido ...
 	#for salslip in frappe.db.sql(""" select name from `tabSalary Slip` where 
 	for salslip in frappe.db.sql(""" SELECT name,status from `tabSalary Slip` where month(start_date) = %s and year(start_date) = %s and  company = %s """,(mes,ano,empresa), as_dict=True):
@@ -556,7 +557,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 
 #(SB + HE + PA + PP + IH + SDF + DU + ST) - (FTJSS - FTI1)
 
-		print tab_detalhes
+		#print tab_detalhes
 
 		for r in tab_detalhes:
 			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') or (r.abbr == 'IH') or (r.abbr == 'SDF') or (r.abbr == 'DU') or (r.abbr == 'ST') :

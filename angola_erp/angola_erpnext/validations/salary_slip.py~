@@ -36,6 +36,7 @@ def validate(doc,method):
 
 	doc.numero_de_faltas = j[0]['count(status)']
 	doc.payment_days = doc.payment_days - j[0]['count(status)']
+	print j[0]['count(status)']
 
 #	print doc.name , " + ", doc.employee
 #	print doc.payment_days - j[0]['count(status)']
