@@ -346,7 +346,10 @@ def update_cambios(fonte):
 				#BFA uses , instead of .
 				moedavenda = moedavenda.replace(",",".")
 				moedavenda = float(moedavenda)
-	
+			else:
+				#BIC or others with ,
+				moedavenda = moedavenda.replace(",",".")
+
 			if (cambios_[0].to_currency != None):
 	#						print "NAO Tem cambios "
 
