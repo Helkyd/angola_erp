@@ -9,7 +9,7 @@ import frappe.model
 import frappe
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
-from frappe.utils import formatdate
+from frappe.utils import formatdate, encode
 from frappe.model.naming import make_autoname
 from frappe.model.mapper import get_mapped_doc
 
@@ -103,13 +103,18 @@ def get_taxa_ipc():
 	return j
 
 @frappe.whitelist()
-def get_contab_taxa_retencao(empresa):
+def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
 	#locate account 34130000 or plano contif 2.80.20.20.30 - Ret Fonte a Pagar - Imposto Industrial
-	print (empresa)
-	j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%'  """,(empresa),as_dict=True)
-
-	print " LISTA CONTAB TAXA RETENCAO conta 3413"
+	print (empresa).encode('utf-8')
+	if (fornclien == 'Supplier'):
+		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%'  """,(empresa),as_dict=True)
+		print " LISTA CONTAB TAXA RETENCAO conta 3413"
+	else:
+		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3414%%'  """,(empresa),as_dict=True)
+		print " LISTA CONTAB TAXA RETENCAO conta 3414"
 	print j	
+
+	# ****************** Still missing aqui qual a conta para o cliente e para fornecedor
 	if (j==[]):
 		#Plano CONTIF
 		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '2.80.20.20.30%%' """,(empresa),as_dict=True)
@@ -137,7 +142,24 @@ def get_compras_taxa_retencao():
 	return j
 
 @frappe.whitelist()
+def get_vendas_taxa_retencao():
+	#locate account 34140000 por liquidar pelo Cliente
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3414%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA TAXA RETENCAO conta 3414"
+	print j	
+	if (j==[]):
+		#Plano CONTIF
+		j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '2.80.20.20.30%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
+		print j	
+
+	return j
+
+@frappe.whitelist()
 def get_taxa_retencao():
+	# POR REMOVER MAIS TARDE  **********************
 	#locate account 34130000
 	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 

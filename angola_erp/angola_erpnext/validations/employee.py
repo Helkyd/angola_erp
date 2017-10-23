@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe import msgprint
 from frappe.utils import getdate
 from datetime import datetime
@@ -16,7 +17,7 @@ def validate(doc,method):
 		frappe.msgprint("Não é permitido criar trabalhadores menores de 18 anos de idade", raise_exception = 1)
 	if doc.relieving_date:
 		if doc.status <> "Left":
-			frappe.msgprint("Status has to be 'LEFT' as the Relieving Date is populated",raise_exception =1)
+			frappe.msgprint(_("Status has to be 'LEFT' as the Relieving Date is populated"),raise_exception =1)
 	
 	doc.employee_number = doc.name
 	doc.employee = doc.name
