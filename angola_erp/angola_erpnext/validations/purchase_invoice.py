@@ -11,7 +11,7 @@ from angola_erp.util.angola import get_taxa_ipc
 
 import erpnext
 
-from frappe.utils import money_in_words, flt
+from frappe.utils import money_in_words, flt, encode
 from frappe.utils import cstr, getdate, date_diff
 ## from erpnext.setup.utils import get_company_currency
 from num2words import num2words
@@ -52,7 +52,7 @@ def validate(doc,method):
 			retencaopercentagem = x.percentagem
 
 	for i in doc.get("items"):			
-		print (i.item_code)
+		print (i.item_code).encode('utf-8')
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte,que_retencao FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
