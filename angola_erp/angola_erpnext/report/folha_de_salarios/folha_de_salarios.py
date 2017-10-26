@@ -19,10 +19,10 @@ def execute(filters=None):
 		row = [ss.name, ss.employee, ss.employee_name, ss.branch, ss.department, ss.designation,
 			ss.company, ss.start_date, ss.end_date, ss.leave_withut_pay, ss.payment_days]
 
-		if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
-		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
-		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
-		if not ss.leave_withut_pay  == None: columns[9] = columns[9].replace('-1','130')
+		#if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
+		#if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
+		#if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
+		#if not ss.leave_withut_pay  == None: columns[9] = columns[9].replace('-1','130')
 
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
