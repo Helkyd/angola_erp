@@ -35,12 +35,13 @@ def validate(doc,method):
 
 #	if not doc.salary_slip_based_on_timesheet:
 	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
+	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
 
 	doc.numero_de_faltas = j[0]['count(status)']
-	doc.payment_days = doc.payment_days - j[0]['count(status)']
+	doc.payment_days = doc.payment_days - j[0]['count(status)'] - j1[0]['count(status)']
 	diaspagamento = doc.payment_days
 	totaldiastrabalho = doc.total_working_days
-	print j[0]['count(status)']
+	print j[0]['count(status)'], j1[0]['count(status)']
 
 #	print doc.name , " + ", doc.employee
 #	print doc.payment_days - j[0]['count(status)']
@@ -546,25 +547,26 @@ def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 				print "salario Ferias ", subferias
 
 				d.amount = subferias
-		if (qry_result.find('payment_days') !=-1 ):
+		
+		if (qry_result.find('payment_days') !=-1 and dias_pagamento != total_dias_trabalho ):
 			#found
 			print total_dias_trabalho
 			print dias_pagamento
 			print 'strip ',qry_result.strip()
-			ff = qry_result.replace('payment_days','dias_pagamento')
+			ff = qry_result.replace('payment_days',str(dias_pagamento))
+			print qry_result.replace('payment_days',str(dias_pagamento))
 			qry_result =ff
 			if (qry_result.find('total_working_days') !=-1):	
-				ff = qry_result.replace('total_working_days','total_dias_trabalho')
+				ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
 				qry_result =ff
+			print frappe.safe_eval(qry_result,None,None)
 
-			print round(eval(qry_result),0)
+			d.amount = frappe.safe_eval(qry_result,None,None) #eval(qry_result)
 
-			d.amount = round(eval(qry_result,None,None),2) #eval(qry_result)
-
-		if (qry_result.find('total_working_days') !=-1):	
-			ff = qry_result.replace('total_working_days','total_dias_trabalho')
+		if (qry_result.find('total_working_days') !=-1  and dias_pagamento != total_dias_trabalho):	
+			ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
 			qry_result =ff
-			d.amount = eval(qry_result)
+			d.amount = frappe.safe_eval(qry_result,None,None)
 
 		
 			#print frappe.safe_eval(ff,None,None)
