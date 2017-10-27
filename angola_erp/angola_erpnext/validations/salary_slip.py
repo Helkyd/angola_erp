@@ -507,9 +507,10 @@ def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 		join `tabSalary Detail` as sd on sd.parent = se.parent where se.employee = %s and sd.abbr = %s """,(emp.name,d.abbr),as_dict=True)
 		qry_result=''
 		
-		if qry_cmpnt[0].formula !='': 
-			print '1 ',qry_cmpnt[0].formula
-			qry_result = qry_cmpnt[0].formula
+		if len(qry_cmpnt):
+			if qry_cmpnt[0].formula !='': 
+				print '1 ',qry_cmpnt[0].formula
+				qry_result = qry_cmpnt[0].formula
 
 		if frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr") == "SB":
 			#Salary Base
