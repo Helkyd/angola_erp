@@ -12,6 +12,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from num2words import num2words
 
+global diaspagamento, totaldiastrabalho 
 
 def validate(doc,method):
 #	get_edc(doc, method)
@@ -19,6 +20,7 @@ def validate(doc,method):
 	net_pay = 0
 	tot_ded = 0
 	tot_cont = 0
+	#dias_pagamento = 0
 
 
 	if type(doc.start_date) == unicode:
@@ -36,6 +38,8 @@ def validate(doc,method):
 
 	doc.numero_de_faltas = j[0]['count(status)']
 	doc.payment_days = doc.payment_days - j[0]['count(status)']
+	diaspagamento = doc.payment_days
+	totaldiastrabalho = doc.total_working_days
 	print j[0]['count(status)']
 
 #	print doc.name , " + ", doc.employee
@@ -78,7 +82,7 @@ def validate(doc,method):
 	print "MEU TESTE"
 	print "VALIDAR SUBSIDIO DE FERIAS"
 
-	valida_sub_ferias(doc)
+	valida_sub_ferias(doc,diaspagamento,totaldiastrabalho)
 
 	return
 
@@ -491,12 +495,21 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
 
 
-def valida_sub_ferias(doc):
+def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 
 	emp = frappe.get_doc("Employee", doc.employee)
 	for d in doc.earnings:
 		#print d.salary_component 
 		print frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr")
+		print 'Formula ', d.formula
+		qry_cmpnt = frappe.db.sql(""" select sd.formula from `tabSalary Structure Employee` as se 
+		join `tabSalary Detail` as sd on sd.parent = se.parent where se.employee = %s and sd.abbr = %s """,(emp.name,d.abbr),as_dict=True)
+		qry_result=''
+		
+		if qry_cmpnt[0].formula !='': 
+			print '1 ',qry_cmpnt[0].formula
+			qry_result = qry_cmpnt[0].formula
+
 		if frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr") == "SB":
 			#Salary Base
 			salariobase = d.amount
@@ -533,7 +546,30 @@ def valida_sub_ferias(doc):
 				print "salario Ferias ", subferias
 
 				d.amount = subferias
+		if (qry_result.find('payment_days') !=-1 ):
+			#found
+			print total_dias_trabalho
+			print dias_pagamento
+			print 'strip ',qry_result.strip()
+			ff = qry_result.replace('payment_days','dias_pagamento')
+			qry_result =ff
+			if (qry_result.find('total_working_days') !=-1):	
+				ff = qry_result.replace('total_working_days','total_dias_trabalho')
+				qry_result =ff
 
+			print round(eval(qry_result),0)
+
+			d.amount = round(eval(qry_result,None,None),2) #eval(qry_result)
+
+		if (qry_result.find('total_working_days') !=-1):	
+			ff = qry_result.replace('total_working_days','total_dias_trabalho')
+			qry_result =ff
+			d.amount = eval(qry_result)
+
+		
+			#print frappe.safe_eval(ff,None,None)
+
+		qry_result=''
 			#if (datetime.date(datetime.datetime.today().year,12,31) - emp.date_of_joining) < 12:
 			#	print "A Menos de um Ano na Empresa"
 
