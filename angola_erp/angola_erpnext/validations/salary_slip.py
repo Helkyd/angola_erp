@@ -74,7 +74,7 @@ def validate(doc,method):
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
 	if (company_currency =='KZ'):
-		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR')	
+		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'
 	else:
 		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 
