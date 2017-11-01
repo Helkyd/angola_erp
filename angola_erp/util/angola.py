@@ -13,6 +13,8 @@ from frappe.utils import formatdate, encode
 from frappe.model.naming import make_autoname
 from frappe.model.mapper import get_mapped_doc
 
+from frappe.email.doctype.email_group.email_group import add_subscribers
+
 @frappe.whitelist()
 def check_caixa_aberto():
 
@@ -409,4 +411,35 @@ def estudante_enroll(source_name):
 	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)	
 	return program_enrollment
 
+
+@frappe.whitelist()
+def update_email_group(doctype, name):
+	if not frappe.db.exists("Email Group", name):
+		email_group = frappe.new_doc("Email Group")
+		email_group.title = name
+		email_group.save()
+	email_list = []
+	students = []
+	if doctype == "Student Group":
+		students = get_student_group_students(name)
+	for stud in students:
+		email = frappe.db.get_value("Student", stud.student, "student_email_id")
+		print email
+		if email:
+			email_list.append(email)	
+	add_subscribers(name, email_list)
+
+@frappe.whitelist()
+def get_student_group_students(student_group, include_inactive=0):
+	"""Returns List of student, student_name in Student Group.
+
+	:param student_group: Student Group.
+	"""
+	if include_inactive:
+		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
+			filters={"parent": student_group}, order_by= "group_roll_number")
+	else:
+		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
+			filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
+	return students
 

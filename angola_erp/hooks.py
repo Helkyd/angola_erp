@@ -125,6 +125,11 @@ doc_events = {
 
 	},
 
+	"Program Enrollment": {
+		"validate": "angola_erp.angola_erpnext.validations.program_enrollment.validate",
+
+	},
+
 #	"System Settings": {
 #		"validate": "angola_erp.angola_erpnext.validations.system_settings.validate",
 
