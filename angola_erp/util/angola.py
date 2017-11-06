@@ -443,3 +443,13 @@ def get_student_group_students(student_group, include_inactive=0):
 			filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
 	return students
 
+@frappe.whitelist()
+def css_per_user(username):
+	""" Should load the CSS created on app theme  per user
+	
+	:param username: currently logged or logging.
+	"""
+
+	print 'css per user'
+
+

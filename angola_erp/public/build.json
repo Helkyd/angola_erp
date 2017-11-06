@@ -1,8 +1,20 @@
 {
 	"css/angola_erp.css": [
 		"public/css/angola_erp.css",
+		"public/css/bootstrap.css",
+		"public/css/angola_erp.css",
+		"public/css/bootstrap-theme.css",
+		"public/css/bootstrap.min.css",
+		"public/css/bootstrap-theme.min.css",
+		"public/css/website.css",
 		"public/js/lib/slickgrid_extended/slickgrid_extended.css"
 
+
+	],
+
+	"js/bootstrap.min.js": [
+		"public/js/bootstrap.js",
+		"public/js/bootstrap.min.js"
 
 	],
 

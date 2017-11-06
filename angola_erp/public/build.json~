@@ -1,6 +1,12 @@
 {
 	"css/angola_erp.css": [
 		"public/css/angola_erp.css",
+		"public/css/bootstrap.css",
+		"public/css/angola_erp.css",
+		"public/css/bootstrap-theme.css",
+		"public/css/bootstrap.min.css",
+		"public/css/bootstrap-theme.min.css",
+		"public/css/website.css",
 		"public/js/lib/slickgrid_extended/slickgrid_extended.css"
 
 
@@ -8,8 +14,8 @@
 
 	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
-		"public/js/shopping_cart.js",
-		"public/js/product_list.js"
+		"public/js/shopping_cart.js"
+
 
 	],
 	"js/angola_erp.min.js": [
