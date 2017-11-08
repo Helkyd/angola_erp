@@ -7,7 +7,8 @@
 		"public/css/bootstrap.min.css",
 		"public/css/bootstrap-theme.min.css",
 		"public/css/website.css",
-		"public/js/lib/slickgrid_extended/slickgrid_extended.css"
+		"public/js/lib/slickgrid_extended/slickgrid_extended.css",
+		"public/css/main.css"
 
 
 	],
@@ -18,9 +19,15 @@
 
 	],
 
+	"js/carregarcss.js": [
+		"public/js/carregarcss.js"
+	],
+
+
 	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
 		"public/js/shopping_cart.js"
+
 
 
 	],
@@ -52,8 +59,6 @@
 		"public/js/pos_ago/customer_toolbar.html",
 		"public/js/pos_ago/pos_ago_invoice_list.html",
 		"public/js/templates/item_selector.html"
-
-
 
 	]
 }

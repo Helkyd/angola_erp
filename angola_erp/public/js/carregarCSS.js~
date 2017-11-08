@@ -1,0 +1,6 @@
+function carregar() {
+	loadCSS("assets/angola_erp/css/erpnext/bootstrap.css")
+	console.log('Carregar')
+}
+
+carregar();

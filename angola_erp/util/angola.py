@@ -444,12 +444,32 @@ def get_student_group_students(student_group, include_inactive=0):
 	return students
 
 @frappe.whitelist()
-def css_per_user(username):
+def css_per_user(username=frappe.session.user):
 	""" Should load the CSS created on app theme  per user
 	
 	:param username: currently logged or logging.
 	"""
 
-	print 'css per user'
+	print 'css per user ', username
 
+	#should look for user folder with CSS and load if not use starndard CSS
+	#assets/css/username/.css
+	
+	#assets/angola_erp/css/erpnext/bootstrap.css
+	"""
+		body {
+		  font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
+		  font-size: 10px;
+		  line-height: 1.42857143;
+		  color: #36414c;
+		  background-color: #ff5858;
+		}
+	"""		
+	#script = open ("./assets/angola_erp/js/carregarCSS.js","r")
+	#script_content = script.read()
+
+	#script.close()
+
+	#js.exec(script_content)
+	
 

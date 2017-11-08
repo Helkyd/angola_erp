@@ -52,7 +52,6 @@ frappe.ui.form.on("App Theme", "onload", function(frm) {
 		url: css_file_user,
 		type: 'HEAD',
 		success: function(data){
-			console.log(data)
 			console.log('ficheiro existe ', css_file_user);
 			css_file = css_file_user;
 		},
