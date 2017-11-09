@@ -14,6 +14,7 @@ frappe.ui.form.on("App Theme", "onload_post_render", function(frm) {
 	frappe.require('assets/frappe/js/lib/jscolor/jscolor.js', function() {
 		$.each(frappe.website_theme.color_variables, function(i, v) {
 			$(frm.fields_dict[v].input).addClass('color {required:false,hash:true}');
+			console.log('pintou!!!!')
 		});
 		jscolor.bind();
 	});
@@ -47,19 +48,7 @@ frappe.ui.form.on("App Theme", "onload", function(frm) {
 	}
 
 
-	$.ajax({
-		cache: false,
-		url: css_file_user,
-		type: 'HEAD',
-		success: function(data){
-			console.log(data)
-			console.log('ficheiro existe ', css_file_user);
-			css_file = css_file_user;
-		},
-		error: function(data){
-			console.log('nao existe ...', data)
-		},
-	})
+
 
 
 	console.log('filecss ',css_file)
@@ -75,8 +64,6 @@ frappe.ui.form.on("App Theme", "onload", function(frm) {
 //		});
 //	}	
 
-	cur_frm.set_value('background_color',$("#body_div").css("background-color"))
-	cur_frm.set_value('font_size',$("#body_div").css("font-size"))
 
 
 });
@@ -84,12 +71,13 @@ frappe.ui.form.on("App Theme", "onload", function(frm) {
 frappe.ui.form.on("App Theme", "refresh", function(frm) {
 	console.log('Refresh')
 	console.log('novo ',cur_frm.docname.substring(0,3))
+	if (frm.doc.username){
+		css_file_user = './assets/angola_erp/css/erpnext/' + frm.doc.username + '_bootstrap.css'
+	}else{
+		css_file_user = './assets/angola_erp/css/erpnext/' + frappe.session.user + '_bootstrap.css'
+	}
+
 	if (cur_frm.docname.substring(0,3)!="New" && cur_frm.docname.substring(0,3)!="Nov"){
-		if (frm.doc.username){
-			css_file_user = './assets/angola_erp/css/erpnext/' + frm.doc.username + '_bootstrap.css'
-		}else{
-			css_file_user = './assets/angola_erp/css/erpnext/' + frappe.session.user + '_bootstrap.css'
-		}
 
 		$.ajax({
 			cache: false,
@@ -103,6 +91,40 @@ frappe.ui.form.on("App Theme", "refresh", function(frm) {
 				console.log('REFRESH nao existe ...', css_file_user)
 			},
 		})
+
+		$.ajax({
+			cache: false,
+			url: css_file_user,
+			type: 'HEAD',
+			success: function(data){
+				console.log(data)
+				console.log('ficheiro existe ', css_file_user);
+				css_file = css_file_user;
+				$.when($.get(css_file_user))
+					.done(function(response) {
+						//$('<style />').text(response).appendTo($('head'));
+						//$('div').html(response);
+						console.log (response)
+
+						//background-color
+						bbcolor = response.substring(response.search('background-color'),response.search(';}'))
+						bbcolor = bbcolor.substring(bbcolor.search('#'),bbcolor.length)
+						ffsize = response.substring(response.search('font-size'))
+						ffsize = ffsize.substring(ffsize.search(':')+1,ffsize.search(';'))
+
+						//cur_frm.set_value('background_color',$("#body_div").css(bbcolor))
+						//cur_frm.set_value('font_size',$("#body_div").css(ffsize))
+
+						$('input[data-fieldname="background_color"]').css("background-color",cur_frm.doc.background_color)
+						//frm.refresh_fields()
+
+					});
+			},
+			error: function(data){
+				console.log('nao existe ...', data)
+			},
+		})
+
 
 	}
 //	frm.set_intro(__('Default theme is set in {0}', ['<a href="#Form/Website Settings">'

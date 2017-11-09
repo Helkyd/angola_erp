@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+import os
 
 class AppTheme(Document):
 	def validate(self):
@@ -35,6 +36,11 @@ class AppTheme(Document):
 		if self.is_standard_and_not_valid_user():
 			frappe.throw(_("You are not allowed to delete a standard Website Theme"),
 				frappe.PermissionError)
+		print 'Apagar tambem o CSS'
+		file1 = './assets/angola_erp/css/erpnext/' + self.username + '_bootstrap.css'
+		print file1
+		os.remove(file1)
+
 
 	def validate_if_customizable(self):
 		if self.is_standard_and_not_valid_user():

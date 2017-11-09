@@ -35,6 +35,11 @@ class AppTheme(Document):
 		if self.is_standard_and_not_valid_user():
 			frappe.throw(_("You are not allowed to delete a standard Website Theme"),
 				frappe.PermissionError)
+		print 'Apagar tambem o CSS'
+		file1 = './assets/angola_erp/css/erpnext/' + self.username + '_bootstrap.css'
+		print file1
+		os.remove(file1)
+
 
 	def validate_if_customizable(self):
 		if self.is_standard_and_not_valid_user():
@@ -61,7 +66,7 @@ class AppTheme(Document):
 		print self.css
 		print self.background_color
 
-		body_css =' body { font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif; font-size: 10px; line-height: 1.42857143; color: #36414c; background-color: ' + self.background_color + ';}'
+		body_css =' body { font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif; font-size: ' + self.font_size + '; line-height: 1.42857143; color: #36414c; background-color: ' + self.background_color + ';}'
 			
 
 

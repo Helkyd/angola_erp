@@ -174,9 +174,9 @@
   "docstatus": 0, 
   "doctype": "Custom Script", 
   "dt": "Event", 
-  "modified": "2017-11-08 19:53:16.717890", 
+  "modified": "2017-11-09 12:03:39.377294", 
   "name": "Event-Client", 
-  "script": "\nfrappe.ui.form.on(\"Event\", {\n\tonload: function(frm){\n\t\tconsole.log ('event load')\n\t},\n\tvalidate: function(frm){\n\t\tconsole.log('aaaaa')\n\n\t\tvar head = document.getElementsByTagName('head')[0];\n\t\tvar script = document.createElement('script');\n\t\tscript.src = 'assets/js/ouical.js';\n\t\tscript.type = 'text/javascript';\n\t\thead.appendChild(script);\n\n\n\n\n\t}\n\n});", 
+  "script": "frappe.ui.form.on(\"Event\", {\n\tonload: function(frm){\n\t\tconsole.log ('event load')\n\t\tvar head = document.getElementsByTagName('head')[0];\n\t\tvar script = document.createElement('script');\n\t\tscript.src = 'assets/js/ouical.js';\n\t\tscript.type = 'text/javascript';\n\t\thead.appendChild(script);\n\n\t},\n\tvalidate: function(frm){\n\t\tconsole.log('aaaaa')\n\n\t\tvar myCalendar = createCalendar({\n\t\t  options: {\n\t\t\tclass: 'my-class',\n\t\t\t\n\t\t\t// You can pass an ID. If you don't, one will be generated for you\n\t\t\tid: 'my-id'\n\t\t  },\n\t\t  data: {\n\t\t\t// Event title\n\t\t\ttitle: cur_frm.doc.subject,\n\n\t\t\t// Event start date\n\t\t\tstart: new Date (cur_frm.doc.starts_on),\n\t\t\t// start: new Date('June 15, 2013 19:00'),\n\t\t\t\n\t\t\t// Event duration (IN MINUTES)\n\t\t\tduration: 120,\n\n\t\t\t// You can also choose to set an end time\n\t\t\t// If an end time is set, this will take precedence over duration\n\t\t\tend: new Date (cur_frm.doc.ends_on),     \n\n\t\t\t// Event Address\n\t\t\taddress: 'Na Empresa',\n\n\t\t\t// Event Description\n\t\t\tdescription: cur_frm.doc.description\n\t\t  }\n\t\t});\n\n\t\t//document.querySelector('#place-where-I-want-this-calendar').appendChild(myCalendar);\n\t\tfrm.set_value('description', frm.doc.description  + '<hr>' + myCalendar.innerHTML)\n\t\t//frm.doc.description = frm.doc.description  + '\\n' + myCalendar\n\t\tfrm.refresh_fields()\t\n\n\t}\n\n});", 
   "script_type": "Client"
  }
 ]
