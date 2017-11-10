@@ -169,4 +169,4 @@
                           getClass(params),
                           getOrGenerateCalendarId(params));
   };
-})(window);
+})(this);

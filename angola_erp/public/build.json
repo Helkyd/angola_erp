@@ -24,8 +24,7 @@
 	],
 
 	"js/ouical.js": [
-		"public/js/ouical.js",
-		"public/js/ouical.min.js"
+		"public/js/ouical.js"
 	],
 
 	"js/angola_erp-web.min.js": [
