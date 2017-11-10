@@ -22,15 +22,6 @@
 	"js/carregarcss.js": [
 		"public/js/carregarcss.js"
 	],
-	"js/loadCSS.js": [
-		"public/js/loadCSS.js"
-
-	],
-
-	"js/ouical.js": [
-		"public/js/ouical.js"
-
-	],
 
 
 	"js/angola_erp-web.min.js": [
