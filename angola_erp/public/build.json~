@@ -1,15 +1,43 @@
 {
 	"css/angola_erp.css": [
 		"public/css/angola_erp.css",
-		"public/js/lib/slickgrid_extended/slickgrid_extended.css"
+		"public/css/bootstrap.css",
+		"public/css/angola_erp.css",
+		"public/css/bootstrap-theme.css",
+		"public/css/bootstrap.min.css",
+		"public/css/bootstrap-theme.min.css",
+		"public/css/website.css",
+		"public/js/lib/slickgrid_extended/slickgrid_extended.css",
+		"public/css/main.css"
 
 
 	],
 
+	"js/bootstrap.min.js": [
+		"public/js/bootstrap.js",
+		"public/js/bootstrap.min.js"
+
+	],
+
+	"js/carregarcss.js": [
+		"public/js/carregarcss.js"
+	],
+	"js/loadCSS.js": [
+		"public/js/loadCSS.js"
+
+	],
+
+	"js/ouical.js": [
+		"public/js/ouical.js"
+
+	],
+
+
 	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
-		"public/js/shopping_cart.js",
-		"public/js/product_list.js"
+		"public/js/shopping_cart.js"
+
+
 
 	],
 	"js/angola_erp.min.js": [
@@ -40,8 +68,6 @@
 		"public/js/pos_ago/customer_toolbar.html",
 		"public/js/pos_ago/pos_ago_invoice_list.html",
 		"public/js/templates/item_selector.html"
-
-
 
 	]
 }
