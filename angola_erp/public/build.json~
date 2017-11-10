@@ -23,7 +23,6 @@
 		"public/js/carregarcss.js"
 	],
 
-
 	"js/angola_erp-web.min.js": [
 		"public/js/website_utils.js",
 		"public/js/shopping_cart.js"
