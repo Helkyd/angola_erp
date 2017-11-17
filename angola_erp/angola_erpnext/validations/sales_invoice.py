@@ -16,6 +16,7 @@ from frappe.utils import cstr, getdate, date_diff
 ## from erpnext.setup.utils import get_company_currency
 from num2words import num2words
 
+from erpnext.stock.get_item_details import get_batch_qty
 
 def validate(doc,method):
 
@@ -63,6 +64,14 @@ def validate(doc,method):
 
 		totalgeralimpostoconsumo += i.imposto_de_consumo					
 		totalgeralretencaofonte +=  i.retencao_na_fonte
+
+		#BATCH Qty 
+		if i.warehouse and i.item_code and i.batch_no:
+			print 'BATCH NO verifica a QTD'
+			print get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+			i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+
+	
 
 	#Save retencao na INVoice 
 	doc.total_retencao_na_fonte = totalgeralretencaofonte
