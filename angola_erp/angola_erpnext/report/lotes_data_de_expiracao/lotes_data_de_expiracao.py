@@ -69,10 +69,6 @@ def get_item_warehouse_batch_map(filters, float_precision):
 	from_date = getdate(filters["from_date"])
 	to_date = getdate(filters["to_date"])
 	
-	expira_dias = filters["in_days"]
-
-	print 'Expira dias ',expira_dias
-
 	for d in sle:
 		iwb_map.setdefault(d.item_code, {}).setdefault(d.warehouse, {})\
 			.setdefault(d.batch_no, frappe._dict({
