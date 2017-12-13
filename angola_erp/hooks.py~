@@ -24,7 +24,7 @@ app_include_css = "assets/angola_erp/css/angola_erp.css"
 
 #app_include_js = "assets/js/angola_erp.min.js"
 
-app_include_js = ["assets/js/ouical.js", "assets/js/angola_erp.min.js", "assets/js/carregarcss.js"]
+app_include_js = ["assets/js/angola_erp.min.js", "assets/js/carregarcss.js"]
 
 #app_include_js = [
 #	"assets/js/angola_erp.min.js",
