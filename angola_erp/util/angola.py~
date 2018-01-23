@@ -465,11 +465,11 @@ def css_per_user(username=frappe.session.user):
 		  background-color: #ff5858;
 		}
 	"""		
-	script = open ("./assets/angola_erp/js/carregarCSS.js","r")
-	script_content = script.read()
+	#script = open ("./assets/angola_erp/js/carregarCSS.js","r")
+	#script_content = script.read()
 
-	script.close()
+	#script.close()
 
-	js.exec(script_content)
+	#js.exec(script_content)
 	
 

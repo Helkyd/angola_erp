@@ -175,14 +175,13 @@ def send_now(name):
 		#Nao tem data
 		print 'Nao TEM DATAs!!!'
 	elif (filtros['from_date'] != frappe.utils.nowdate() and name == 'Registo de Vendas'):
-		if (name == 'Registo de Vendas'):
-			data_ini = {"from_date":frappe.utils.nowdate()}
-			data_fim = {"to_date":frappe.utils.nowdate()}
-			filtros.update({"from_date":frappe.utils.nowdate(), "to_date":frappe.utils.nowdate()})
-			print 'dentro do registo vendas'
-			print filtros
-			auto_email_report.filters = json.dumps(filtros)
-			auto_email_report.save()
+		data_ini = {"from_date":frappe.utils.nowdate()}
+		data_fim = {"to_date":frappe.utils.nowdate()}
+		filtros.update({"from_date":frappe.utils.nowdate(), "to_date":frappe.utils.nowdate()})
+		print 'dentro do registo vendas'
+		print filtros
+		auto_email_report.filters = json.dumps(filtros)
+		auto_email_report.save()
 
 	auto_email_report.send()
 
