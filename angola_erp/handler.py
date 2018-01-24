@@ -13,20 +13,22 @@ from frappe.utils.response import build_response
 from werkzeug.wrappers import Response
 from six import string_types
 
+import json
+
+
 
 @frappe.whitelist(allow_guest=True)
 def fbtoken(args=None):
-	cmd = frappe.local.form_dict.cmd
 
+	data =  json.loads(frappe.local.form_dict.data)
 	print "API FBTOKEN"
-	print cmd
-	print cmd[0]
-	print args
-	print frappe.response
+	print "DATA..."
+	print data
 	print "FBTOKEN"
-	print frappe.get_request_header("verify_token")
-	if cmd == 'token':
+	print data['verify_token']
+	if data["verify_token"] == 'token':
 		print "TOKEN CORRETA"	
+		return data["verify_token"]
 
 def handle():
 	"""handle request"""
