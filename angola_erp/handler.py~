@@ -20,12 +20,10 @@ import json
 @frappe.whitelist(allow_guest=True)
 def fbtoken(args=None):
 
-	data =  json.loads(frappe.local.form_dict.data)
+	data =  frappe.local.form_dict.data
 	print "API FBTOKEN"
 	print "DATA..."
 	print data
-	print "DATA 1111"
-	print json.loads(data)
 	print "FBTOKEN"
 	print data['verify_token']
 	if data["verify_token"] == 'token':

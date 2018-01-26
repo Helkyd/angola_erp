@@ -14,13 +14,13 @@ from werkzeug.wrappers import Response
 from six import string_types
 
 import json
-
+from sys import argv
 
 
 @frappe.whitelist(allow_guest=True)
 def fbtoken(args=None):
 
-	data =  json.loads(frappe.local.form_dict.data)
+	data =  frappe.local.form_dict.data
 	print "API FBTOKEN"
 	print "DATA..."
 	print data
