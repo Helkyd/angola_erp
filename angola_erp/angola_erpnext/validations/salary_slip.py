@@ -549,28 +549,33 @@ def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 
 				d.amount = subferias
 		
-		if (qry_result.find('payment_days') !=-1 and dias_pagamento != total_dias_trabalho ):
-			#found
-			print total_dias_trabalho
-			print dias_pagamento
-			print 'strip ',qry_result.strip()
-			ff = qry_result.replace('payment_days',str(dias_pagamento))
-			print qry_result.replace('payment_days',str(dias_pagamento))
-			qry_result =ff
-			if (qry_result.find('total_working_days') !=-1):	
+		print 'SALARY SLIpppppppppppppppppppp'
+		print qry_result
+
+		if qry_result != None: 
+			print 'payment_days' in qry_result
+			if (qry_result.find('payment_days') !=-1 and dias_pagamento != total_dias_trabalho ):
+				#found
+				print total_dias_trabalho
+				print dias_pagamento
+				print 'strip ',qry_result.strip()
+				ff = qry_result.replace('payment_days',str(dias_pagamento))
+				print qry_result.replace('payment_days',str(dias_pagamento))
+				qry_result =ff
+				if (qry_result.find('total_working_days') !=-1):	
+					ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
+					qry_result =ff
+				print frappe.safe_eval(qry_result,None,None)
+
+				d.amount = frappe.safe_eval(qry_result,None,None) #eval(qry_result)
+
+			if (qry_result.find('total_working_days') !=-1  and dias_pagamento != total_dias_trabalho):	
 				ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
 				qry_result =ff
-			print frappe.safe_eval(qry_result,None,None)
-
-			d.amount = frappe.safe_eval(qry_result,None,None) #eval(qry_result)
-
-		if (qry_result.find('total_working_days') !=-1  and dias_pagamento != total_dias_trabalho):	
-			ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
-			qry_result =ff
-			d.amount = frappe.safe_eval(qry_result,None,None)
+				d.amount = frappe.safe_eval(qry_result,None,None)
 
 		
-			#print frappe.safe_eval(ff,None,None)
+				#print frappe.safe_eval(ff,None,None)
 
 		qry_result=''
 			#if (datetime.date(datetime.datetime.today().year,12,31) - emp.date_of_joining) < 12:

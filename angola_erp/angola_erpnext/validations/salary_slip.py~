@@ -12,6 +12,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from num2words import num2words
 
+global diaspagamento, totaldiastrabalho 
 
 def validate(doc,method):
 #	get_edc(doc, method)
@@ -19,6 +20,7 @@ def validate(doc,method):
 	net_pay = 0
 	tot_ded = 0
 	tot_cont = 0
+	#dias_pagamento = 0
 
 
 	if type(doc.start_date) == unicode:
@@ -33,10 +35,13 @@ def validate(doc,method):
 
 #	if not doc.salary_slip_based_on_timesheet:
 	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
+	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
 
 	doc.numero_de_faltas = j[0]['count(status)']
-	doc.payment_days = doc.payment_days - j[0]['count(status)']
-	print j[0]['count(status)']
+	doc.payment_days = doc.payment_days - j[0]['count(status)'] - j1[0]['count(status)']
+	diaspagamento = doc.payment_days
+	totaldiastrabalho = doc.total_working_days
+	print j[0]['count(status)'], j1[0]['count(status)']
 
 #	print doc.name , " + ", doc.employee
 #	print doc.payment_days - j[0]['count(status)']
@@ -69,7 +74,7 @@ def validate(doc,method):
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
 	if (company_currency =='KZ'):
-		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR')	
+		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'
 	else:
 		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 
@@ -78,7 +83,7 @@ def validate(doc,method):
 	print "MEU TESTE"
 	print "VALIDAR SUBSIDIO DE FERIAS"
 
-	valida_sub_ferias(doc)
+	valida_sub_ferias(doc,diaspagamento,totaldiastrabalho)
 
 	return
 
@@ -491,12 +496,22 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
 
 
-def valida_sub_ferias(doc):
+def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 
 	emp = frappe.get_doc("Employee", doc.employee)
 	for d in doc.earnings:
 		#print d.salary_component 
 		print frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr")
+		print 'Formula ', d.formula
+		qry_cmpnt = frappe.db.sql(""" select sd.formula from `tabSalary Structure Employee` as se 
+		join `tabSalary Detail` as sd on sd.parent = se.parent where se.employee = %s and sd.abbr = %s """,(emp.name,d.abbr),as_dict=True)
+		qry_result=''
+		
+		if (qry_cmpnt):
+			if qry_cmpnt[0].formula !='': 
+				print '1 ',qry_cmpnt[0].formula
+				qry_result = qry_cmpnt[0].formula
+
 		if frappe.db.get_value("Salary Component", d.salary_component, "salary_component_abbr") == "SB":
 			#Salary Base
 			salariobase = d.amount
@@ -533,7 +548,35 @@ def valida_sub_ferias(doc):
 				print "salario Ferias ", subferias
 
 				d.amount = subferias
+		
+		print 'SALARY SLIpppppppppppppppppppp'
+		print qry_result
+		print 'payment_days' in qry_result
+		if qry_result != None: 
+			if (qry_result.find('payment_days') !=-1 and dias_pagamento != total_dias_trabalho ):
+				#found
+				print total_dias_trabalho
+				print dias_pagamento
+				print 'strip ',qry_result.strip()
+				ff = qry_result.replace('payment_days',str(dias_pagamento))
+				print qry_result.replace('payment_days',str(dias_pagamento))
+				qry_result =ff
+				if (qry_result.find('total_working_days') !=-1):	
+					ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
+					qry_result =ff
+				print frappe.safe_eval(qry_result,None,None)
 
+				d.amount = frappe.safe_eval(qry_result,None,None) #eval(qry_result)
+
+			if (qry_result.find('total_working_days') !=-1  and dias_pagamento != total_dias_trabalho):	
+				ff = qry_result.replace('total_working_days',str(total_dias_trabalho))
+				qry_result =ff
+				d.amount = frappe.safe_eval(qry_result,None,None)
+
+		
+				#print frappe.safe_eval(ff,None,None)
+
+		qry_result=''
 			#if (datetime.date(datetime.datetime.today().year,12,31) - emp.date_of_joining) < 12:
 			#	print "A Menos de um Ano na Empresa"
 
@@ -546,6 +589,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 	print "Processa o Salario Iliquido ..."
 	print "Processa o Salario Iliquido ..."
 	salario_iliquido =0;
+	print mes, ano, empresa	
 	#Processa o Salario Iliquido ...
 	#for salslip in frappe.db.sql(""" select name from `tabSalary Slip` where 
 	for salslip in frappe.db.sql(""" SELECT name,status from `tabSalary Slip` where month(start_date) = %s and year(start_date) = %s and  company = %s """,(mes,ano,empresa), as_dict=True):
@@ -556,7 +600,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 
 #(SB + HE + PA + PP + IH + SDF + DU + ST) - (FTJSS - FTI1)
 
-		print tab_detalhes
+		#print tab_detalhes
 
 		for r in tab_detalhes:
 			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') or (r.abbr == 'IH') or (r.abbr == 'SDF') or (r.abbr == 'DU') or (r.abbr == 'ST') :
