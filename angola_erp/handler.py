@@ -20,15 +20,33 @@ from sys import argv
 @frappe.whitelist(allow_guest=True)
 def fbtoken(args=None):
 
+	cmd = frappe.local.form_dict.cmd
 	data =  frappe.local.form_dict.data
 	print "API FBTOKEN"
+	print "CMD"
+	print cmd
 	print "DATA..."
 	print data
+	print "ARGS"
+	print kwargs
+
+	fb_verifyToken = kwargs['hub.verify_token']
+	fb_challenge = kwargs['hub.challenge']
+	fb_hub = kwargs['hub.mode']
+
+
 	print "FBTOKEN"
-	print data['verify_token']
-	if data["verify_token"] == 'token':
-		print "TOKEN CORRETA"	
-		return data["verify_token"]
+	print fb_verifyToken
+	print fb_hub
+	print "Challenge"
+	print type(kwargs)
+	print kwargs.get('hub.challenge')
+
+
+	if fb_hub == 'subscribe' and fb_verifyToken == 'token':
+		print "TOKEN CORRETA"    
+		return Response(kwargs.get('hub.challenge'))
+
 
 def handle():
 	"""handle request"""
