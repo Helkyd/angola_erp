@@ -53,9 +53,9 @@ def fbtoken(args=None):
 
 
 		if fb_hub == 'subscribe' and fb_verifyToken == 'token':
-		    print "TOKEN CORRETA"    
-		    return Response(kwargs.get('hub.challenge'))
-
+			print "TOKEN CORRETA"    
+		    	return Response(kwargs.get('hub.challenge'))
+			
 
 	print "DATA OBJECTs, MESSAGE, SENDER"
 
@@ -64,15 +64,15 @@ def fbtoken(args=None):
 		print "PAGE MESSAGE"
 		print data1['entry'][0]['messaging'][0]['message']
 		print data1['entry'][0]['messaging'][0]['message']['text']
-			   print "PAGE SENDER"
-			print data1['entry'][0]['messaging'][0]['sender']
-			print data1['entry'][0]['messaging'][0]['recipient']
+		print "PAGE SENDER"
+		print data1['entry'][0]['messaging'][0]['sender']
+		print data1['entry'][0]['messaging'][0]['recipient']
 
 
 		if data1['entry'][0]['messaging'][0]['message']['text'].startswith('This is a test message from the Facebook team.'):
-		    #reply the message
-		    print "RESPOSTA FACEBOOK TEAM"
-		    return Response("AngolaERP Bot Working.")
+		    	#reply the message
+			print "RESPOSTA FACEBOOK TEAM"
+		    	return Response("AngolaERP Bot Working.")
 
 
 @frappe.whitelist(allow_guest=True)
