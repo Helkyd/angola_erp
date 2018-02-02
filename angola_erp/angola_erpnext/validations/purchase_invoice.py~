@@ -11,7 +11,7 @@ from angola_erp.util.angola import get_taxa_ipc
 
 import erpnext
 
-from frappe.utils import money_in_words, flt
+from frappe.utils import money_in_words, flt, encode
 from frappe.utils import cstr, getdate, date_diff
 ## from erpnext.setup.utils import get_company_currency
 from num2words import num2words
@@ -52,8 +52,8 @@ def validate(doc,method):
 			retencaopercentagem = x.percentagem
 
 	for i in doc.get("items"):			
-		print (i.item_code)
-		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte,que_retencao FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
+		print (i.item_code).encode('utf-8')
+		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte,que_retencao, has_batch_no FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
 			if i.imposto_de_consumo == 0:
@@ -76,6 +76,17 @@ def validate(doc,method):
 
 		totalgeralimpostoconsumo += i.imposto_de_consumo					
 		totalgeralretencaofonte +=  i.retencao_na_fonte
+
+		#Verifica se tem Batch ...
+		print (prod[0].has_batch_no)
+		if prod[0].has_batch_no == 1:
+			itembatch = frappe.db.sql("""SELECT batch_id, count(batch_id) as contar FROM `tabBatch` WHERE item = %s """, i.item_code , as_dict=True)		
+			print (itembatch)
+			print (itembatch[0].batch_id)
+			print (itembatch[0].contar)
+			if itembatch[0].contar == 1 and i.batch_no == None:
+				#default Batch added
+				i.batch_no = itembatch[0].batch_id
 
 	#Save retencao na INVoice 
 	doc.total_retencao_na_fonte = totalgeralretencaofonte
@@ -130,7 +141,7 @@ def validate(doc,method):
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
 	if (company_currency =='KZ'):
-		doc.in_words = num2words(doc.grand_total, lang='pt_BR').title()	+ ' Kwanzas'
+		doc.in_words = num2words(doc.grand_total, lang='pt_BR').title()	+ ' Kwanzas.'
 	else:
 		doc.in_words = money_in_words(doc.grand_total, company_currency)
 
