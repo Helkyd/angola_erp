@@ -83,15 +83,6 @@
  {
   "docstatus": 0, 
   "doctype": "Custom Script", 
-  "dt": "Lead", 
-  "modified": "2018-02-02 12:09:02.461855", 
-  "name": "Lead-Client", 
-  "script": "frappe.ui.form.on(\"Lead\", \"refresh\", function(frm) {\r\n    frm.add_custom_button(__(\"Sales Call\"), function() {\r\n        // When this button is clicked, do this\r\n\t\t\tfrappe.set_route(\"Form\", \"Sales Call Tool\",\r\n\t\t\t{\"document\": \"Lead\",\r\n\t\t\t \"lead\": frm.doc.name,\r\n\t\t\t \"date_of_communication\": Date()});\r\n\t\t\t \r\n    },  __(\"Add Communication for\"));\r\n});", 
-  "script_type": "Client"
- }, 
- {
-  "docstatus": 0, 
-  "doctype": "Custom Script", 
   "dt": "Communication", 
   "modified": "2018-02-02 12:09:02.492939", 
   "name": "Communication-Client", 
