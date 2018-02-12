@@ -78,12 +78,12 @@ def validate(doc,method):
 		totalgeralretencaofonte +=  i.retencao_na_fonte
 
 		#Verifica se tem Batch ...
-		print (prod[0].has_batch_no)
+		#print (prod[0].has_batch_no)
 		if prod[0].has_batch_no == 1:
 			itembatch = frappe.db.sql("""SELECT batch_id, count(batch_id) as contar FROM `tabBatch` WHERE item = %s """, i.item_code , as_dict=True)		
-			print (itembatch)
-			print (itembatch[0].batch_id)
-			print (itembatch[0].contar)
+			#print (itembatch)
+			#print (itembatch[0].batch_id)
+			#print (itembatch[0].contar)
 			if itembatch[0].contar == 1 and i.batch_no == None:
 				#default Batch added
 				i.batch_no = itembatch[0].batch_id

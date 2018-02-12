@@ -61,7 +61,7 @@ def validate(doc,method):
 				
 		if prod[0].retencao_na_fonte ==1:
 			print ("RETENCAO FONTE")
-			print (prod[0].item_code)
+			print (prod[0].item_code).encode('utf-8')
 			for x in lista_retencoes:
 				if x.descricao == prod[0].que_retencao:
 					print ('pertagem ', x.percentagem)
