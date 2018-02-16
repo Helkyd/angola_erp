@@ -135,6 +135,7 @@ def add_jentry(empresa):
 
 	if registoerro == True:
 		text_file.close()
+		print 'Ficheiro criado /tmp/criarcontas.txt ' 
 		return
 
 	client= FrappeClient("http://127.0.0.1:8000","administrator","123")

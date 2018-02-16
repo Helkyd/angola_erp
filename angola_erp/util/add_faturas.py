@@ -101,7 +101,12 @@ def add_jentry(empresa):
 
 								print "ERRRO CONTA 1"
 								print "Conta ", unicode(conta.strip()), " nao existe"
-								registoerro = True							
+								registoerro = True		
+
+								#Tenta criar a conta apartir dos 3 digitos
+								existe =  frappe.get_list("Account",filters=[['name', 'like',conta[0:3] + '%']],fields=['name','company'])
+
+												
 								text_file.write("Conta " + unicode(conta.strip()) + " nao existe\n" )
 									
 						except frappe.DoesNotExistError:
@@ -135,6 +140,7 @@ def add_jentry(empresa):
 
 	if registoerro == True:
 		text_file.close()
+		print 'Ficheiro criado /tmp/criarcontas.txt ' 
 		return
 
 	client= FrappeClient("http://127.0.0.1:8000","administrator","123")
