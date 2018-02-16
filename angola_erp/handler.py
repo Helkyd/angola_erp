@@ -17,69 +17,7 @@ import json
 from sys import argv
 import time
 
-
-@frappe.whitelist(allow_guest=True)
-def fbtoken(args=None):
-
-	cmd = frappe.local.form_dict.cmd
-	data =  frappe.local.form_dict.data
-	print "API FBTOKEN"
-	print "CMD"
-	print cmd
-	print "DATA..."
-	print type(data)
-	print data
-	print "DATA ENTRY"
-	data1 = json.loads(data)
-	print data1
-	print data1['entry']
-	print "ARGS"
-	print kwargs
-
-
-	#{'hub.verify_token': u'token', 'hub.challenge': u'1600257574', 'cmd': u'angola_erp.handler.fbtoken', 'hub.mode': u'subscribe', 'data': u''}
-	if kwargs.get('hub.verify_token'):
-		fb_verifyToken = kwargs['hub.verify_token']
-		fb_challenge = kwargs['hub.challenge']
-		fb_hub = kwargs['hub.mode']
-
-
-		print "FBTOKEN"
-		print fb_verifyToken
-		print fb_hub
-		print "Challenge"
-		print type(kwargs)
-		print kwargs.get('hub.challenge')
-
-
-		if fb_hub == 'subscribe' and fb_verifyToken == 'token':
-			print "TOKEN CORRETA"    
-		    	return Response(kwargs.get('hub.challenge'))
-			
-
-	print "DATA OBJECTs, MESSAGE, SENDER"
-
-	if data1['object'] == 'page':
-
-		print "PAGE MESSAGE"
-		print data1['entry'][0]['messaging'][0]['message']
-		print data1['entry'][0]['messaging'][0]['message']['text']
-		print "PAGE SENDER"
-		print data1['entry'][0]['messaging'][0]['sender']
-		print data1['entry'][0]['messaging'][0]['recipient']
-
-
-		if data1['entry'][0]['messaging'][0]['message']['text'].startswith('This is a test message from the Facebook team.'):
-		    	#reply the message
-			print "RESPOSTA FACEBOOK TEAM"
-		    	return Response("AngolaERP Bot Working.")
-
-
-@frappe.whitelist(allow_guest=True)
-def aerpversion():
-	print frappe.get_attr("angola_erp"+".__version__")
-	return frappe.get_attr("angola_erp"+".__version__")
-
+from pymessenger.bot import Bot
 
 def handle():
 	"""handle request"""
@@ -204,3 +142,110 @@ def get_attr(cmd):
 @frappe.whitelist()
 def ping():
 	return "pong"
+
+
+
+@frappe.whitelist(allow_guest=True)
+def fbtoken(args=None):
+	
+	bot = Bot('EAAGpoZASI8iIBAPpWSmlMyYoGZA8ZBDwf4YbToK9YHZCCEbRZB15nGdqMmH981eBdLdgUtZCVUnY6ZChUlKyONoKQYNumzMTkMZBQcamkYGJ359P4fmHebZCIjUCJEnNKpxKFZBQwxVt5XHdZBftxtQTk8XeCBBpEJZBvr8SBuZCVEAtHkAZDZD')
+
+        metodo = frappe.local.request.method
+        print "METODO"
+        print metodo
+        cmd = frappe.local.form_dict.cmd
+        print time.localtime()
+        data =  frappe.local.form_dict.data
+        print "API FBTOKEN"
+        print "CMD"
+        print cmd
+        print "DATA..."
+        print type(data)
+        print data
+        print "DATA ENTRY"
+        data1 = json.loads(data)
+        print data1
+        print data1['entry']
+        print "ARGS"
+        if kwargs:
+                print kwargs
+		
+
+        #{'hub.verify_token': u'token', 'hub.challenge': u'1600257574', 'cmd': u'angola_erp.handler.fbtoken', 'hub.mode': u'subscribe', 'data': u''}
+        if kwargs.get('hub.verify_token'):
+                fb_verifyToken = kwargs['hub.verify_token']
+                fb_challenge = kwargs['hub.challenge']
+                fb_hub = kwargs['hub.mode']
+
+
+                print "FBTOKEN"
+                print fb_verifyToken
+                print fb_hub
+                print "Challenge"
+                print type(kwargs)
+                print kwargs.get('hub.challenge')
+
+
+                if fb_hub == 'subscribe' and fb_verifyToken == 'token':
+                        print "TOKEN CORRETA"
+                        return Response(kwargs.get('hub.challenge'))
+
+
+        print "DATA OBJECTs, MESSAGE, SENDER"
+
+        if data1['object'] == 'page':
+
+                print "PAGE MESSAGE"
+                print data1['entry']
+                print "PAGE ENTRY 0"
+                print data1['entry'][0].get('changes')
+                print 'PAGE  Changes'
+                print data1['entry'][0]['changes'][0].get('field')
+                print 'PAGE Messagin'
+                print data1['entry'][0].get('messaging')
+
+
+
+                if data1['entry'][0]['messaging']:
+                        print "MESSAGING"
+                        print data1['entry'][0]['messaging'][0]['message']
+                        print data1['entry'][0]['messaging'][0]['message']['text']
+                        print "PAGE SENDER"
+                        print data1['entry'][0]['messaging'][0]['sender']
+                        print data1['entry'][0]['messaging'][0]['recipient']
+
+			recipient_id = data1['entry'][0]['messaging'][0]['sender']['id'] 
+
+
+                        if data1['entry'][0]['messaging'][0]['message']['text'].startswith('This is a test message from the Facebook team.'):
+                                #reply the message
+                                print "RESPOSTA FACEBOOK TEAM"
+                		bot.send_text_message(recipient_id, "AngolaERP BOT working")
+                                return Response("AngolaERP Bot Working.")
+		elif data1['entry'][0]['messaging'][0]['message'].get('text'):
+		        resposta_sent_text = "AngolaERP BOT! Obrigado pelo seu contacto"
+		        bot.send_text_message(recipient_id, resposta_sent_text)
+		        return "Resposta enviada"
+
+                elif data1['entry'][0]['changes']:
+                        print "ENTRY CHANGES"
+                        print data1['entry'][0]['changes'][0]['field']
+                        print data1['entry'][0]['changes'][0]['value']
+
+        elif data1['object'] == 'user':
+                print "OJECT USER"
+		print data1['entry'][0]['changes'][0].get('field')
+		if data1['entry'][0]['changes'][0]['field'] == 'message_sends':			
+			print 'MESSAGE SENDS'
+			print data1['entry'][0]['changes'][0]['value']
+			print data1['entry'][0]['changes'][0]['value']['from']
+			print data1['entry'][0]['changes'][0]['value']['from']['email']
+			print data1['entry'][0]['changes'][0]['value']['from']['name']
+			print data1['entry'][0]['changes'][0]['value']['message']
+
+
+
+@frappe.whitelist(allow_guest=True)
+def aerpversion():
+	print frappe.get_attr("angola_erp"+".__version__")
+	return frappe.get_attr("angola_erp"+".__version__")

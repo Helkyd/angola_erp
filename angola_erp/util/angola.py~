@@ -473,3 +473,12 @@ def css_per_user(username=frappe.session.user):
 	#js.exec(script_content)
 	
 
+@frappe.whitelist()
+def get_versao_erp():
+	""" Due to School renamed to Education ....
+	
+	"""
+
+	print frappe.get_attr("erpnext"+".__version__")
+
+	return frappe.get_attr("erpnext"+".__version__")
