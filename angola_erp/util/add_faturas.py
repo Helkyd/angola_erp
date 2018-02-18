@@ -60,7 +60,7 @@ def add_jentry(empresa):
 
 
 	#VERIFICA SE AS CONTAS EXISTEM... Antes de voltar a processar novamente ...
-
+	client= FrappeClient("http://127.0.0.1:8000","administrator","@2MS@2017")
 	with open ('/tmp/journalentry_dev.csv') as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro...Verificando Contas"
@@ -93,21 +93,154 @@ def add_jentry(empresa):
 			
 
 						try:
-							existe =  frappe.get_list("Account",filters=[['name', 'like',conta + '%']],fields=['name','company'])
-							print "CONTAS CONTAB"
-							print existe == []
+							#existe =  frappe.get_list("Account",filters=[['name', 'like',conta + '%']],fields=['name','company','is_group'])
+							existe = frappe.db.sql(""" SELECT name, company, is_group from `tabAccount` where name like %s and company like %s """,(conta + '%',empresa),as_dict=True)
+
+							#print "CONTAS CONTAB"
+							#print existe == []
 							#print existe	
 							if existe == []:
 
-								print "ERRRO CONTA 1"
-								print "Conta ", unicode(conta.strip()), " nao existe"
-								registoerro = True		
-
+								print 'Conta ', conta, ' nao existe...tentar procura 3 digitos..'
 								#Tenta criar a conta apartir dos 3 digitos
-								existe =  frappe.get_list("Account",filters=[['name', 'like',conta[0:3] + '%']],fields=['name','company'])
+								#existe1 =  frappe.get_list("Account",filters=[['name', 'like',conta[0:3] + '%']],fields=['name','report_type','root_type','account_type','company','is_group'])
 
-												
-								text_file.write("Conta " + unicode(conta.strip()) + " nao existe\n" )
+								conta0 = conta[0:3] + '%'
+								existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
+
+								if existe1 == []:
+									conta0 = conta[0:2] + '%'
+									existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
+
+
+									for contas in existe1:
+										print 'contas 3 e 2'
+										print contas
+										if contas['company'] == empresa and contas['is_group'] == 1:
+											if contas['name'].startswith(conta[0:2] + ' '):
+
+												conta1 = contas['name']
+												conta1desc = conta1
+												if conta1.count('-') >= 2:
+													conta1desc = conta1[conta1.find('-')+1:len(conta1)]
+
+												conta1desc = conta1desc[0:conta1desc.find('-')-1]
+
+												dados = {
+													"doctype": "Account",
+													"report_type": contas['report_type'],
+													"owner": "administrator",
+													"account_name": conta[0:3] + ' - ' + conta1desc,
+													"freeze_account": "No",
+													"root_type": contas['root_type'],
+													"docstatus": 0,
+													"company": empresa,
+													"is_group": 1,
+													"tax_rate": 0.0,
+													"account_currency": "KZ",
+													"parent_account": contas['name'],
+													"name": conta[0:3] + ' - ' + conta1desc,
+													"idx": 0,
+													"docstatus": 0
+												}
+												x = client.session.post("http://127.0.0.1:8000/api/resource/Account",data={"data":json.dumps(dados)})
+												print dados
+												print "++++ RESULTADO Accounts conta 2 digitos  +++++"
+
+												print " resultado ", x
+
+												if x.status_code == 200:
+													#200
+													print 'Registo salvo'
+													registosalvo = True
+													#Tenta criar novamente
+													conta0 = conta[0:3] + '%'
+													existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
+
+										
+												else:
+
+													print "Conta ou Grupo ", conta0, ' tem que ser criado!'
+													return
+
+								for contas in existe1:
+							
+									#print contas
+									#print empresa
+									if contas['company'] == empresa and contas['is_group'] == 1:
+										conta1 = contas['name']
+										conta1desc = conta1
+										if conta1.count('-') >= 2:
+											conta1desc = conta1[conta1.find('-')+1:len(conta1)]
+
+										conta1desc = conta1desc[0:conta1desc.find('-')-1]
+										print conta1desc
+
+
+
+										registoerro = False
+
+										dados = {
+											"doctype": "Account",
+											"report_type": contas['report_type'],
+											"owner": "administrator",
+											"account_name": conta + ' - ' + conta1desc,
+											"freeze_account": "No",
+											"root_type": contas['root_type'],
+											"docstatus": 0,
+											"company": empresa,
+											"is_group": 0,
+											"tax_rate": 0.0,
+											"account_currency": "KZ",
+											"parent_account": contas['name'],
+											"name": conta + ' - ' + conta1desc,
+											"idx": 0,
+											"docstatus": 0
+										}
+
+										print dados
+										x = client.session.post("http://127.0.0.1:8000/api/resource/Account",data={"data":json.dumps(dados)})
+										print "++++ RESULTADO Accounts +++++"
+										print "++++ RESULTADO Accounts  +++++"
+										print "++++ RESULTADO Accounts  +++++"
+										print "++++ RESULTADO Accounts  +++++"
+
+										print " resultado ", x
+
+										if x.status_code == 200:
+
+											#200
+											print 'Registo salvo'
+											registosalvo = True
+
+										
+										else:
+											print "ERRRO CONTA 1"
+											print "Conta ", unicode(conta.strip()), " nao existe"
+											registoerro = True		
+
+											text_file.write("Conta " + unicode(conta.strip()) + " nao existe\n" )
+
+										#break
+
+							else:
+								#Tem registos mas nao tem a conta
+								registoerro = True
+								for contas in existe:
+							
+									#print contas['company']
+									#print empresa
+									if contas['company'] == empresa:
+										conta1 = contas['name']
+										conta1desc = conta1[conta1.find('-')+1:len(conta1)]
+										conta1desc = conta1desc[0:conta1desc.find('-')-1]
+										#print "CONTA EXISTE"
+										#print conta1
+										#print conta1desc
+
+										registosalvo = True
+										registoerro = False
+
 									
 						except frappe.DoesNotExistError:
 							print "ERRRO CONTA 2"
@@ -120,28 +253,33 @@ def add_jentry(empresa):
 
 						if registoerro == False:
 							registoerro1 = True
-							for contas in existe:
-						
-								#print contas['company']
-								#print empresa
-								if contas['company'] == empresa:
-									#print "Lancamento no file"
-									#print contas['name']
-									conta = contas['name']
-									registoerro1 = False
+							if registosalvo == False:
+								for contas in existe:
+									print existe
+								
+									#print contas['company']
+									#print empresa
+									if contas['company'] == empresa: #and contas['company'] == 1:
+										#print "Lancamento no file"
+										#print contas['name']
+										conta = contas['name']
+										registoerro1 = False
 
-							if registoerro1 == True:
+								if registoerro1 == True:
 
-								print "ERRRO CONTA 3"
-								print "Conta ", unicode(conta.strip()), " nao existe"
-								registoerro = True
-								text_file.write("Conta " + unicode(conta.strip()) + " nao existe")
+									print "ERRRO CONTA 3"
+									print "Conta ", unicode(conta.strip()), " nao existe"
+									registoerro = True
+									text_file.write("Conta " + unicode(conta.strip()) + " nao existe")
 							
 
 	if registoerro == True:
 		text_file.close()
 		print 'Ficheiro criado /tmp/criarcontas.txt ' 
 		return
+
+
+	registosalvo = False
 
 	client= FrappeClient("http://127.0.0.1:8000","administrator","123")
 	with open ('/tmp/journalentry_dev.csv') as csvfile:
@@ -369,7 +507,12 @@ def add_jentry(empresa):
 							print "++++ RESULTADO +++++"
 							print "++++ RESULTADO +++++"
 
-							print " resultado ", x
+							print " resultado ", x.status_code
+							if x.status_code == 200:
+								print 'salvo'
+								print diario, ' ', numerodiario, ' ', descricao
+							else:
+								return
 
 
 							contasJV = []
@@ -454,7 +597,13 @@ def add_jentry(empresa):
 		print "++++ RESULTADO +++++"
 		print "++++ RESULTADO +++++"
 
-		print "RESULTADO ", x
+		print " resultado ", x.status_code
+		if x.status_code == 200:
+			print 'salvo'
+			print " resultado ", x.status_code
+		else:
+			return
+
 
 	#client.logout()
 

@@ -47,12 +47,12 @@ def validate(doc,method):
 			retencaopercentagem = x.percentagem
 
 	for i in doc.get("items"):			
-
+		print "ITEMS IMPOSTOS +++++++"
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
 			if i.imposto_de_consumo == 0:
-				i.imposto_de_consumo = (i.amount * 10) / 100
+				i.imposto_de_consumo = (i.amount * 5) / 100
 				
 		if prod[0].retencao_na_fonte ==1:
 			print ("RETENCAO FONTE")
@@ -78,15 +78,21 @@ def validate(doc,method):
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
 					print ("RECALCULA")
-					percentagem=ai.rate 
+
+					if (ai.rate == 0):
+						percentagem = 5
+					else:
+						percentagem = ai.rate
+				
 					for aii in doc.get("items"):
 						if aii.parent == doc.name:
+							print 'Dentro do ITem'
 							prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, aii.item_code , as_dict=True)					
 
 							#if (iii==0){iii=0}
 							
 							if prod[0].imposto_de_consumo == 1:
-
+								print 'IMPOSTO TEM'
 								if aii.imposto_de_consumo == 0:
 									print ""
 								
@@ -100,17 +106,38 @@ def validate(doc,method):
 
 
 								despesas = (percentagem * totaldespesas_noretencaofonte)/100
+								print percentagem
+								print totaldespesas_noretencaofonte
+								print despesas
+								print totalgeralimpostoconsumo
+								print ai.account_head
 								ai.charge_type="Actual"
-								ai.tax_amount=despesas
+								ai.tax_amount=totalgeralimpostoconsumo #despesas
 
 
 
 				else:
 					print ("CALCULA DESPESAS")
-					despesas = (ai.rate * totaldespesas_noretencaofonte)/100
+					if (ai.rate == 0):
+						percentagem = 5
+					else:
+						percentagem = ai.rate
 
-					ai.charge_type = "Actual"
-					ai.tax_amount = despesas
+					despesas = (percentagem * totaldespesas_noretencaofonte)/100
+
+					print percentagem
+					print totaldespesas_noretencaofonte
+					print despesas
+
+					print totalgeralimpostoconsumo
+					if despesas != totalgeralimpostoconsumo:
+
+						ai.charge_type = "Actual"
+						ai.tax_amount = totalgeralimpostoconsumo
+
+					else:
+						ai.charge_type = "Actual"
+						ai.tax_amount = despesas
 
 
 
@@ -134,7 +161,7 @@ def validate(doc,method):
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
 	if (company_currency =='KZ'):
-		doc.in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas'	
+		doc.in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'	
 	else:
 		doc.in_words = money_in_words(doc.rounded_total, company_currency)
 
