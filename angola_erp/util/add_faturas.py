@@ -94,7 +94,8 @@ def add_jentry(empresa):
 
 						try:
 							#existe =  frappe.get_list("Account",filters=[['name', 'like',conta + '%']],fields=['name','company','is_group'])
-							existe = frappe.db.sql(""" SELECT name, company, is_group from `tabAccount` where name like %s and company like %s """,(conta + '%',empresa),as_dict=True)
+							cc = conta + '%'
+							existe = frappe.db.sql(""" SELECT name, company, is_group from `tabAccount` where name like %s and company like %s """,(cc,empresa),as_dict=True)
 
 							#print "CONTAS CONTAB"
 							#print existe == []
@@ -112,7 +113,11 @@ def add_jentry(empresa):
 									conta0 = conta[0:2] + '%'
 									existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
 
-
+									#Raro nao existir 
+									if existe1 == []:
+										print 'Conta ', conta[0:2], ' nao existe. Tem que criar.'
+										return
+									
 									for contas in existe1:
 										print 'contas 3 e 2'
 										print contas
@@ -156,6 +161,7 @@ def add_jentry(empresa):
 													#Tenta criar novamente
 													conta0 = conta[0:3] + '%'
 													existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
+													break
 
 										
 												else:
@@ -213,7 +219,8 @@ def add_jentry(empresa):
 											print 'Registo salvo'
 											registosalvo = True
 
-										
+										elif x.status_code == 409:
+											print 'Registo ja existe ....'
 										else:
 											print "ERRRO CONTA 1"
 											print "Conta ", unicode(conta.strip()), " nao existe"
@@ -226,9 +233,12 @@ def add_jentry(empresa):
 							else:
 								#Tem registos mas nao tem a conta
 								registoerro = True
+								#if conta == '48110000':
+								#	print 'TEM REGISTOS mas nao tem CONTA ', conta
 								for contas in existe:
-							
-									#print contas['company']
+									#if '48110000' in contas['name']:
+									#	print contas['company']
+									#	print contas['name']
 									#print empresa
 									if contas['company'] == empresa:
 										conta1 = contas['name']
@@ -281,7 +291,7 @@ def add_jentry(empresa):
 
 	registosalvo = False
 
-	client= FrappeClient("http://127.0.0.1:8000","administrator","123")
+	client= FrappeClient("http://127.0.0.1:8000","administrator","@2MS@2017")
 	with open ('/tmp/journalentry_dev.csv') as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro..."
@@ -511,6 +521,9 @@ def add_jentry(empresa):
 							if x.status_code == 200:
 								print 'salvo'
 								print diario, ' ', numerodiario, ' ', descricao
+							elif x.status_code == 417:
+								print 'Ano Fiscal nao existe ...crie todos os Anos Fiscais passados!'
+								return
 							else:
 								return
 
