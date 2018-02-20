@@ -147,8 +147,6 @@ def ping1():
 
 
 @frappe.whitelist(allow_guest=True)
-def fbtoken(args=None):
-
 def fbtoken(**kwargs):
 
 	clientID = '467986423542306'
