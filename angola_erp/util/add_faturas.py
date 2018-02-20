@@ -620,7 +620,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 								"""
 								#caso count reg >=2 and count conta >=2 deb e cred na mesma conta...
 								#caso recordcount - countcontas = 1 entao cred e deb na mesma conta...
-								"""
+								
 								d = {}
 								registos = 0
 								for elem in contasJV:
@@ -642,7 +642,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										contasiguais = True
 										return
 
-								"""
+								
 
 								for index,item in contasJV:
 									print "CONTAS IGUAIS VERIFICAR"
