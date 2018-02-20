@@ -21,12 +21,17 @@ import csv
 import json
 
 
+
 @frappe.whitelist()
-def check_jentry(empresa):
+def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 	if empresa is None:
 		print "Nome da Empresa necessario"
 		return
+	elif usuario is None:
+		print "Usuario e Senha necessario"
+		return
+
 	else:
 		#cost center
 		centrocusto = frappe.get_list("Company",filters=[['name','like', empresa]],fields=['cost_center'])
@@ -63,7 +68,9 @@ def check_jentry(empresa):
 	contador = 0
 
 	#VERIFICA SE AS CONTAS EXISTEM... Antes de voltar a processar novamente ...
-	client= FrappeClient("http://127.0.0.1:8000","administrator","@2MS@2017")
+
+	client= FrappeClient(site,usuario,senha)	
+
 	with open ('/tmp/journalentry_dev.csv') as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro...Verificando Contas"
@@ -335,12 +342,16 @@ def check_jentry(empresa):
 
 
 @frappe.whitelist()
-def add_jentry(empresa):
+def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 
 	if empresa is None:
 		print "Nome da Empresa necessario"
 		return
+	elif usuario is None:
+		print "Usuario e Senha necessario"
+		return
+
 	else:
 		#cost center
 		centrocusto = frappe.get_list("Company",filters=[['name','like', empresa]],fields=['cost_center'])
@@ -376,7 +387,8 @@ def add_jentry(empresa):
 
 
 
-	client= FrappeClient("http://127.0.0.1:8000","administrator","@2MS@2017")
+	client= FrappeClient(site,usuario,senha)	
+
 	with open ('/tmp/journalentry_dev.csv') as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro..."
@@ -608,10 +620,12 @@ def add_jentry(empresa):
 								"""
 								#caso count reg >=2 and count conta >=2 deb e cred na mesma conta...
 								#caso recordcount - countcontas = 1 entao cred e deb na mesma conta...
+								"""
 								d = {}
 								registos = 0
 								for elem in contasJV:
 									registos += 1
+									print "VERIFICA DUPLICADOS!!!!"
 									print elem
 									if elem['account'] in d:
 										d[elem['account']] += 1
@@ -623,7 +637,7 @@ def add_jentry(empresa):
 									print "Contas iguais"
 									contasiguais = True
 
-								
+								"""
 
 								for index,item in contasJV:
 									print "CONTAS IGUAIS VERIFICAR"
