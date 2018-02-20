@@ -52,7 +52,7 @@ def validate(doc,method):
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
 			if i.imposto_de_consumo == 0:
-				i.imposto_de_consumo = (i.amount * 10) / 100
+				i.imposto_de_consumo = (i.amount * 5) / 100
 				
 		if prod[0].retencao_na_fonte ==1:
 			print ("RETENCAO FONTE")
@@ -86,7 +86,11 @@ def validate(doc,method):
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
 					print ("RECALCULA")
-					percentagem=ai.rate 
+					if (ai.rate == 0):
+						percentagem = 5
+					else:
+						percentagem = ai.rate
+
 					for aii in doc.get("items"):
 						if aii.parent == doc.name:
 							prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, aii.item_code , as_dict=True)					
@@ -108,17 +112,40 @@ def validate(doc,method):
 
 
 								despesas = (percentagem * totaldespesas_noretencaofonte)/100
+								print percentagem
+								print totaldespesas_noretencaofonte
+								print despesas
+								print totalgeralimpostoconsumo
+								print ai.account_head
+
 								ai.charge_type="Actual"
-								ai.tax_amount=despesas
+								#ai.tax_amount=despesas
+								ai.tax_amount = totalgeralimpostoconsumo #despesas
 
 
 
 				else:
 					print ("CALCULA DESPESAS")
+					if (ai.rate == 0):
+						percentagem = 5
+					else:
+						percentagem = ai.rate
+
 					despesas = (ai.rate * totaldespesas_noretencaofonte)/100
 
-					ai.charge_type = "Actual"
-					ai.tax_amount = despesas
+					print percentagem
+					print totaldespesas_noretencaofonte
+					print despesas
+
+					print totalgeralimpostoconsumo
+					if despesas != totalgeralimpostoconsumo:
+
+						ai.charge_type = "Actual"
+						ai.tax_amount = totalgeralimpostoconsumo
+
+					else:
+						ai.charge_type = "Actual"
+						ai.tax_amount = despesas
 
 
 

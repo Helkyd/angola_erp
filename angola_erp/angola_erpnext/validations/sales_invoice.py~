@@ -52,7 +52,7 @@ def validate(doc,method):
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
 			if i.imposto_de_consumo == 0:
-				i.imposto_de_consumo = (i.amount * 10) / 100
+				i.imposto_de_consumo = (i.amount * 5) / 100
 				
 		if prod[0].retencao_na_fonte ==1:
 			print ("RETENCAO FONTE")
@@ -67,8 +67,6 @@ def validate(doc,method):
 
 		#BATCH Qty 
 		if i.warehouse and i.item_code and i.batch_no:
-			print 'BATCH NO verifica a QTD'
-			print 'BATCH NO verifica a QTD'
 			print 'BATCH NO verifica a QTD'
 			print get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 			i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']

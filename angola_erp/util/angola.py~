@@ -456,8 +456,8 @@ def css_per_user(username=frappe.session.user):
 	#assets/css/username/.css
 	
 	#assets/angola_erp/css/erpnext/bootstrap.css
-	"""
-		body {
+	
+	"""	body {
 		  font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
 		  font-size: 10px;
 		  line-height: 1.42857143;
