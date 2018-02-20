@@ -633,13 +633,14 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										d[elem['account']] = 1
 								print "RESULTADO DUPLICADOS"
 								print ([x for x, y in d.items() if y >1])
+								if int(d.items()[0][1]) > 1:
 
-								if registos - int(d.items()[0][1]) == 1:
-									print "Contas iguais"
-									print registos
-									print int(d.items()[0][1])
-									contasiguais = True
-									return
+									if registos - int(d.items()[0][1]) == 1:
+										print "Contas iguais"
+										print registos
+										print int(d.items()[0][1])
+										contasiguais = True
+										return
 
 								"""
 
