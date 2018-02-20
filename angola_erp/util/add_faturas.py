@@ -124,7 +124,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									"owner":"Administrator",
 									"docstatus":0
 								}
-								x = client.session.post("http://127.0.0.1:8000/api/resource/Fiscal Year",data={"data":json.dumps(dados)})
+								x = client.session.post(site +"/api/resource/Fiscal Year",data={"data":json.dumps(dados)})
 								print dados
 								print "++++ RESULTADO Ano Fiscal  +++++"
 								print " resultado ", x
@@ -192,7 +192,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 													"idx": 0,
 													"docstatus": 0
 												}
-												x = client.session.post("http://127.0.0.1:8000/api/resource/Account",data={"data":json.dumps(dados)})
+												x = client.session.post(site + "/api/resource/Account",data={"data":json.dumps(dados)})
 												print dados
 												print "++++ RESULTADO Accounts conta 2 digitos  +++++"
 
@@ -251,7 +251,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										}
 
 										print dados
-										x = client.session.post("http://127.0.0.1:8000/api/resource/Account",data={"data":json.dumps(dados)})
+										x = client.session.post(site + "/api/resource/Account",data={"data":json.dumps(dados)})
 										print "++++ RESULTADO Accounts +++++"
 										print "++++ RESULTADO Accounts  +++++"
 										print "++++ RESULTADO Accounts  +++++"
@@ -631,11 +631,16 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										d[elem['account']] += 1
 									else:
 										d[elem['account']] = 1
-								
+								print "RESULTADO DUPLICADOS"
 								print ([x for x, y in d.items() if y >1])
-								if registos - int(d.items()[0][1]) == 1:
-									print "Contas iguais"
-									contasiguais = True
+								if int(d.items()[0][1]) > 1:
+
+									if registos - int(d.items()[0][1]) == 1:
+										print "Contas iguais"
+										print registos
+										print int(d.items()[0][1])
+										contasiguais = True
+										return
 
 								"""
 
@@ -668,7 +673,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 								if contasiguais == False:
 
-									x = client.session.post("http://127.0.0.1:8000/api/resource/Journal Entry",data={"data":json.dumps(dados)})
+									x = client.session.post(site + "/api/resource/Journal Entry",data={"data":json.dumps(dados)})
 									print "++++ RESULTADO +++++"
 									print "++++ RESULTADO +++++"
 									print "++++ RESULTADO +++++"
@@ -774,7 +779,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 		olddiario = diario
 
 		registosalvo = True		
-		x = client.session.post("http://127.0.0.1:8000/api/resource/Journal Entry",data={"data":json.dumps(dados)})
+		x = client.session.post(site + "/api/resource/Journal Entry",data={"data":json.dumps(dados)})
 
 		print "++++ RESULTADO +++++"
 		print "++++ RESULTADO +++++"
