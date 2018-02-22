@@ -606,18 +606,18 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 								registosalvo = True
 
 								#If conta1 = conta2 CANCEL add... conta deb and cre cannot be the same...
-								print "CONTAS JV"
-								print contasJV
+								#print "CONTAS JV"
+								#print contasJV
 								
-								print 'debito ', contas1
-								print 'credito ', contas2
-								print contas1 == contas2
+								#print 'debito ', contas1
+								#print 'credito ', contas2
+								#print contas1 == contas2
 								conta00 = ''
 								conta00tipo = ''
 								conta00valor = 0
 								contasiguais = False
 
-								"""
+								
 								#caso count reg >=2 and count conta >=2 deb e cred na mesma conta...
 								#caso recordcount - countcontas = 1 entao cred e deb na mesma conta...
 								
@@ -628,21 +628,37 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									print "VERIFICA DUPLICADOS!!!!"
 									print elem
 									if elem['account'] in d:
+
 										d[elem['account']] += 1
+			
+										if 'credit_in_account_currency' in d:
+											d[elem['account']['credit']] = d[elem['credit_in_account_currency']]
+										else:
+											d[elem['account']['debit']] = d[elem['debit_in_account_currency']]
+
 									else:
 										d[elem['account']] = 1
+
+										if 'credit_in_account_currency' in d:
+											d[elem['account']['credit']] = d[elem['credit_in_account_currency']]
+										else:
+											print d['debit_in_account_currency']
+											d[elem['account']['debit']] = d[elem['debit_in_account_currency']]
+
+										
 								print "RESULTADO DUPLICADOS"
 								print ([x for x, y in d.items() if y >1])
 								if int(d.items()[0][1]) > 1:
 
-									if registos - int(d.items()[0][1]) == 1:
+									if (registos - int(d.items()[0][1]) == 1) or (registos == int(d.items()[0][1])):
 										print "Contas iguais"
+										print d.items
 										print registos
 										print int(d.items()[0][1])
-										contasiguais = True
+										#contasiguais = True
 										return
 
-								
+								"""
 
 								for index,item in contasJV:
 									print "CONTAS IGUAIS VERIFICAR"
@@ -796,6 +812,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 		else:
 			return
 
+	print "FIM DO LANCAMENTO DOS DADOS PRIMAVERA NO ERPNext"
 
 	#client.logout()
 

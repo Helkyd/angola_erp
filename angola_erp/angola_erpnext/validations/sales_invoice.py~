@@ -37,6 +37,7 @@ def validate(doc,method):
 	totalservicos_retencaofonte =0
 	totaldespesas_noretencaofonte =0
 
+	percentagem = 0
 	
 	
 	ii=0
@@ -45,14 +46,20 @@ def validate(doc,method):
 		if x.descricao =='Retencao na Fonte':
 			print ('pertagem ', x.percentagem)
 			retencaopercentagem = x.percentagem
+		elif (x.descricao =='IPC') or (x.descricao =='Imposto de Consumo'):
+			print ('IPC % ', x.percentagem)
+			percentagem = x.percentagem
+
 
 	for i in doc.get("items"):			
 
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
-			if i.imposto_de_consumo == 0:
+			if percentagem == 0:
 				i.imposto_de_consumo = (i.amount * 5) / 100
+			else:
+				i.imposto_de_consumo = (i.amount * percentagem) / 100
 				
 		if prod[0].retencao_na_fonte ==1:
 			print ("RETENCAO FONTE")
@@ -78,6 +85,7 @@ def validate(doc,method):
 	doc.base_retencao_fonte = totalbaseretencaofonte
 
 	#Calcula_despesas Ticked
+	totalgeralimpostoconsumo = 0
 	iii=0
 	print ("Despesas")
 	for ai in doc.get("taxes"):
@@ -86,7 +94,11 @@ def validate(doc,method):
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
 					print ("RECALCULA")
-					percentagem=ai.rate 
+					if (ai.rate == 0) and (percentagem == 0) :
+						percentagem = 5
+					else:
+						percentagem = ai.rate
+
 					for aii in doc.get("items"):
 						if aii.parent == doc.name:
 							prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, aii.item_code , as_dict=True)					
@@ -108,17 +120,40 @@ def validate(doc,method):
 
 
 								despesas = (percentagem * totaldespesas_noretencaofonte)/100
+								print percentagem
+								print totaldespesas_noretencaofonte
+								print despesas
+								print totalgeralimpostoconsumo
+								print ai.account_head
+
 								ai.charge_type="Actual"
-								ai.tax_amount=despesas
+								#ai.tax_amount=despesas
+								ai.tax_amount = totalgeralimpostoconsumo #despesas
 
 
 
 				else:
 					print ("CALCULA DESPESAS")
+					if (ai.rate == 0) and (percentagem == 0) :
+						percentagem = 5
+					else:
+						percentagem = ai.rate
+
 					despesas = (ai.rate * totaldespesas_noretencaofonte)/100
 
-					ai.charge_type = "Actual"
-					ai.tax_amount = despesas
+					print percentagem
+					print totaldespesas_noretencaofonte
+					print despesas
+
+					print totalgeralimpostoconsumo
+					if despesas != totalgeralimpostoconsumo:
+
+						ai.charge_type = "Actual"
+						ai.tax_amount = totalgeralimpostoconsumo
+
+					else:
+						ai.charge_type = "Actual"
+						ai.tax_amount = despesas
 
 
 
