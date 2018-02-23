@@ -82,12 +82,13 @@ def validate(doc,method):
 	print "ANTES DESPESAS"
 	print totalgeralimpostoconsumo
 	#Calcula_despesas Ticked
-	totalgeralimpostoconsumo = 0
+	
 	iii=0
 	print ("Despesas")
 	for ai in doc.get("taxes"):
 		if ai.parent == doc.name and ai.charge_type !="":
 			if ai.calcula_despesas:
+				totalgeralimpostoconsumo = 0
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
 					print ("RECALCULA")
@@ -125,7 +126,7 @@ def validate(doc,method):
 								print totalgeralimpostoconsumo
 								print ai.account_head
 								ai.charge_type = "Actual"
-								ai.tax_amount = totalgeralimpostoconsumo #despesas
+								ai.tax_amount = despesas #totalgeralimpostoconsumo 
 							else:
 								ai.tax_amount = 0
 
@@ -151,6 +152,12 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			else:
+				print "SEM DESPESAS MAS CALCULA IPC"
+				print "SEM DESPESAS MAS CALCULA IPC"
+				ai.charge_type = "Actual"
+				ai.tax_amount = totalgeralimpostoconsumo
+
 
 
 

@@ -107,7 +107,7 @@ def validate(doc,method):
 							if prod[0].imposto_de_consumo == 1:
 								print 'IMPOSTO TEM'
 								if aii.imposto_de_consumo == 0:
-									print ""
+									print "valor imp ", aii.imposto_de_consumo
 								
 								if aii.retencao_na_fonte == 1:
 										
@@ -125,7 +125,7 @@ def validate(doc,method):
 								print totalgeralimpostoconsumo
 								print ai.account_head
 								ai.charge_type = "Actual"
-								ai.tax_amount = totalgeralimpostoconsumo #despesas
+								ai.tax_amount = despesas #totalgeralimpostoconsumo 
 							else:
 								ai.tax_amount = 0
 
@@ -151,6 +151,12 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			else:
+				print "SEM DESPESAS MAS CALCULA IPC"
+				print "SEM DESPESAS MAS CALCULA IPC"
+				ai.charge_type = "Actual"
+				ai.tax_amount = totalgeralimpostoconsumo
+
 
 
 

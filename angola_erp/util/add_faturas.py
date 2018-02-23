@@ -632,16 +632,19 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										d[elem['account']] += 1
 			
 										if 'credit_in_account_currency' in d:
+											print d['credit_in_account_currency']
 											d[elem['account']['credit']] = d[elem['credit_in_account_currency']]
-										else:
+										elif 'debit_in_account_currency' in d:
+											print d['debit_in_account_currency']
 											d[elem['account']['debit']] = d[elem['debit_in_account_currency']]
 
 									else:
 										d[elem['account']] = 1
 
 										if 'credit_in_account_currency' in d:
+											print d['credit_in_account_currency']
 											d[elem['account']['credit']] = d[elem['credit_in_account_currency']]
-										else:
+										elif 'debit_in_account_currency' in d:
 											print d['debit_in_account_currency']
 											d[elem['account']['debit']] = d[elem['debit_in_account_currency']]
 
@@ -652,11 +655,11 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 									if (registos - int(d.items()[0][1]) == 1) or (registos == int(d.items()[0][1])):
 										print "Contas iguais"
-										print d.items
+										print d.items()
 										print registos
 										print int(d.items()[0][1])
 										#contasiguais = True
-										return
+										#return
 
 								"""
 
