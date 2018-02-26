@@ -42,7 +42,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 	"""
 	print "Ficheiro journalentry_dev.csv deve estar no /TMP"
 	print "Ficheiro extraido do Primavera"
-	print "Ter a certeza de Order by Ano, Mes, Dia, Diario, NumDiario"
+	print "Ter a certeza de Order by Ano, Mes, Dia, Diario, NumDiario, Descricao"
 	print "Criar os Anos passados existentes no Ficheiro no ERPNext"
 
 	print "Mudar o Usuario e a Senha para Importar"
@@ -362,7 +362,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 	"""
 	print "Ficheiro journalentry_dev.csv deve estar no /TMP"
 	print "Ficheiro extraido do Primavera"
-	print "Ter a certeza de Order by Ano, Mes, Dia, Diario, NumDiario"
+	print "Ter a certeza de Order by Ano, Mes, Dia, Diario, NumDiario, Descricao"
 	print "Criar os Anos passados existentes no Ficheiro no ERPNext"
 
 	print "Mudar o Usuario e a Senha para Importar"
@@ -405,10 +405,6 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 				#print row[0]
 				#print row[2] != 0
 				#print int(row[2]) <= 12
-				print 'dia ', row[3] #DIA
-				print 'diario ', row[4] #DIARIO
-				print 'numdiario ', row[5] #NumDiario
-				print 'ano ', row[35] #Ano
 
 				if (len(row[0]) >1): #(row[0].strip() != "0"):
 					if int(row[2]) != 0 and int(row[2]) <= 12: 
@@ -793,43 +789,10 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										print 'conta dup', contaduplicada.items()
 
 
-									
-
-								"""
-
-								for index,item in contasJV:
-									print "CONTAS IGUAIS VERIFICAR"
-									print "CONTAS IGUAIS VERIFICAR"
-									print item
-									if item['account'] != conta00:
-										conta00 = item['account']
-										if 'debit_in_account_currency' in item:
-											conta00tipo = 'debit_in_account_currency'
-											conta00valor = item['debit_in_account_currency']
-										else:
-											conta00tipo = 'credit_in_account_currency'
-											conta00valor = item['credit_in_account_currency']
-									else:
-										if conta00tipo == 'credit_in_account_currency': 
-											if 'debit_in_account_currency' in item:
-												if item['debit_in_account_currency'] == conta00valor:
-													contasiguais = True
-													return
-													break
-										elif conta00tipo == 'debit_in_account_currency':
-											if 'credit_in_account_currency' in item:
-												if item['credit_in_account_currency'] == conta00valor:
-													contasiguais = True
-													return
-													break
-								"""
 
 								if contasiguais == False:
 
 									x = client.session.post(site + "/api/resource/Journal Entry",data={"data":json.dumps(dados)})
-									print "++++ RESULTADO +++++"
-									print "++++ RESULTADO +++++"
-									print "++++ RESULTADO +++++"
 									print "++++ RESULTADO +++++"
 
 									print " resultado ", x.status_code
@@ -840,6 +803,11 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										time.sleep(.500)
 									elif x.status_code == 417:
 										print 'Verifique Ano Fiscal Ou Debito e Credito na mesma conta!'
+
+										print 'diario ', diario
+										print 'numdiario ', numerodiario
+										print 'descricao ', descricao
+
 										print "CONTAS JV ------"
 										print contasJV
 						
@@ -848,6 +816,10 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 										return
 									else:
+										print 'diario ', diario
+										print 'numdiario ', numerodiario
+										print 'descricao ', descricao
+
 										print "CONTAS JV ------"
 										print contasJV
 						
@@ -947,6 +919,10 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 			print datagravacao
 
 		else:
+			print 'diario ', diario
+			print 'numdiario ', numerodiario
+			print 'descricao ', descricao
+
 			return
 
 	print "FIM DO LANCAMENTO DOS DADOS PRIMAVERA NO ERPNext"
