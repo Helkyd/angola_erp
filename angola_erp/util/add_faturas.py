@@ -627,26 +627,98 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									registos += 1
 									print "VERIFICA DUPLICADOS!!!!"
 									print elem
-									if elem['account'] in d:
+									print elem['account']
+									print "D Elem"
+									print d.items()
+									#print d.has_key([elem['account'], elem['credit_in_account_currency']])
+									#print d.has_key([elem['account'], elem['debit_in_account_currency']])
 
-										d[elem['account']] += 1
-			
-										if 'credit_in_account_currency' in d:
-											print d['credit_in_account_currency']
-											d[elem['account']['credit']] = d[elem['credit_in_account_currency']]
-										elif 'debit_in_account_currency' in d:
-											print d['debit_in_account_currency']
-											d[elem['account']['debit']] = d[elem['debit_in_account_currency']]
+									if d != {}:
+										print elem['account']
+										print "tipo ", d.items()[0][0][0]
+										print d.items()[0][0][1]
 
-									else:
-										d[elem['account']] = 1
+										if elem['account'] in d.items()[0][0][0]:
+											print "Conta +1"			
+											if 'credit_in_account_currency' in elem:
+											
+												print elem['credit_in_account_currency']
+												if elem['credit_in_account_currency'] in d.items()[0][0][1]:
+													if  elem['credit_in_account_currency'] == d.items()[0][0][1]:
+														d[elem['account'], elem['credit_in_account_currency']] += 1
+													else: 
+														d[elem['account'], elem['credit_in_account_currency']] = 1
+												else:
+													d[elem['account'], elem['credit_in_account_currency']] = 1
 
-										if 'credit_in_account_currency' in d:
-											print d['credit_in_account_currency']
-											d[elem['account']['credit']] = d[elem['credit_in_account_currency']]
-										elif 'debit_in_account_currency' in d:
-											print d['debit_in_account_currency']
-											d[elem['account']['debit']] = d[elem['debit_in_account_currency']]
+											elif 'debit_in_account_currency' in elem:
+												print elem['account']
+												print elem['debit_in_account_currency']
+												if elem['debit_in_account_currency'] in d.items()[0][0][1]:
+													print d.items()[0][0][1]
+													#print d[elem['account'], elem['debit_in_account_currency']]
+
+													if  elem['debit_in_account_currency'] == d.items()[0][0][1]: 
+														d[elem['account'], elem['debit_in_account_currency']] += 1
+													else:
+														d[elem['account'], elem['debit_in_account_currency']] = 1
+												else:
+													d[elem['account'], elem['debit_in_account_currency']] = 1
+										elif elem['account'] in d.items()[0][0]:
+											print "Conta +2"			
+											return
+											if 'credit_in_account_currency' in elem:
+												print elem['credit_in_account_currency']
+												d[elem['account'], elem['credit_in_account_currency']] = 1
+
+											elif 'debit_in_account_currency' in elem:
+												print elem['debit_in_account_currency']
+												d[elem['account'], elem['debit_in_account_currency']] = 1
+										elif type(d) == list:
+											print "lista"
+											return
+										#	print d[0][0][0]
+										#	if elem['account'] in d[0][0][0]:
+										#		print "Conta List 1"			
+										#		if 'credit_in_account_currency' in elem:
+											
+										#			print elem['credit_in_account_currency']
+										#			if elem['credit_in_account_currency'] in d[0][0][1]:
+										#				d[elem['account'], elem['credit_in_account_currency']] += 1
+										#			else:
+										#				d[elem['account'], elem['credit_in_account_currency']] = 1
+
+										#		elif 'debit_in_account_currency' in elem:
+										#			print elem['debit_in_account_currency']
+										#			if elem['debit_in_account_currency'] in d[0][0][1]:
+										#				d[elem['account'], elem['debit_in_account_currency']] += 1
+										#			else:
+										#				d[elem['account'], elem['debit_in_account_currency']] = 1
+
+										else:
+											if 'credit_in_account_currency' in elem:
+												print elem['credit_in_account_currency']
+												d[elem['account'], elem['credit_in_account_currency']] = 1
+											elif 'debit_in_account_currency' in elem:
+												print elem['debit_in_account_currency']
+												d[elem['account'], elem['debit_in_account_currency']] = 1
+
+
+										print "========"
+										print d.items()
+
+
+									elif d == {}:
+										#d[elem['account']] = 1
+										print "Conta 1"
+										if 'credit_in_account_currency' in elem:
+											print elem['credit_in_account_currency']
+											d[elem['account'], elem['credit_in_account_currency']] = 1
+										elif 'debit_in_account_currency' in elem:
+											print elem['debit_in_account_currency']
+											d[elem['account'], elem['debit_in_account_currency']] = 1
+
+								print "Conta 1 ", d.items()
 
 										
 								print "RESULTADO DUPLICADOS"
@@ -658,8 +730,60 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										print d.items()
 										print registos
 										print int(d.items()[0][1])
-										#contasiguais = True
+										if (registos == int(d.items()[0][1])):
+											contasiguais = True
 										#return
+								else:
+									#Para os casos 4 registos com 3 contas iguais mais valores diferentes ...
+									print "REGISTOs por verificar!!!!!"
+									print "REGISTOs por verificar!!!!!"
+									print "REGISTOs por verificar!!!!!"
+									print d.items()
+									print registos
+									contaduplicada = {}
+									acrescenta = True
+									for conta in d.items():
+										#print conta
+										print 'conta ', conta[0][0]
+										#print d.items()[0]
+										if contaduplicada != {}:
+											print 'reg dupl ',contaduplicada.items()
+											for c in contaduplicada.items():
+												print 'dentro ', c[0]
+												if c[0] == conta[0][0]:
+													print 'xxxxxx'
+													print contaduplicada[c[0]]
+													print contaduplicada[conta[0][0]] + 1	
+													contaduplicada[conta[0][0]] = contaduplicada[conta[0][0]] + 1
+													acrescenta = False
+													if int(contaduplicada[conta[0][0]]) == 2:
+														print "ESTE TEM QUE PARAR 2 vezes"
+														print "ESTE TEM QUE PARAR 2 vezes"
+													elif int(contaduplicada[conta[0][0]]) >= 3:
+														print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+														print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+														print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+
+														#contasiguais = True
+														#return
+													#return
+											
+											if acrescenta == True:
+												print 'acrescenta'
+												contaduplicada[conta[0][0]] = 1
+										#if conta[0][0] in contaduplicada.items():
+										#	print "depois"
+										#	contaduplicada[conta[0][0]] += 1
+										else:
+											print "inicio"
+
+											contaduplicada[conta[0][0]] = 1
+											print contaduplicada[conta[0][0]]
+
+										print 'conta dup', contaduplicada.items()
+
+
+									
 
 								"""
 
