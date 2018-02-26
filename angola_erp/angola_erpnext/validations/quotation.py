@@ -27,15 +27,17 @@ def validate(doc,method):
 
 	temretencao = False 
 	temimpostoconsumo = False 
-	retencaofonte =0
-	retencaopercentagem =0
+	retencaofonte = 0
+	retencaopercentagem = 0
 	totalpararetencao = 0
 	totalgeralimpostoconsumo = 0
 	totalgeralretencaofonte = 0
 	totalbaseretencaofonte = 0
 	retencaofonteDESC = ""
-	totalservicos_retencaofonte =0
-	totaldespesas_noretencaofonte =0
+	totalservicos_retencaofonte = 0
+	totaldespesas_noretencaofonte = 0
+	
+	percentagem = 0
 
 	
 	
@@ -45,15 +47,24 @@ def validate(doc,method):
 		if x.descricao =='Retencao na Fonte':
 			print ('pertagem ', x.percentagem)
 			retencaopercentagem = x.percentagem
+		elif (x.descricao =='IPC') or (x.descricao =='Imposto de Consumo'):
+			print ('IPC % ', x.percentagem)
+			percentagem = x.percentagem
+
 
 	for i in doc.get("items"):			
 		print "ITEMS IMPOSTOS +++++++"
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
-			if i.imposto_de_consumo == 0:
+			#if i.imposto_de_consumo == 0:
+			print i.amount
+
+			if percentagem == 0:
 				i.imposto_de_consumo = (i.amount * 5) / 100
-				
+			else:
+				i.imposto_de_consumo = (i.amount * percentagem) / 100
+
 		if prod[0].retencao_na_fonte ==1:
 			print ("RETENCAO FONTE")
 			i.retencao_na_fonte = (i.amount * retencaopercentagem) / 100
@@ -68,18 +79,21 @@ def validate(doc,method):
 	#Save retencao na INVoice 
 	doc.total_retencao_na_fonte = totalgeralretencaofonte
 	doc.base_retencao_fonte = totalbaseretencaofonte
-
+	print "ANTES DESPESAS"
+	print totalgeralimpostoconsumo
 	#Calcula_despesas Ticked
+	
 	iii=0
 	print ("Despesas")
 	for ai in doc.get("taxes"):
 		if ai.parent == doc.name and ai.charge_type !="":
 			if ai.calcula_despesas:
+				totalgeralimpostoconsumo = 0
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
 					print ("RECALCULA")
 
-					if (ai.rate == 0):
+					if (ai.rate == 0) and (percentagem == 0) :
 						percentagem = 5
 					else:
 						percentagem = ai.rate
@@ -94,7 +108,7 @@ def validate(doc,method):
 							if prod[0].imposto_de_consumo == 1:
 								print 'IMPOSTO TEM'
 								if aii.imposto_de_consumo == 0:
-									print ""
+									print "valor imp ", aii.imposto_de_consumo
 								
 								if aii.retencao_na_fonte == 1:
 										
@@ -112,13 +126,13 @@ def validate(doc,method):
 								print totalgeralimpostoconsumo
 								print ai.account_head
 								ai.charge_type = "Actual"
-								ai.tax_amount = totalgeralimpostoconsumo #despesas
+								ai.tax_amount = despesas #totalgeralimpostoconsumo 
 							else:
 								ai.tax_amount = 0
 
 				else:
 					print ("CALCULA DESPESAS")
-					if (ai.rate == 0):
+					if (ai.rate == 0) and (percentagem == 0) :
 						percentagem = 5
 					else:
 						percentagem = ai.rate
@@ -138,6 +152,12 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			else:
+				print "SEM DESPESAS MAS CALCULA IPC"
+				print "SEM DESPESAS MAS CALCULA IPC"
+				ai.charge_type = "Actual"
+				ai.tax_amount = totalgeralimpostoconsumo
+
 
 
 
