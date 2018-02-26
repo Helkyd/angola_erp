@@ -746,26 +746,35 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										#print conta
 										print 'conta ', conta[0][0]
 										#print d.items()[0]
-										if contaduplicada != {}:
+										if contasiguais == True:
+											print "Saindo do loop Conta d.ITEMS"
+											break
+										elif contaduplicada != {}:
 											print 'reg dupl ',contaduplicada.items()
 											for c in contaduplicada.items():
 												print 'dentro ', c[0]
 												if c[0] == conta[0][0]:
-													print 'xxxxxx'
-													print contaduplicada[c[0]]
-													print contaduplicada[conta[0][0]] + 1	
+													#print 'xxxxxx'
 													contaduplicada[conta[0][0]] = contaduplicada[conta[0][0]] + 1
 													acrescenta = False
 													if int(contaduplicada[conta[0][0]]) == 2:
 														print "ESTE TEM QUE PARAR 2 vezes"
 														print "ESTE TEM QUE PARAR 2 vezes"
-													elif int(contaduplicada[conta[0][0]]) >= 3:
-														print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
-														print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
-														print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+														print contaduplicada[c[0]]
 
-														contasiguais = True
-														return
+
+													elif int(contaduplicada[conta[0][0]]) >= 3:
+														if registos == contaduplicada[c[0]]:
+															print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+															print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+															print "ESTE TEM QUE PARAR 3 ou mais !!!!!"
+															print contaduplicada[c[0]]
+
+															print registos
+
+															contasiguais = True
+															break
+														#return
 													#return
 											
 											if acrescenta == True:
