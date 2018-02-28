@@ -128,7 +128,8 @@ def send_via_gateway(arg):
 		# http://10.192.8.104/cgi/WebCGI?11401=account=admin&password=helio&port=1&destination=
 		paraquem = d #arg.get('receiver_list')[0]
 		paraquem += "&content="
-		paraquem += arg.get('message')
+		paraquem += arg.get('message') 
+		paraquem += "\r\n\r\n"
 		print "PARA QUEM"
 		print paraquem
 		print ss.sms_gateway_url
