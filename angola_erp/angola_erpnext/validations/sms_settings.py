@@ -153,10 +153,36 @@ def send_request(gateway_url, params):
 	print gateway_url
 	print params
 
-	import requests
-	response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
-	response.raise_for_status()
-	return response.status_code
+	#import requests
+	#response = requests.get(gateway_url, params = params, headers={'Accept': "text/plain, text/html, */*"})
+	#response.raise_for_status()
+
+	#HELKyds
+	import urllib2
+	
+	response = urllib2.Request(gateway_url, params = params, {'Accept': "text/plain, text/html, */*"})
+	
+	try:
+		f = urllib2.urlopen(response)
+		
+		#for x  in f:	
+		#	print (x)
+	
+		
+		f.close()
+
+	except urllib2.HTTPError, e:
+		print ('HTTPError = ' + str(e.code))
+		return str(e.code)
+	except urllib2.URLError, e:
+		print ('URLError = ' + str(e.reason))
+		return str(e.code)
+	except httplib.HTTPException, e:
+		print ('HTTPException')
+		return str(e.code)
+
+
+	return f.code
 
 
 #=========================
