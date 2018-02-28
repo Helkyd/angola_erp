@@ -160,7 +160,7 @@ def send_request(gateway_url, params):
 	#HELKyds
 	import urllib2
 	
-	response = urllib2.Request(gateway_url, params = params, {'Accept': "text/plain, text/html, */*"})
+	response = urllib2.Request(gateway_url, params, {'Accept': "text/plain, text/html, */*"})
 	
 	try:
 		f = urllib2.urlopen(response)
