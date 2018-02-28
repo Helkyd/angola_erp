@@ -52,8 +52,6 @@ def validate(doc,method):
 
 
 	for i in doc.get("items"):			
-		print "ITEMS "
-		print i.item_code
 		if i.item_code != None:
 			prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 			if prod[0].imposto_de_consumo ==1:
