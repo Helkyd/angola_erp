@@ -65,6 +65,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 	registosalvo = False
 	registoerro = False
 
+
 	contador = 0
 
 	#VERIFICA SE AS CONTAS EXISTEM... Antes de voltar a processar novamente ...
@@ -131,7 +132,8 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 								if x.status_code == 200:
 									#200
 									print 'Anos Fiscal criado ', registoano
-									frappe.db.commit()		
+									frappe.db.commit()
+									time.sleep(.800)		
 										
 								else:
 									print x
@@ -160,7 +162,63 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									#Raro nao existir 
 									if existe1 == []:
 										print 'Conta ', conta[0:2], ' nao existe. Tem que criar.'
-										return
+										conta0 = conta[0:1] + ' -%' #Um digito apenas
+										existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
+										print conta0, ' ', existe1
+										print existe1[0]['name']
+										if existe1 != []:
+											conta1 = existe1[0]['name']
+											conta1desc = conta1
+											if conta1.count('-') >= 2:
+												conta1desc = conta1[conta1.find('-')+1:len(conta1)]
+
+											conta1desc = conta1desc[0:conta1desc.find('-')-1]
+
+											dados = {
+												"doctype": "Account",
+												"report_type": existe1[0]['report_type'],
+												"owner": "administrator",
+												"account_name": conta[0:2] + ' - ' + conta1desc,
+												"freeze_account": "No",
+												"root_type": existe1[0]['root_type'],
+												"docstatus": 0,
+												"company": empresa,
+												"is_group": 1,
+												"tax_rate": 0.0,
+												"account_currency": "KZ",
+												"parent_account": existe1[0]['name'],
+												"name": conta[0:2] + ' - ' + conta1desc,
+												"idx": 0,
+												"docstatus": 0
+											}
+											x = client.session.post(site + "/api/resource/Account",data={"data":json.dumps(dados)})
+											print dados
+											print "++++ RESULTADO Accounts conta 1 digitos  +++++"
+
+											print " resultado ", x
+
+											if x.status_code == 200:
+												#200
+												frappe.db.commit()
+												print 'Registo salvo'
+												registosalvo = True
+												time.sleep(.800)
+												#Tenta criar novamente
+												conta0 = conta[0:2] + '%'
+												existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
+												print conta0, ' ', existe1
+												print existe1[0]['name']
+
+												
+												#break
+
+									
+											else:
+
+												print "Conta ou Grupo ", conta0, ' tem que ser criado!'
+												return
+											
+
 									
 									for contas in existe1:
 										print 'contas 3 e 2'
@@ -200,13 +258,14 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 												if x.status_code == 200:
 													#200
+													frappe.db.commit()
 													print 'Registo salvo'
 													registosalvo = True
 													#Tenta criar novamente
 													conta0 = conta[0:3] + '%'
 													existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
 
-													time.sleep(.500)
+													time.sleep(.800)
 													break
 
 										
@@ -262,9 +321,10 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										if x.status_code == 200:
 
 											#200
+											frappe.db.commit()
 											print 'Registo salvo'
 											registosalvo = True
-											time.sleep(.500)
+											time.sleep(.800)
 
 										elif x.status_code == 409:
 											print 'Registo ja existe ....'
@@ -385,13 +445,15 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 	registosalvo = False
 	registoerro = False
 
-
+	registoerro1 = False
 
 	client= FrappeClient(site,usuario,senha)	
 
 	with open ('/tmp/journalentry_dev.csv') as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro..."
+
+		text_file = open('/tmp/movimentos_error.txt', "w")
 
 		for row in readCSV:
 			#print row
@@ -835,6 +897,12 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									#print "DEPOIS REGISTO "
 									#print contas1
 									#print contas2
+								else:
+									registoerro1 = True
+									text_file.write("Diario " + unicode(diario.strip()) + "\n NumeroDiario " + unicode(numerodiario.strip()) + "\n Descricao " + unicode(descricao.strip()) + "\n")
+									text_file.write(contasJV + "\n")
+
+
 
 								if contas1:					
 									#Debito
@@ -879,9 +947,6 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 	if registosalvo == False and registoerro == False:
 		print "PRECISA SALVAR O ULTIMO REGISTO ======="
-		print "PRECISA SALVAR O ULTIMO REGISTO ======="
-		print "PRECISA SALVAR O ULTIMO REGISTO ======="
-		print "PRECISA SALVAR O ULTIMO REGISTO ======="
 
 		dados = {
 			"posting_date": datagravacao,
@@ -909,9 +974,6 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 		x = client.session.post(site + "/api/resource/Journal Entry",data={"data":json.dumps(dados)})
 
 		print "++++ RESULTADO +++++"
-		print "++++ RESULTADO +++++"
-		print "++++ RESULTADO +++++"
-		print "++++ RESULTADO +++++"
 
 		print " resultado ", x.status_code
 		if x.status_code == 200:
@@ -926,6 +988,13 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 			print 'descricao ', descricao
 
 			return
+
+	if registoerro1 == True:
+		text_file.close()
+		print 'Ficheiro criado /tmp/movimentos_error.txt ' 
+		return
+
+
 
 	print "FIM DO LANCAMENTO DOS DADOS PRIMAVERA NO ERPNext"
 

@@ -52,31 +52,33 @@ def validate(doc,method):
 
 
 	for i in doc.get("items"):			
-
-		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
-		if prod[0].imposto_de_consumo ==1:
-			print ("IMPOSTO CONSUMO")
-			if percentagem == 0:
-				i.imposto_de_consumo = (i.amount * 5) / 100
-			else:
-				i.imposto_de_consumo = (i.amount * percentagem) / 100
+		print "ITEMS "
+		print i.item_code
+		if i.item_code != None:
+			prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
+			if prod[0].imposto_de_consumo ==1:
+				print ("IMPOSTO CONSUMO")
+				if percentagem == 0:
+					i.imposto_de_consumo = (i.amount * 5) / 100
+				else:
+					i.imposto_de_consumo = (i.amount * percentagem) / 100
 				
-		if prod[0].retencao_na_fonte ==1:
-			print ("RETENCAO FONTE")
-			i.retencao_na_fonte = (i.amount * retencaopercentagem) / 100
-			totalbaseretencaofonte += i.amount
-			totalservicos_retencaofonte += totalbaseretencaofonte
-		else:
-			totaldespesas_noretencaofonte += i.amount		
+			if prod[0].retencao_na_fonte ==1:
+				print ("RETENCAO FONTE")
+				i.retencao_na_fonte = (i.amount * retencaopercentagem) / 100
+				totalbaseretencaofonte += i.amount
+				totalservicos_retencaofonte += totalbaseretencaofonte
+			else:
+				totaldespesas_noretencaofonte += i.amount		
 
-		totalgeralimpostoconsumo += i.imposto_de_consumo					
-		totalgeralretencaofonte +=  i.retencao_na_fonte
+			totalgeralimpostoconsumo += i.imposto_de_consumo					
+			totalgeralretencaofonte +=  i.retencao_na_fonte
 
-		#BATCH Qty 
-		if i.warehouse and i.item_code and i.batch_no:
-			print 'BATCH NO verifica a QTD'
-			print get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
-			i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+			#BATCH Qty 
+			if i.warehouse and i.item_code and i.batch_no:
+				print 'BATCH NO verifica a QTD'
+				print get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+				i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 
 	
 

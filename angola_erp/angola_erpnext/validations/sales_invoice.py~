@@ -52,7 +52,9 @@ def validate(doc,method):
 
 
 	for i in doc.get("items"):			
-
+		print "ITEMS "
+		print i.item_code
+		
 		prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 		if prod[0].imposto_de_consumo ==1:
 			print ("IMPOSTO CONSUMO")
@@ -158,6 +160,12 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			else:
+				print "SEM DESPESAS MAS CALCULA IPC"
+				print "SEM DESPESAS MAS CALCULA IPC"
+				ai.charge_type = "Actual"
+				ai.tax_amount = totalgeralimpostoconsumo
+
 
 
 
