@@ -126,15 +126,16 @@ def send_via_gateway(arg):
 		print arg.get('message')
 
 		# http://10.192.8.104/cgi/WebCGI?11401=account=admin&password=helio&port=1&destination=
-		paraquem = d #arg.get('receiver_list')[0]
+		paraquem ="account=admin&password=helio&port=1&destination="
+		paraquem += d #arg.get('receiver_list')[0]
 		paraquem += "&content="
 		paraquem += arg.get('message') 
 		paraquem += "\r\n\r\n"
 		print "PARA QUEM"
 		print paraquem
-		print ss.sms_gateway_url
+		print ss.sms_gateway_url[0:ss.sms_gateway_url.find('11401')-1]
 
-		status = send_request(ss.sms_gateway_url + paraquem, "")
+		status = send_request(ss.sms_gateway_url[0:ss.sms_gateway_url.find('11401')-1], paraquem)
 
 		if 200 <= status < 300:
 			success_list.append(d)
@@ -176,10 +177,10 @@ def send_request(gateway_url, params):
 		return str(e.code)
 	except urllib2.URLError, e:
 		print ('URLError = ' + str(e.reason))
-		return str(e.code)
+		return str(e.reason)
 	except httplib.HTTPException, e:
 		print ('HTTPException')
-		return str(e.code)
+
 
 
 	return f.code
