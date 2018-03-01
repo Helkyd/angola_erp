@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2017-10-09 15:56:18.517695", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Sales Invoice", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "<style>\n\t.print-format table, .print-format tr, \n\t.print-format td, .print-format div, .print-format p {\n\t\tfont-family: Monospace;\n\t\tline-height: 200%;\n\t\tvertical-align: middle;\n\t}\n\t@media screen {\n\t\t.print-format {\n\t\t\twidth: 6in;\n\t\t\tpadding: 0.25in;\n\t\t\tmin-height: 8in;\n\t\t}\n\t}\n</style>\n\n<p class=\"text-center\">\n\t<h3><b>{{ company }}<br></h3>\n\t<b>NIF: 2402145730 </b> <br>\n\t<small><b>Centralidade do Kilamba Edificio Q7 </b></small>\n\t\n</p>\n<p style=\"font-size:9px\">\n\t{{  __(\"POS No : \") }} {{ offline_pos_name }}</b><br>\n\t<b>{{ __(\"Customer\") }}:</b> {{ customer }}<br>\n</p>\n\n<p style=\"font-size:9px\">\n\t<b>{{ __(\"Data\") }}:</b> {{ moment(posting_date).format(\"DD-MM-YYYY\") }}<br>\n</p>\n\n<hr>\n<table class=\"table table-condensed cart no-border\">\n\t<thead>\n\t\t<tr>\n\t\t\t<th width=\"250%\">{{ __(\"Item\") }}</b></th>\n\t\t\t<th width=\"5%\" class=\"text-right\">{{ __(\"Qty\") }}</th>\n\t\t\t<th width=\"5%\" class=\"text-right\">{{ __(\"Amount\") }}</th>\n\t\t</tr>\n\t</thead>\n\t<tbody>\n\t\t{% for item in items %}\n\t\t<tr ><b>\n\t\t\t<td class=\"text-left\" style=\"width: 200%\">\n\t\t\t\t<small>{{ item.item_name }}</small>\n\t\t\t</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<small>\n\t\t\t<td class=\"text-left\">{{ format_currency(item.rate, currency) }}</td>\n\t\t\t<td class=\"text-right\">{{ format_number(item.qty, null,precision(\"difference\")) }}</td>\n\t\t\t<td class=\"text-right\">{{ format_currency(item.amount, currency) }}</td>\n\t\t\t</small>\n\t\t</tr>\n\t\t{% endfor %}\n\t</tbody>\n</table>\n\n<table class=\"table table-condensed no-border\">\n\t<tbody>\n\t\t<tr>\n\t\t\t<td class=\"text-right\" style=\"width: 70%\">\n\t\t\t\t{{ __(\"Net Total\") }}\n\t\t\t</td>\n\t\t\t<td class=\"text-right\">\n\t\t\t\t{{ format_currency(total, currency) }}\n\t\t\t</td>\n\t\t</tr>\n\t\t{% for row in taxes %}\n\t\t{% if not row.included_in_print_rate %}\n\t\t<tr>\n\t\t\t<td class=\"text-right\" style=\"width: 70%\">\n\t\t\t\t{{ row.description }}\n\t\t\t</td>\n\t\t\t<td class=\"text-right\">\n\t\t\t\t{{ format_currency(row.tax_amount, currency) }}\n\t\t\t</td>\n\t\t</tr>\n\t\t{% endif %}\n\t\t{% endfor %}\n\t\t{% if discount_amount %}\n\t\t<tr>\n\t\t\t<td class=\"text-right\" style=\"width: 75%\">\n\t\t\t\t{{ __(\"Discount\") }}\n\t\t\t</td>\n\t\t\t<td class=\"text-right\">\n\t\t\t\t{{ format_currency(discount_amount, currency) }}\n\t\t\t</td>\n\t\t</tr>\n\t\t{% endif %}\n\t\t<tr>\n\t\t\t<td class=\"text-right\" style=\"width: 75%\">\n\t\t\t\t<b>{{ __(\"Grand Total\") }}</b>\n\t\t\t</td>\n\t\t\t<td class=\"text-right\">\n\t\t\t\t<b>{{ format_currency(grand_total, currency) }}</b>\n\t\t\t</td>\n\t\t</tr>\n\t\t<tr>\n\t\t\t<td class=\"text-right\" style=\"width: 75%\">\n\t\t\t\t<b>{{ __(\"Valor Pago\") }}</b>\n\t\t\t</td>\n\t\t\t<td class=\"text-right\">\n\t\t\t\t{{ format_currency(paid_amount, currency) }}\n\t\t\t</td>\n\t\t</tr>\n\t</tbody>\n</table>\n{% if terms %}\n<hr>\n<p>{{ terms }}</p>\n{% endif %}\n<small>\n<p class=\"text-center\" >{{ __(\"Obrigado, volte sempre.\") }}</p>\n<p class=\"text-left\" style=\"font-size:8px\"> <small> Imposto de Selo Pago Por Guia Decreto Lei 18/192 DR I Serie de 25/05/1992</small></p>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-03-01 12:44:20.366079", 
+ "modified_by": "Administrator", 
+ "module": "Angola ERPNext", 
+ "name": "POS-Xixa", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Js", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}
