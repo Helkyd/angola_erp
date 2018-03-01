@@ -206,7 +206,8 @@ scheduler_events = {
 
 override_whitelisted_methods = {
 	"erpnext.setup.doctype.sms_settings.sms_settings.send_sms": "angola_erp.angola_erpnext.validations.sms_settings.send_sms",
-	"frappe.email.doctype.auto_email_report.auto_email_report.send_now": "angola_erp.angola_erpnext.validations.auto_email_report.send_now"
+	"frappe.email.doctype.auto_email_report.auto_email_report.send_now": "angola_erp.angola_erpnext.validations.auto_email_report.send_now",
+	"frappe.email.doctype.auto_email_report.auto_email_report.send_daily": "angola_erp.angola_erpnext.validations.auto_email_report.send_daily"
 
 }
 
