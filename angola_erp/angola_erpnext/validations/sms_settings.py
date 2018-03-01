@@ -126,6 +126,8 @@ def send_via_gateway(arg):
 		print arg.get('message')
 
 		# http://10.192.8.104/cgi/WebCGI?11401=account=admin&password=helio&port=1&destination=
+		# curl  -s --data "account=sukadra&password=sukadra&port=4&destination=89053709987&content=111111111"  http://192.168.100.130/cgi/WebCGI?11401
+		paraquem = {}
 		paraquem ="account=admin&password=helio&port=1&destination="
 		paraquem += d #arg.get('receiver_list')[0]
 		paraquem += "&content="
@@ -133,10 +135,10 @@ def send_via_gateway(arg):
 		paraquem += "\r\n\r\n"
 		print "PARA QUEM"
 		print paraquem
-		print ss.sms_gateway_url[0:ss.sms_gateway_url.find('11401')-1]
+		print ss.sms_gateway_url
 
-		status = send_request(ss.sms_gateway_url[0:ss.sms_gateway_url.find('11401')-1], paraquem)
-
+		status = send_request(ss.sms_gateway_url, paraquem)
+		print 'status ', status
 		if 200 <= status < 300:
 			success_list.append(d)
 
