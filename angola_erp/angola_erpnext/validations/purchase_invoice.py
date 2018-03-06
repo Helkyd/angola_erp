@@ -37,6 +37,7 @@ def validate(doc,method):
 	totaldespesas_noretencaofonte =0
 
 	percentagem = 0
+	msg_item = []
 	
 	#Taxa de Cambio
 	print "SALES ORDER CAMBIO"	
@@ -95,6 +96,13 @@ def validate(doc,method):
 				if itembatch[0].contar == 1 and i.batch_no == None:
 					#default Batch added
 					i.batch_no = itembatch[0].batch_id
+				elif itembatch[0].contar > 1 and i.batch_no == None:
+					#Mais que um batch
+					msg_item.append(i.item_code)
+
+	if msg_item != []:
+		frappe.throw(("Items {0} tem mais quem um Lote. Por favor selecionar").format(msg_item))
+
 
 	#Save retencao na INVoice 
 	doc.total_retencao_na_fonte = totalgeralretencaofonte
