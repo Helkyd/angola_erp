@@ -11,6 +11,7 @@ from frappe.utils import cstr, getdate, date_diff
 from datetime import datetime, timedelta
 from frappe.utils import get_datetime, cint, get_datetime_str
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
+from frappe.utils import encode
 
 
 def validate(doc,method):
@@ -18,14 +19,14 @@ def validate(doc,method):
 	print "propinas"
 	print doc.docstatus
 	
-	print doc.referente_ao_mes 
+	print doc.referente_ao_mes.encode('utf-8') 
 	print _(frappe.utils.datetime.datetime.now().strftime("%B"))
 
 	if not doc.referente_ao_mes:
 		#acrescenta o mes corrente ....
 		if frappe.utils.datetime.datetime.now().strftime("%B") == 'January': doc.referente_ao_mes = 'Janeiro'
 		if frappe.utils.datetime.datetime.now().strftime("%B") == 'February':doc.referente_ao_mes = 'Fevereiro'
-		if frappe.utils.datetime.datetime.now().strftime("%B") == 'March':doc.referente_ao_mes = 'Marco'
+		if frappe.utils.datetime.datetime.now().strftime("%B") == 'March':doc.referente_ao_mes = 'Março'
 		if frappe.utils.datetime.datetime.now().strftime("%B") == 'April':doc.referente_ao_mes = 'Abril'
 		if frappe.utils.datetime.datetime.now().strftime("%B") == 'May':doc.referente_ao_mes = 'Maio'
 		if frappe.utils.datetime.datetime.now().strftime("%B") == 'June':doc.referente_ao_mes = 'Junho'
