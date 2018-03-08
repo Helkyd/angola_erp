@@ -13,6 +13,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, random_string
 from frappe.utils import cstr, flt, getdate
+from frappe.utils import encode
 from StringIO import StringIO
 from frappeclient import FrappeClient
 from datetime import datetime
@@ -21,9 +22,131 @@ import csv
 import json
 
 
+@frappe.whitelist()
+def test_jentry():
+	"""
+		Pode ser apagado quando o check e Add to jentry estiver melhor ....
+		Este usado para ver se o adding das contas funciona ...quando da o erro 417
+
+	"""
+
+	contasjv=[{u'account': u'729 -  Custos Com O Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'credit_in_account_currency': u'115264466',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'82070000 - Custo Com Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'debit_in_account_currency': u'115264466',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'729 -  Custos Com O Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'credit_in_account_currency': u'15677066',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'82070000 - Custo Com Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'debit_in_account_currency': u'15677066',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'729 -  Custos Com O Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'credit_in_account_currency': u'4770910',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'82070000 - Custo Com Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'debit_in_account_currency': u'4770910',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'729 -  Custos Com O Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'credit_in_account_currency': u'920500',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'82070000 - Custo Com Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'debit_in_account_currency': u'920500',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'729 -  Custos Com O Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'credit_in_account_currency': u'85684',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'82070000 - Custo Com Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'debit_in_account_currency': u'85684',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'729 -  Custos Com O Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'credit_in_account_currency': u'128055366',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'},
+	{u'account': u'82070000 - Custo Com Pessoal - 2ms',
+	u'account_currency': u'KZ',
+	u'cost_center': u'Principal - 2ms',
+	u'debit_in_account_currency': u'128055366',
+	u'docstatus': 1,
+	u'doctype': u'Journal Entry Account',
+	u'exchange_rate': 1,
+	u'is_advance': u'No'}]
+
+	
+	doc = frappe.get_doc({
+		"posting_date" : "2012-06-20",
+		"doctype" : "Journal Entry",
+		"naming_series" : "JV-", 
+		"voucher_type" : "Journal Entry",
+		"company" : "2MS - Comercio e Representacoes, Lda",
+		"accounts" : contasjv,
+		"owner" : "administrator",
+		"cheque_no" : "1111",
+		"cheque_date" : "2012-06-20",
+		"user_remark" : "olddescricao"
+
+	})
+	doc.insert()
+
+
 
 @frappe.whitelist()
-def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
+def check_jentry(empresa, usuario, senha,ficheiro="journalentry_dev.csv", site="http://127.0.0.1:8000"):
 
 	if empresa is None:
 		print "Nome da Empresa necessario"
@@ -70,9 +193,12 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 	#VERIFICA SE AS CONTAS EXISTEM... Antes de voltar a processar novamente ...
 
-	client= FrappeClient(site,usuario,senha)	
+	client= FrappeClient(site,usuario,senha)
+	if not "tmp" in ficheiro:
+		ficheiro = "/tmp/" + ficheiro	
 
-	with open ('/tmp/journalentry_dev.csv') as csvfile:
+	#with open ('/tmp/journalentry_dev.csv') as csvfile:
+	with open (ficheiro) as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro...Verificando Contas"
 
@@ -84,14 +210,22 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 			elif row[0] == "\xef\xbb\xbfConta":
 				print 'ainda falta'
 			else:
-
+				#print row
 				if (len(row[0]) >1): #(row[0].strip() != "0"):
+					#print row[1]
+					#print row[2]
 					if row[2] != 0 and int(row[2]) <= 12:
 
 						conta = row[0]
 						valoralt = row[11]
 						descricao = row[10]
 						natureza = row[12]
+						#print row[34]
+						#print 'datagravacao ', row[35]
+						#print 'ana ', row[36]
+						#print 'conta ', conta
+						#print 'descricao ', descricao
+
 						datagravacao = datetime.strptime(row[34],'%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d')
 
 
@@ -165,7 +299,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 										conta0 = conta[0:1] + ' -%' #Um digito apenas
 										existe1 = frappe.db.sql(""" SELECT name, report_type, root_type, account_type, company, is_group from `tabAccount` where name like %s and company like %s and is_group =1 """,(conta0,empresa),as_dict=True)
 										print conta0, ' ', existe1
-										print existe1[0]['name']
+										#print existe1[0]['name']
 										if existe1 != []:
 											conta1 = existe1[0]['name']
 											conta1desc = conta1
@@ -286,28 +420,48 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 										conta1desc = conta1desc[0:conta1desc.find('-')-1]
 										print conta1desc
+										print "conta ", conta
 
 
 
 										registoerro = False
+										if len(conta) == 3:
+											dados = {
+												"doctype": "Account",
+												"report_type": contas['report_type'],
+												"owner": "administrator",
+												"account_name": conta + '00000 - ' + conta1desc,
+												"freeze_account": "No",
+												"root_type": contas['root_type'],
+												"docstatus": 0,
+												"company": empresa,
+												"is_group": 0,
+												"tax_rate": 0.0,
+												"account_currency": "KZ",
+												"parent_account": contas['name'],
+												"name": conta + '00000 - ' + conta1desc,
+												"idx": 0,
+												"docstatus": 0
+											}
 
-										dados = {
-											"doctype": "Account",
-											"report_type": contas['report_type'],
-											"owner": "administrator",
-											"account_name": conta + ' - ' + conta1desc,
-											"freeze_account": "No",
-											"root_type": contas['root_type'],
-											"docstatus": 0,
-											"company": empresa,
-											"is_group": 0,
-											"tax_rate": 0.0,
-											"account_currency": "KZ",
-											"parent_account": contas['name'],
-											"name": conta + ' - ' + conta1desc,
-											"idx": 0,
-											"docstatus": 0
-										}
+										else:
+											dados = {
+												"doctype": "Account",
+												"report_type": contas['report_type'],
+												"owner": "administrator",
+												"account_name": conta + ' - ' + conta1desc,
+												"freeze_account": "No",
+												"root_type": contas['root_type'],
+												"docstatus": 0,
+												"company": empresa,
+												"is_group": 0,
+												"tax_rate": 0.0,
+												"account_currency": "KZ",
+												"parent_account": contas['name'],
+												"name": conta + ' - ' + conta1desc,
+												"idx": 0,
+												"docstatus": 0
+											}
 
 										print dados
 										x = client.session.post(site + "/api/resource/Account",data={"data":json.dumps(dados)})
@@ -347,16 +501,24 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									#	print contas['company']
 									#	print contas['name']
 									#	print empresa
+									print 'EXISTE '
+									print existe
+									print 'conta ', conta
 									if contas['company'] == empresa:
-										conta1 = contas['name']
-										conta1desc = conta1[conta1.find('-')+1:len(conta1)]
-										conta1desc = conta1desc[0:conta1desc.find('-')-1]
+										if contas['is_group'] == 1 and len(conta) == 3:
+											#conta 3 digitos add 00000
+											print "cria a conta com 5 ZEROs!!!!!"
+											#return
+										else:
+											conta1 = contas['name']
+											conta1desc = conta1[conta1.find('-')+1:len(conta1)]
+											conta1desc = conta1desc[0:conta1desc.find('-')-1]
 										#print "CONTA EXISTE"
 										#print conta1
 										#print conta1desc
 
-										registosalvo = True
-										registoerro = False
+											registosalvo = True
+											registoerro = False
 
 									
 						except frappe.DoesNotExistError:
@@ -402,7 +564,7 @@ def check_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 
 @frappe.whitelist()
-def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
+def add_jentry(empresa, usuario, senha, ficheiro="journalentry_dev.csv", site="http://127.0.0.1:8000"):
 
 
 	if empresa is None:
@@ -447,9 +609,14 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 	registoerro1 = False
 
-	client= FrappeClient(site,usuario,senha)	
+	clientediversos = frappe.db.sql(""" SELECT name from `tabCustomer` where name like 'diversos' """,as_dict=True)
 
-	with open ('/tmp/journalentry_dev.csv') as csvfile:
+	client= FrappeClient(site,usuario,senha)
+	if not "tmp" in ficheiro:
+		ficheiro = "/tmp/" + ficheiro	
+	
+
+	with open (ficheiro) as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro..."
 
@@ -530,7 +697,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 								if contas['company'] == empresa:
 									#print "Lancamento no file"
 									#print contas['name']
-									conta = contas['name']
+									conta = contas['name'] #.encode('utf-8')
 									registoerro = False
 
 							if registoerro == True:
@@ -543,28 +710,59 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 							if natureza == "D":
 								#print 'NATUREZA D'
-								contas1 = {
-										"is_advance": "No", 
-										"cost_center": centrocusto[0]['cost_center'],
-										"account": conta,
-										"doctype": "Journal Entry Account", 									"debit_in_account_currency": valoralt, 
-										"account_currency": "KZ",
-										"exchange_rate": 1,
-										"docstatus": 1
-									}
+								if conta.startswith('31121000'):
+									contas1 = {
+											"is_advance": "No", 
+											"cost_center": centrocusto[0]['cost_center'],
+											"account": conta,
+											"doctype": "Journal Entry Account", 									"debit_in_account_currency": valoralt, 
+											"account_currency": "KZ",
+											"exchange_rate": 1,
+											"docstatus": 1,
+											"party_type": "Customer",
+											"party": clientediversos[0]['name'] 
+										}
+								else:
+									contas1 = {
+											"is_advance": "No", 
+											"cost_center": centrocusto[0]['cost_center'],
+											"account": conta,
+											"doctype": "Journal Entry Account", 									"debit_in_account_currency": valoralt, 
+											"account_currency": "KZ",
+											"exchange_rate": 1,
+											"docstatus": 1
+										}
+
+
 								#print contas1
 							elif natureza == "C":
-								#print 'NATUREZA C'
-								contas2 = {
-										"is_advance": "No",
-										"cost_center": centrocusto[0]['cost_center'],
-										"account": conta,
-										"doctype":"Journal Entry Account", 									"credit_in_account_currency": valoralt,
-										"account_currency": "KZ",
-										"exchange_rate": 1,
-										"docstatus": 1
-									}
-								#print contas2
+								print 'NATUREZA C'
+								if conta.startswith('31121000'):
+									contas2 = {
+											"is_advance": "No",
+											"cost_center": centrocusto[0]['cost_center'],
+											"account": conta,
+											"doctype":"Journal Entry Account", 									"credit_in_account_currency": valoralt,
+											"account_currency": "KZ",
+											"exchange_rate": 1,
+											"docstatus": 1,
+											"party_type": "Customer",
+											"party": clientediversos[0]['name']
+										}
+								else:
+									contas2 = {
+											"is_advance": "No",
+											"cost_center": centrocusto[0]['cost_center'],
+											"account": conta,
+											"doctype":"Journal Entry Account", 									"credit_in_account_currency": valoralt,
+											"account_currency": "KZ",
+											"exchange_rate": 1,
+											"docstatus": 1
+										}
+
+
+								print conta #.encode('utf-8')
+								print unicode(contas2).decode('utf-8')
 
 
 
@@ -575,6 +773,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 								oldregistodia = registodia
 								oldnumerodiario = numerodiario
 								olddiario = diario
+								olddatagravacao = datagravacao
 
 								print contas1
 								print contas2
@@ -594,7 +793,7 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 								print "DEVE SALVAR O REGISTO E INICIAR NOVO"
 
 								dados = {
-									"posting_date": datagravacao,
+									"posting_date": olddatagravacao,
 									"doctype": "Journal Entry", 
 									"naming_series": "JV-", 
 									"voucher_type": "Journal Entry", 
@@ -603,15 +802,16 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									"owner": "administrator", 
 									"cheque_no": 'dia ' + olddiario + ' diario ' + oldnumerodiario,
 									"cheque_date": datagravacao,
-									"user_remark": olddescricao + ' dia ' + olddiario + ' diario ' + oldnumerodiario + ' dated ' + datagravacao,
-									"remark": "Reference #" + olddiario + numerodiario + ' dated ' + datagravacao, 
+									"user_remark": olddescricao + ' dia ' + olddiario + ' diario ' + oldnumerodiario + ' dated ' + olddatagravacao,
+									"remark": "Reference #" + olddiario + oldnumerodiario + ' dated ' + olddatagravacao, 
 									"docstatus": 1	
 								}
 
-								olddescricao = descricao
-								oldregistodia = registodia
-								oldnumerodiario = numerodiario
-								olddiario = diario
+								#moved down
+								#olddescricao = descricao
+								#oldregistodia = registodia
+								#oldnumerodiario = numerodiario
+								#olddiario = diario
 
 								registosalvo = True
 
@@ -655,29 +855,31 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 											
 											if c[0][0] == elem['account']:
 												print 'conta +1'
+												print c[0][1]
 												if 'credit_in_account_currency' in elem:
 											
-													#print elem['credit_in_account_currency']
+													print elem['credit_in_account_currency']
 													if  elem['credit_in_account_currency'] == c[0][1]:
 														d[elem['account'], elem['credit_in_account_currency']] += 1
 													else:
 														d[elem['account'], elem['credit_in_account_currency']] = 1
-
+													acrescenta = False
 													break
 
 												elif 'debit_in_account_currency' in elem:
 													#print 'DEBITO'
 													#print elem['account']
-													#print elem['debit_in_account_currency']
+													print elem['debit_in_account_currency']
 													#print c[0][1]
 													if  elem['debit_in_account_currency'] == c[0][1]: 
 														d[elem['account'], elem['debit_in_account_currency']] += 1
 													else:
 														d[elem['account'], elem['debit_in_account_currency']] = 1
+													acrescenta = False
 													break
 
 												#contaduplicada[conta[0][0]] = contaduplicada[conta[0][0]] + 1
-												acrescenta = False
+												
 												#break
 
 										
@@ -862,15 +1064,16 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									print " resultado ", x.status_code
 									if x.status_code == 200:
 										print 'salvo'
-										print diario, ' ', numerodiario, ' ', descricao
-										print datagravacao
+										print olddiario, ' ', oldnumerodiario, ' ', olddescricao
+										print olddatagravacao
 										time.sleep(.500)
 									elif x.status_code == 417:
 										print 'Verifique Ano Fiscal Ou Debito e Credito na mesma conta!'
 
-										print 'diario ', diario
-										print 'numdiario ', numerodiario
-										print 'descricao ', descricao
+										print 'diario ', olddiario
+										print 'numdiario ', oldnumerodiario
+										print 'descricao ', olddescricao
+										print 'datagravacao ', olddatagravacao
 
 										print "CONTAS JV ------"
 										print contasJV
@@ -899,8 +1102,18 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									#print contas2
 								else:
 									registoerro1 = True
-									text_file.write("Diario " + unicode(diario.strip()) + "\n NumeroDiario " + unicode(numerodiario.strip()) + "\n Descricao " + unicode(descricao.strip()) + "\n")
-									text_file.write(contasJV + "\n")
+									text_file.write(empresa + "\n")
+									text_file.write("Diario " + unicode(olddiario.strip()) + "\n NumeroDiario " + unicode(oldnumerodiario.strip()) + "\n Descricao " + unicode(olddescricao.strip()) + "\n")
+									print contasJV
+									for tmp in contasJV:
+										text_file.write(tmp['account'] + "\n")
+										if 'debit_in_account_currency' in tmp:
+											text_file.write(tmp['debit_in_account_currency'] + "\n")
+										else:
+											text_file.write(tmp['credit_in_account_currency'] + "\n")
+										text_file.write("\n")	
+									#text_file.write(contasJV) Por ver como passar
+									#text_file.write("\n\n")
 
 
 
@@ -914,7 +1127,13 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 									contas2 = {}
 
 
-					
+								#novos values nos old
+								olddescricao = descricao
+								oldregistodia = registodia
+								oldnumerodiario = numerodiario
+								olddiario = diario
+
+	
 							else:
 								print "Continua Registo ======="
 								print "ACRESCENTA AO REGISTO ..."
@@ -947,9 +1166,6 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 
 	if registosalvo == False and registoerro == False:
 		print "PRECISA SALVAR O ULTIMO REGISTO ======="
-		print "PRECISA SALVAR O ULTIMO REGISTO ======="
-		print "PRECISA SALVAR O ULTIMO REGISTO ======="
-		print "PRECISA SALVAR O ULTIMO REGISTO ======="
 
 		dados = {
 			"posting_date": datagravacao,
@@ -976,9 +1192,6 @@ def add_jentry(empresa, usuario, senha, site="http://127.0.0.1:8000"):
 		registosalvo = True		
 		x = client.session.post(site + "/api/resource/Journal Entry",data={"data":json.dumps(dados)})
 
-		print "++++ RESULTADO +++++"
-		print "++++ RESULTADO +++++"
-		print "++++ RESULTADO +++++"
 		print "++++ RESULTADO +++++"
 
 		print " resultado ", x.status_code
