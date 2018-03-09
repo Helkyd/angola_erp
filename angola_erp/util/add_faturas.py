@@ -620,7 +620,7 @@ def add_jentry(empresa, usuario, senha, ficheiro="journalentry_dev.csv", site="h
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro..."
 		
-		text_file = open('/tmp/' + ficheiro[ficheiro.find('/tmp/')+1:len(ficheiro)] + '_movimentos_error.txt', "w")
+		text_file = open(ficheiro[0:ficheiro.find('_')+1] + 'movimentos_error.txt', "w")
 
 		for row in readCSV:
 			#print row
