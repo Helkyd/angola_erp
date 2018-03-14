@@ -91,7 +91,7 @@ def get_invoices(filters, additional_query_columns):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
 	conditions = get_conditions(filters)
-	return frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(base_grand_total) as Total, sum(base_grand_total*1/100) as Selo from `tabSales Invoice` where docstatus =1 and outstanding_amount = 0 %s group by month(posting_date) order by year(posting_date)""".format(additional_query_columns or '') %
+	return frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(base_grand_total) as Total, sum(base_grand_total*1/100) as Selo from `tabSales Invoice` where docstatus =1 and outstanding_amount = 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') %
 		conditions, filters, as_dict=1)	
 
 
