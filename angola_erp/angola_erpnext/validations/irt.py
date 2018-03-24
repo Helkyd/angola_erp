@@ -57,10 +57,12 @@ def set_faltas(mes,ano,empresa):
 		from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and year(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,ano,tra.name), as_dict=False)
 
 
+		j3 = frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
 		print 'VERIFICA ATTENDANCE e LEAVE'
 		print tra.name
 
-		
+		print j3
 		
 
 		j1 = frappe.get_doc("Employee",tra.name)		
@@ -93,6 +95,21 @@ def set_faltas(mes,ano,empresa):
 			#save on Employee record
 			#j1 = frappe.get_doc("Employee",tra.name)
 			j1.subsidio_de_ferias = 0
+			#j1.save()
+
+		if j3[0][0] > 0:
+			#save on Employee record
+			#j1 = frappe.get_doc("Employee",tra.name)
+
+			print " HORAS EXTRAS"					
+			print j3[0][0]
+
+			j1.horas_extras = j3[0][0]			
+			#j1.save()
+		else:
+			#save on Employee record
+			#j1 = frappe.get_doc("Employee",tra.name)
+			j1.horas_extras = 0
 			#j1.save()
 
 

@@ -12,7 +12,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from num2words import num2words
 
-global diaspagamento, totaldiastrabalho 
+global diaspagamento, totaldiastrabalho, horasextra 
 
 def validate(doc,method):
 #	get_edc(doc, method)
@@ -37,11 +37,16 @@ def validate(doc,method):
 	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
 	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
 
+	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
+
 	doc.numero_de_faltas = j[0]['count(status)']
 	doc.payment_days = doc.payment_days - j[0]['count(status)'] - j1[0]['count(status)']
 	diaspagamento = doc.payment_days
 	totaldiastrabalho = doc.total_working_days
+	horasextra = j2[0]['horas']
+	
 	print j[0]['count(status)'], j1[0]['count(status)']
+	print 'Horas Extra ', j2[0]['horas']
 
 #	print doc.name , " + ", doc.employee
 #	print doc.payment_days - j[0]['count(status)']
@@ -532,7 +537,7 @@ def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 				print "rever a formula !!!", d.amount
 				print date_diff(frappe.utils.nowdate(),emp.date_of_joining)
 
-				salariohora = ((salariobase*12)/(52*40))
+				salariohora = ((salariobase*12)/(52*40)) # em vez de 40horas devem ser 44horas
 				print "Salario Hora ", salariohora
 
 				meses1 = date_diff(frappe.utils.nowdate(),emp.date_of_joining)/30
