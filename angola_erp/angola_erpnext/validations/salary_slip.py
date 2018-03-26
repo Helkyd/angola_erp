@@ -12,7 +12,10 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from num2words import num2words
 
-global diaspagamento, totaldiastrabalho, horasextra 
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.accounts.utils import get_fiscal_year
+
+global diaspagamento, totaldiastrabalho, horasextra, trabalhouferiado 
 
 def validate(doc,method):
 #	get_edc(doc, method)
@@ -32,21 +35,61 @@ def validate(doc,method):
 	print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 
 	print doc.name , " + ", doc.employee, " + ", doc.start_date
+	print doc.payment_days, " + ", doc.total_working_days
+	print doc.company
 
 #	if not doc.salary_slip_based_on_timesheet:
-	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
-	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
+	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
 
-	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(doc.employee,mes_startdate.month,mes_startdate.year), as_dict=True)
+	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
+	#Still need to COUNT for Present during Holiday
+	fiscal_year = get_fiscal_year(doc.start_date, company=doc.company)[0]
+	month = "%02d" % getdate(doc.start_date).month
+	m = get_month_details(fiscal_year, month)
+
+
+	#m = get_month_details(mes_startdate.year, mes_startdate.month)
+	msd = m.month_start_date
+	med = m.month_end_date
+	print 'Mes start ', msd
+	print 'Mes END ', med
+
+	holiday_list = get_holiday_list_for_employee(doc.employee)
+	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
+		where
+			parent=%(holiday_list)s
+			and holiday_date >= %(start_date)s
+			and holiday_date <= %(end_date)s''', {
+				"holiday_list": holiday_list,
+				"start_date": msd,
+				"end_date": med
+			})
+
+	holidays = [cstr(i) for i in holidays]
+
+	trabalhouferiado = 0
+
+	for h in holidays:
+		print h
+		hh = frappe.db.sql(""" select attendance_date,status,company,employee from `tabAttendance` where docstatus = 1 and status = 'Present' and attendance_date = %s and employee = %s and company = %s """,(h,doc.employee, doc.company), as_dict = True)
+		print hh
+		if hh:
+			print "TRABALHOU !!!!"
+			trabalhouferiado += 1
+
+	doc.total_working_days = doc.total_working_days + trabalhouferiado
 	doc.numero_de_faltas = j[0]['count(status)']
-	doc.payment_days = doc.payment_days - j[0]['count(status)'] - j1[0]['count(status)']
+	doc.payment_days = (doc.payment_days + trabalhouferiado) - j[0]['count(status)'] - j1[0]['count(status)']
 	diaspagamento = doc.payment_days
 	totaldiastrabalho = doc.total_working_days
 	horasextra = j2[0]['horas']
-	
+	print 'ATTENDANCE ABSENT e ON LEAVE'
 	print j[0]['count(status)'], j1[0]['count(status)']
 	print 'Horas Extra ', j2[0]['horas']
+
+	print 'diastrab+feriado ', totaldiastrabalho + trabalhouferiado
 
 #	print doc.name , " + ", doc.employee
 #	print doc.payment_days - j[0]['count(status)']
