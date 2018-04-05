@@ -75,7 +75,15 @@ def validate(doc,method):
 			#BATCH Qty 
 			if i.warehouse and i.item_code and i.batch_no:
 				print 'BATCH NO verifica a QTD'
+				print i.batch_no
+				print i.warehouse
+				print i.item_code
 				print get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+				#print get_batch_qty(i.warehouse,i.item_code)['actual_batch_qty']
+				#for xx in get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']:
+				#	print "LISTA BATCHES....."
+				#	print xx
+
 				i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 
 	
