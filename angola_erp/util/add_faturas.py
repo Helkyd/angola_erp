@@ -1023,6 +1023,8 @@ def add_jentry(empresa, usuario, senha, ficheiro="journalentry_dev.csv", site="h
 													if int(contaduplicada[conta[0][0]]) == 2:
 														print "ESTE TEM QUE PARAR 2 vezes"
 														print "ESTE TEM QUE PARAR 2 vezes"
+														print "Nao deve salvar o registo!!!"
+														print registos
 														print contaduplicada[c[0]]
 
 
@@ -1081,7 +1083,20 @@ def add_jentry(empresa, usuario, senha, ficheiro="journalentry_dev.csv", site="h
 										print "REGISTO ++++++++"
 										print dados
 
-										return
+										#Salva o erro no File ...e Continua
+										registoerro1 = True
+										text_file.write(empresa + "\n")
+										text_file.write("Diario " + unicode(olddiario.strip()) + "\n NumeroDiario " + unicode(oldnumerodiario.strip()) + "\n Descricao " + unicode(olddescricao.strip()) + "\n")
+										#print contasJV
+										for tmp in contasJV:
+											text_file.write(tmp['account'] + "\n")
+											if 'debit_in_account_currency' in tmp:
+												text_file.write(tmp['debit_in_account_currency'] + "\n")
+											else:
+												text_file.write(tmp['credit_in_account_currency'] + "\n")
+											text_file.write("\n")	
+
+										#return Retirado por enquanto... deu erro mas pode continuar a importar.
 									else:
 										print 'diario ', diario
 										print 'numdiario ', numerodiario

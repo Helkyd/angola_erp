@@ -619,7 +619,7 @@ def add_jentry(empresa, usuario, senha, ficheiro="journalentry_dev.csv", site="h
 	with open (ficheiro) as csvfile:
 		readCSV = csv.reader(csvfile)
 		print "Lendo o ficheiro..."
-		print ficheiro[0:ficheiro.find('_')+1]
+		
 		text_file = open(ficheiro[0:ficheiro.find('_')+1] + 'movimentos_error.txt', "w")
 
 		for row in readCSV:
@@ -1023,6 +1023,8 @@ def add_jentry(empresa, usuario, senha, ficheiro="journalentry_dev.csv", site="h
 													if int(contaduplicada[conta[0][0]]) == 2:
 														print "ESTE TEM QUE PARAR 2 vezes"
 														print "ESTE TEM QUE PARAR 2 vezes"
+														print "Nao deve salvar o registo!!!"
+														print registos
 														print contaduplicada[c[0]]
 
 
