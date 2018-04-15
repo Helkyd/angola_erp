@@ -40,12 +40,19 @@ def validate(doc,method):
 	print doc.company.encode('utf-8')
 
 #	if not doc.salary_slip_based_on_timesheet:
-	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
+	#Falta Injustificada
+	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
+	#Falta Justificada c/salario
+	ja= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
 	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
 
 	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
-	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+	#Half day Injustificada
+	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
 	#Still need to COUNT for Present during Holiday
 	fiscal_year = get_fiscal_year(doc.start_date, company=doc.company)[0]

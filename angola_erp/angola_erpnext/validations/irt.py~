@@ -30,6 +30,10 @@ def get_lista_retencoes():
 #TO BE REMOVED IF Client ERPNEXT v8
 def set_faltas1(mes,ano,empresa):
 	print " DADOS ATTENDANCE"
+	print " POR RETIRAR "
+	print " POR RETIRAR "
+	print " POR RETIRAR "
+	print " POR RETIRAR "
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
 
@@ -53,8 +57,13 @@ def set_faltas(mes,ano,empresa):
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
 
+		#Faltas Injustificadas
 		j= frappe.db.sql(""" SELECT count(status)
-		from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+		from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
+		#Faltas Justificadas C/Salario
+		ja= frappe.db.sql(""" SELECT count(status)
+		from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
 		j2 = frappe.db.sql(""" SELECT count(status)
 		from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and year(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,ano,tra.name), as_dict=False)
@@ -68,7 +77,7 @@ def set_faltas(mes,ano,empresa):
 		print 'VERIFICA ATTENDANCE e LEAVE'
 		print tra.name
 
-		print j3
+		#print j3
 		
 
 		j1 = frappe.get_doc("Employee",tra.name)		
@@ -160,8 +169,10 @@ def set_salary_slip_pay_days(pag,emp,ano,mes):
 def get_faltas(emp,mes,ano, empresa):
 	print " DADOS ATTENDANCE"
 	print emp, ' ', mes, ' ', ano
+
+	#Falta Injustificada
 	j= frappe.db.sql(""" SELECT count(status)
-	from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and company = %s and docstatus=1 """,(emp,mes,ano, empresa), as_dict=False)
+	from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and company = %s and docstatus=1 """,(emp,mes,ano, empresa), as_dict=False)
 
 	j2 = frappe.db.sql(""" SELECT count(status)
 	from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and year(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,ano,emp), as_dict=False)
