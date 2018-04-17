@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
+from frappe.utils import formatdate, encode
 
 import frappe.model
 import frappe.utils
@@ -393,7 +394,7 @@ def make_accural_jv_entry(self):
 			print "VEvervegtertasdfasfdsafsadf"
 			print "VEvervegtertasdfasfdsafsadf"
 			print "EARNINGS"
-			print acc
+			print acc.encode('utf-8')
 			print conta.find('72210000')
 			print conta.find('5.10.80.10.10.20.10') 
 
@@ -463,7 +464,7 @@ def make_accural_jv_entry(self):
 #				contasal_prj = self['project'] 
 
 				print "CONTA 34610000"
-				print acc
+				print acc.encode('utf-8')
 				print amount
 				print contasal_amt
 				print payable_amount
@@ -475,7 +476,7 @@ def make_accural_jv_entry(self):
 #				contasal_prj = self['project'] 
 
 				print "CONTA 2.80.20.20.20"
-				print acc
+				print acc.encode('utf-8')
 				print amount
 				print contasal_amt
 				print payable_amount

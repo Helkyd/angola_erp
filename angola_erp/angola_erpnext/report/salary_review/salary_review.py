@@ -23,12 +23,8 @@ def execute(filters=None):
 	data = []
 	for ss in salary_slips:
 		#Somente o primeiro e ultimo nome ....dd[dd.rfind(' '):len(dd)]
-		row = [ss.employee_name[0:ss.employee_name.find(' ')] + ' ' + ss.employee_name[ss.employee_name.rfind(' '):len(ss.employee_name)], ss.department, ss.designation
+		row = [ss.employee_name[0:ss.employee_name.find(' ')] + ' ' + ss.employee_name[ss.employee_name.rfind(' '):len(ss.employee_name)], ss.designation
 			]
-		if (not ss.department == None and not ss.department == ''):
-			#row += [ss.department]
-
-			columns[1] = columns[1].replace('-1','80')
 		if (not ss.designation  == None and not ss.designation  == '') :
 			#row += [ss.designation]
 			columns[2] = columns[2].replace('-1','80')
@@ -53,7 +49,7 @@ def execute(filters=None):
 def get_columns(salary_slips):
 	columns = [
 		_("Employee Name") + ":Data:120", 
-		_("Department") + ":Link/Department:-1", _("Designation") + ":Link/Designation:-1"
+		_("Designation") + ":Link/Designation:-1"
 		
 	]
 
