@@ -49,14 +49,23 @@ def get_columns(salary_slips):
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 
-	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type
+	for component in frappe.db.sql("""select distinct sd.salary_component, sc.type, sc.salary_component_abbr
 		from `tabSalary Detail` sd, `tabSalary Component` sc
 		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by sd.idx, sd.abbr """ %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
+
 		salary_components[_(component.type)].append(component.salary_component)
 
+
+
+
+	#columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
+	#	[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+	#	[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+
+
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+		[_("Gross Pay") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component' if d !='Imposto Sobre o Rendimento do Trabalho' else 'salary_component_abbr') + (":Currency:120")) for d in salary_components[_("Deduction")]] + \
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
