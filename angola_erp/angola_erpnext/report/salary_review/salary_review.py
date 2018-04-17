@@ -27,7 +27,7 @@ def execute(filters=None):
 			]
 		if (not ss.designation  == None and not ss.designation  == '') :
 			#row += [ss.designation]
-			columns[2] = columns[2].replace('-1','80')
+			columns[1] = columns[1].replace('-1','80')
 
 		print 'ver colunas'
 		print columns
