@@ -383,7 +383,7 @@ def make_accural_jv_entry(self):
 			accounts.append({
 					"account": acc,
 					"debit_in_account_currency": flt(amount, precision),
-					"cost_center": self['cost_center'],
+					"cost_center": self.cost_center,
 					"project": contasal_prj 
 				})
 
@@ -449,7 +449,7 @@ def make_accural_jv_entry(self):
 			accounts.append({
 					"account": acc,
 					"credit_in_account_currency": flt(amount, precision),
-					"cost_center": self['cost_center'],
+					"cost_center": self.cost_center,
 					"project": contasal_prj 
 				})
 		#HELKYDS
@@ -486,7 +486,7 @@ def make_accural_jv_entry(self):
 			accounts.append({
 					"account": contasal,
 					"credit_in_account_currency": contasal_amt,
-					"cost_center": self['cost_center'],
+					"cost_center": self.cost_center,
 					"project": contasal_prj
 				})
 			payable_amount = payable_amount-contasal_amt		

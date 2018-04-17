@@ -36,6 +36,7 @@ def validate(doc,method):
 	retencaofonteDESC = ""
 	totalservicos_retencaofonte =0
 	totaldespesas_noretencaofonte =0
+	totaldescontos_linha = 0
 
 	percentagem = 0
 	
@@ -87,10 +88,16 @@ def validate(doc,method):
 				i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 
 	
+			#Total Desconto Linha
+			if i.margin_type == "Percentage":
+				totaldescontos_linha += i.amount
 
 	#Save retencao na INVoice 
 	doc.total_retencao_na_fonte = totalgeralretencaofonte
 	doc.base_retencao_fonte = totalbaseretencaofonte
+
+	#Save Descontos linha
+	doc.total_desconto_linha = totaldescontos_linha
 
 	#Calcula_despesas Ticked
 	

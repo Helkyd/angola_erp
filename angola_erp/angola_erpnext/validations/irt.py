@@ -30,28 +30,40 @@ def get_lista_retencoes():
 #TO BE REMOVED IF Client ERPNEXT v8
 def set_faltas1(mes,ano,empresa):
 	print " DADOS ATTENDANCE"
+	print " POR RETIRAR "
+	print " POR RETIRAR "
+	print " POR RETIRAR "
+	print " POR RETIRAR "
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
 
 		j= frappe.db.sql(""" SELECT count(status)
 		from `tabAttendance` where employee = %s and status = 'Absent' and month(att_date) = %s and year(att_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
+		j4= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
 		print " ATTENDANCE"
 		print j[0][0]	
 		#save on Employee record
 		j1 = frappe.get_doc("Employee",tra.name)
-		j1.numer_faltas = j[0][0]
+		j1.numer_faltas = flt(j[0][0]) + (flt(j4[0][0])/2)
 		j1.save()
 	return j
 
 @frappe.whitelist()
 def set_faltas(mes,ano,empresa):
 	print " DADOS ATTENDANCE - SET FALTAS"
+	print " DADOS ATTENDANCE - SET FALTAS"
 	print  mes, ' ', ano
 	for tra in frappe.db.sql(""" SELECT name,status from tabEmployee where status = 'Active' and company = %s """,(empresa), as_dict=True):
 
+		#Faltas Injustificadas
 		j= frappe.db.sql(""" SELECT count(status)
-		from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+		from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
+		#Faltas Justificadas C/Salario
+		ja= frappe.db.sql(""" SELECT count(status)
+		from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
 		j2 = frappe.db.sql(""" SELECT count(status)
 		from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and year(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,ano,tra.name), as_dict=False)
@@ -59,10 +71,14 @@ def set_faltas(mes,ano,empresa):
 
 		j3 = frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
+		#Half day Injustificado
+		j4= frappe.db.sql(""" SELECT count(status)
+		from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+
 		print 'VERIFICA ATTENDANCE e LEAVE'
 		print tra.name
 
-		print j3
+		#print j3
 		
 
 		j1 = frappe.get_doc("Employee",tra.name)		
@@ -113,6 +129,24 @@ def set_faltas(mes,ano,empresa):
 			#j1.save()
 
 
+		if j4[0][0] > 0:
+			#save on Employee record
+			#j1 = frappe.get_doc("Employee",tra.name)
+
+			print " FALTA HALF DAY"					
+			#print j4[0][0]
+			print j[0][0] + (flt(j4[0][0])/2)
+			print 'aaaa'
+
+			j1.numer_faltas = flt(j[0][0])	+ (flt(j4[0][0])/2)
+			#j1.save()
+		else:
+			#save on Employee record
+			#j1 = frappe.get_doc("Employee",tra.name)
+			if j[0][0]  < 0 :
+				j1.numer_faltas = 0
+			#j1.save()
+
 		j1.save()
 
 
@@ -136,20 +170,26 @@ def set_salary_slip_pay_days(pag,emp,ano,mes):
 def get_faltas(emp,mes,ano, empresa):
 	print " DADOS ATTENDANCE"
 	print emp, ' ', mes, ' ', ano
+
+	#Falta Injustificada
 	j= frappe.db.sql(""" SELECT count(status)
-	from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and company = %s and docstatus=1 """,(emp,mes,ano, empresa), as_dict=False)
+	from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and company = %s and docstatus=1 """,(emp,mes,ano, empresa), as_dict=False)
 
 	j2 = frappe.db.sql(""" SELECT count(status)
 	from `tabLeave Application` where status = 'Approved' and month(from_date) = %s and year(from_date) = %s and employee = %s and subsidio_de_ferias=1 and docstatus=1 """,(mes,ano,emp), as_dict=False)
 
+	#Half day Falta Injustificada
+	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(emp,mes,ano,empresa), as_dict=False)
+
+
 	print " ATTENDANCE"
-	print j[0][0]	
+	print j[0][0], j3[0][0]	
 	print " LEAVE APPLICATION"		
 	print j2[0][0]
 	
 	#save on Employee record
 	j1 = frappe.get_doc("Employee",emp)
-	j1.numer_faltas = j[0][0]
+	j1.numer_faltas = flt(j[0][0]) + (flt(j3[0][0])	/ 2)
 
 	if j2[0][0] > 0:
 		#save on Employee record

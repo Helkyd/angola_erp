@@ -7,6 +7,7 @@ import erpnext
 from frappe import msgprint
 from frappe.utils import money_in_words, flt
 from frappe.utils import cstr, getdate, date_diff
+from frappe.utils import formatdate, encode
 ## from erpnext.setup.utils import get_company_currency
 from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -36,13 +37,22 @@ def validate(doc,method):
 
 	print doc.name , " + ", doc.employee, " + ", doc.start_date
 	print doc.payment_days, " + ", doc.total_working_days
-	print doc.company
+	print doc.company.encode('utf-8')
 
 #	if not doc.salary_slip_based_on_timesheet:
-	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
+	#Falta Injustificada
+	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
+	#Falta Justificada c/salario
+	ja= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
 	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
 
 	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+
+	#Half day Injustificada
+	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
 	#Still need to COUNT for Present during Holiday
 	fiscal_year = get_fiscal_year(doc.start_date, company=doc.company)[0]
@@ -80,13 +90,17 @@ def validate(doc,method):
 			trabalhouferiado += 1
 
 	doc.total_working_days = doc.total_working_days + trabalhouferiado
-	doc.numero_de_faltas = j[0]['count(status)']
+	doc.numero_de_faltas = flt(j[0]['count(status)']) + (flt(j3[0]['count(status)'])/2)
 	doc.payment_days = (doc.payment_days + trabalhouferiado) - j[0]['count(status)'] - j1[0]['count(status)']
 	diaspagamento = doc.payment_days
 	totaldiastrabalho = doc.total_working_days
 	horasextra = j2[0]['horas']
 	print 'ATTENDANCE ABSENT e ON LEAVE'
-	print j[0]['count(status)'], j1[0]['count(status)']
+	print 'ATTENDANCE ABSENT e ON LEAVE'
+	print 'ATTENDANCE ABSENT e ON LEAVE'
+	print j[0]['count(status)'], j3[0]['count(status)'], j1[0]['count(status)']
+	print j[0]['count(status)'], j3[0]['count(status)'], j1[0]['count(status)']
+	print (flt(j[0]['count(status)']) + flt(j3[0]['count(status)']))
 	print 'Horas Extra ', j2[0]['horas']
 
 	print 'diastrab+feriado ', totaldiastrabalho + trabalhouferiado
@@ -638,7 +652,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 	print "Processa o Salario Iliquido ..."
 	print "Processa o Salario Iliquido ..."
 	salario_iliquido =0;
-	print mes, ano, empresa	
+	print mes, ano, empresa.encode('utf-8')
 	#Processa o Salario Iliquido ...
 	#for salslip in frappe.db.sql(""" select name from `tabSalary Slip` where 
 	for salslip in frappe.db.sql(""" SELECT name,status from `tabSalary Slip` where month(start_date) = %s and year(start_date) = %s and  company = %s """,(mes,ano,empresa), as_dict=True):

@@ -1,30 +1,11 @@
-<style>
-	.print-format table, .print-format tr, 
-	.print-format td, .print-format div, .print-format p {
-
-		line-height: 200%;
-		vertical-align: middle;
-	}
-	@media screen {
-		.print-format {
-			size:	A4 portrait;
-			font-size: 8px;
-			
-		}
-	}
-	
-
-</style>
-
-<div style="margin-bottom: 7px;" class="text-center">
+<div style="margin-bottom: 7px;" class="text-center">	
 	{%= frappe.boot.letter_heads[filters.letter_head ] %}
 </div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-
 <h5 class="text-center">{{ __("From") }} {%= filters.date_range[0] %} {{ __("to") }} {%= filters.date_range[1] %}</h5>
 <hr>
 <h5 class="text-left"><b>{{ __("Company") }}</b> {{ filters.company }} </h5>
-<table class="table table-bordered" style="font-size: 10px;">
+<table class="table table-bordered">
 	<thead>
 		<tr>
 			{% for(var i=1, l=report.columns.length; i<l; i++) { %}
@@ -32,22 +13,21 @@
 			{% } %}
 		</tr>
 	</thead>
-    <tbody>
+	<tbody>
 		{% for(var j=0, k=data.length; j<k; j++) { %}
-            {%
+			{%
 				var row = data[j];
 			%}
 			<tr>
 				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
 					<td class="text-right">
 						{% var fieldname = report.columns[i].field; %}
-						
-                        {% if (!isNaN(row[fieldname])) { %}
-                            {%= format_currency(row[fieldname]) %}
-                        {% } else { %}
-						    {% if (!is_null(row[fieldname])) { %}
-							    {%= row[fieldname] %}
-                            {% } %}
+						{% if (report.columns[i].fieldtype=='Currency' && !isNaN(row[fieldname])) { %}
+							{%= format_currency(row[fieldname]) %}
+						{% } else { %}
+							{% if (!is_null(row[fieldname])) { %}
+								{%= row[fieldname] %}
+							{% } %}
 						{% } %}
 					</td>
 				{% } %}
