@@ -79,6 +79,7 @@ def validate(doc,method):
 				print i.batch_no
 				print i.warehouse
 				print i.item_code
+				print ('qtd atual ', i.actual_qty)
 				print get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 				#print get_batch_qty(i.warehouse,i.item_code)['actual_batch_qty']
 				#for xx in get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']:
@@ -86,6 +87,9 @@ def validate(doc,method):
 				#	print xx
 
 				i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+				if i.actual_qty == 0:
+					print 'ACTUAL QTY ZEROOOOOOOO'
+					i.actual_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 
 	
 			#Total Desconto Linha
