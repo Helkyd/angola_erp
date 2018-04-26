@@ -103,14 +103,14 @@ class FichadeProcesso(Document):
 				"doctype": "Sales Order",
 				"delivery_date": get_datetime(frappe.utils.now()) + timedelta(days=2) ,
 				"customer": self.customer_reference,
+				"project":self.name
 			})
 			for num_servicos in frappe.get_all("Servicos_Ficha_Processo",filters={'Parent':self.name},fields=['Parent','servico_ficha_processo','descricao_ficha_processo','preco_ficha_processo']):
 				projecto.append('items',{
 					"item_code": num_servicos.servico_ficha_processo,
 					"item_name": num_servicos.descricao_ficha_processo,
 					"description": num_servicos.descricao_ficha_processo,
-					"rate":num_servicos.preco_ficha_processo,
-					"project":self.name,
+					"rate":num_servicos.preco_ficha_processo,					
 					"qty": 1
 				})
 

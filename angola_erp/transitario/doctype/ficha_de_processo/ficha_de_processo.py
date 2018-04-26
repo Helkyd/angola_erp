@@ -62,6 +62,7 @@ class FichadeProcesso(Document):
 				"expected_end_date": get_datetime(frappe.utils.now()) + timedelta(days=5),  #self.et_delivery_process ,
 				"is_active": "Yes",
 				"project_type": "Internal",
+				"estimated_costing": self.broker_funds,
 				"customer": self.customer_reference
 			})
 			projecto.insert()
