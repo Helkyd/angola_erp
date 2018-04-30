@@ -136,3 +136,12 @@ def get_projecto_status_completed():
 	return frappe.db.sql("""select name from `tabProject` WHERE status = 'Completed' """, as_dict=False)
 
 
+@frappe.whitelist()
+def set_ficha_closed(ficha):
+	print 'Fechar a Ficha de Processo'	
+	fecharficha = frappe.get_doc("Ficha de Processo", ficha)
+
+	frappe.db.sql("""update `tabFicha de Processo` set status_process = 'Fechado' where name = %s """,ficha, as_dict=False)
+
+
+

@@ -163,6 +163,8 @@ def get_vendas_taxa_retencao():
 def get_taxa_retencao():
 	# POR REMOVER MAIS TARDE  **********************
 	#locate account 34130000
+
+	#Account 3413 ou 3414
 	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
 	print " LISTA TAXA RETENCAO conta 3413"

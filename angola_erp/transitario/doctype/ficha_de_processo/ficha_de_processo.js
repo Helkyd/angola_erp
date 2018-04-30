@@ -141,30 +141,49 @@ frappe.ui.form.on('Ficha de Processo', {
 			cur_frm.refresh_fields('broker_funds');
 		}
 
-		if (cur_frm.docstatus ==1){ //(cur_frm.has_perm("submit")) {
+
+		if (frm.doc.docstatus ==1){ //(cur_frm.has_perm("submit")) {
 			// close
+			console.log('Fecha ou Nao')
 			if (prj1.responseJSON != undefined){			
 				x = 0
 				for (x in prj1.responseJSON.message){
 					if (prj1.responseJSON.message[x] == cur_frm.doc.name){
-						cur_frm.add_custom_button(__('Fechar'), this.close_ficha_processo, __("Status"))
+						frm.add_custom_button(("Fechar"), function() {
+
+							frappe.call({
+								'async': false,
+								'method': 'angola_erp.transitario.doctype.ficha_de_processo.ficha_de_processo.set_ficha_closed',
+								'args':{
+									'ficha': cur_frm.doc.name,
+								}
+							});
+
+							cur_frm.reload_doc()
+						});
+
 					}
 				}
 			}
-			//if (prj.responseJSON != undefined){
-			//	if (prj.responseJSON.message == "Completed") {
+			if (prj.responseJSON != undefined){
+				if (prj.responseJSON.message[0][1] == "Completed" && prj.responseJSON.message[0][0] == cur_frm.doc.name) {
+					console.log('projeto corrente fechado!!!!')
 			//		cur_frm.add_custom_button(__('Fechar'), this.close_ficha_processo, __("Status"))
 
-			//	}
-			//}
+				}
+			}
 		}
 
-	},
-	close_ficha_processo: function(){
-		cur_frm.cscript.update_status_process("Close", "Fechado")
 	}
 
 });
+
+
+var close_ficha_processo = function(){
+	cur_frm.doc.status_process = "Fechado";	
+	//cur_frm.cscript.update_status_process("Close", "Fechado");
+}
+
 
 frappe.ui.form.on("Ficha de Processo","process_number",function(frm,cdt,cdn){
 	if (cur_frm.doc.taxa_cambio_bna == 0 || cur_frm.doc.taxa_cambio_bna == undefined ) {

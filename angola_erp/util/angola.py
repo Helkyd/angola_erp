@@ -180,7 +180,7 @@ def get_taxa_retencao():
 
 @frappe.whitelist()
 def get_lista_retencoes():
-	j= frappe.db.sql(""" SELECT name, descricao, percentagem from `tabRetencoes` """,as_dict=True)
+	j= frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` """,as_dict=True)
 
 	print " LISTA RETENCOES"
 	print j	

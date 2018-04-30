@@ -74,15 +74,15 @@ frappe.ui.form.on('Ficha de Processo', {
 			frm.add_custom_button(("Requisicao de Fundos"), function() {				
 				cur_frm.reload_doc()
 				console.log('rint')
-				var me = this;
+				//var me = this;
 				//frappe.route_options = {"name": cur_frm.doc.sales_invoice, "customer":cur_frm.doc.student_name}
 				//frappe.route_options = {"project_name": cur_frm.doc.name,"customer": cur_frm.doc.customer_reference}
 				//frappe.set_route('query-report#Requisicao_de_Fundos', cur_frm.doctype,cur_frm.docname);
-				var html = frappe.render("Requisicao_de_Fundos", cur_frm.doc)	
+				//var html = frappe.render("Requisicao_de_Fundos", cur_frm.doc)	
 				//cur_frm.print_preview.print_formats[1]
 				//ur_frm.print_preview.preview(cur_frm.print_preview.print_formats[1])
-				cur_frm.print_preview.get_print_format(cur_frm.print_preview.print_formats[1])
-				cur_frm.print_preview.selected_format(cur_frm.print_preview.print_formats[1])
+				//cur_frm.print_preview.get_print_format(cur_frm.print_preview.print_formats[1])
+				//cur_frm.print_preview.selected_format(cur_frm.print_preview.print_formats[1])
 				cur_frm.print_preview.printit(1)
 				//me.print_document(html)
 				//frappe.query_reports["Requisicao de Fundos"];
@@ -141,30 +141,49 @@ frappe.ui.form.on('Ficha de Processo', {
 			cur_frm.refresh_fields('broker_funds');
 		}
 
-		if (cur_frm.docstatus ==1){ //(cur_frm.has_perm("submit")) {
+
+		if (frm.doc.docstatus ==1){ //(cur_frm.has_perm("submit")) {
 			// close
+			console.log('Fecha ou Nao')
 			if (prj1.responseJSON != undefined){			
 				x = 0
 				for (x in prj1.responseJSON.message){
 					if (prj1.responseJSON.message[x] == cur_frm.doc.name){
-						cur_frm.add_custom_button(__('Fechar'), this.close_ficha_processo, __("Status"))
+						frm.add_custom_button(("Fechar"), function() {
+
+							frappe.call({
+								'async': false,
+								'method': 'angola_erp.transitario.doctype.ficha_de_processo.ficha_de_processo.set_ficha_closed',
+								'args':{
+									'ficha': cur_frm.doc.name,
+								}
+							});
+
+							cur_frm.reload_doc()
+						});
+
 					}
 				}
 			}
-			//if (prj.responseJSON != undefined){
-			//	if (prj.responseJSON.message == "Completed") {
+			if (prj.responseJSON != undefined){
+				if (prj.responseJSON.message[0][1] == "Completed") {
+					console.log('projeto corrente fechado!!!!')
 			//		cur_frm.add_custom_button(__('Fechar'), this.close_ficha_processo, __("Status"))
 
-			//	}
-			//}
+				}
+			}
 		}
 
-	},
-	close_ficha_processo: function(){
-		cur_frm.cscript.update_status_process("Close", "Fechado")
 	}
 
 });
+
+
+var close_ficha_processo = function(){
+	cur_frm.doc.status_process = "Fechado";	
+	//cur_frm.cscript.update_status_process("Close", "Fechado");
+}
+
 
 frappe.ui.form.on("Ficha de Processo","process_number",function(frm,cdt,cdn){
 	if (cur_frm.doc.taxa_cambio_bna == 0 || cur_frm.doc.taxa_cambio_bna == undefined ) {
