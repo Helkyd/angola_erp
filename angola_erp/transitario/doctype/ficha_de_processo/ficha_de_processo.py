@@ -67,6 +67,8 @@ class FichadeProcesso(Document):
 			})
 			projecto.insert()
 			frappe.msgprint('{0}{1}'.format("Ficha de Processo criado como Projeto ", self.name))
+
+			self.project = self.name
 			#create the Tasks
 
 			for num_servicos in frappe.get_all("Servicos_Ficha_Processo",filters={'Parent':self.name},fields=['Parent','servico_ficha_processo','descricao_ficha_processo']):
@@ -117,9 +119,9 @@ class FichadeProcesso(Document):
 
 						
 			projecto.insert()
-			frappe.msgprint('{0}{1}'.format("Ficha de Processo criado como Ordem de Venda ", self.name))
+			frappe.msgprint('{0}{1}'.format("Ficha de Processo criado como Ordem de Venda ", projecto.name))
 			#create the Tasks
-
+			self.sales_order = projecto.name
 
 
 @frappe.whitelist()

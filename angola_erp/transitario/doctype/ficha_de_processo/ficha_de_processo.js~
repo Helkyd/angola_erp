@@ -68,17 +68,57 @@ frappe.ui.form.on('Ficha de Processo', {
 
 		if (cur_frm.doc.status_process == 'Em Curso' && !cur_frm.doc.__islocal || cur_frm.doc.status_process == 'Fechado' ){
 
-			frm.add_custom_button(__("Projecto"), function() {
+			frm.clear_custom_buttons()	//Clear the existing one .. so ours can be added.
+
+			//Requisicao de Fundos
+			frm.add_custom_button(("Requisicao de Fundos"), function() {				
 				cur_frm.reload_doc()
+				console.log('rint')
+				var me = this;
+				//frappe.route_options = {"name": cur_frm.doc.sales_invoice, "customer":cur_frm.doc.student_name}
+				//frappe.route_options = {"project_name": cur_frm.doc.name,"customer": cur_frm.doc.customer_reference}
+				//frappe.set_route('query-report#Requisicao_de_Fundos', cur_frm.doctype,cur_frm.docname);
+				var html = frappe.render("Requisicao_de_Fundos", cur_frm.doc)	
+				//cur_frm.print_preview.print_formats[1]
+				//ur_frm.print_preview.preview(cur_frm.print_preview.print_formats[1])
+				cur_frm.print_preview.get_print_format(cur_frm.print_preview.print_formats[1])
+				cur_frm.print_preview.selected_format(cur_frm.print_preview.print_formats[1])
+				cur_frm.print_preview.printit(1)
+				//me.print_document(html)
+				//frappe.query_reports["Requisicao de Fundos"];
+				//frappe.query_report.load();
+
+			});
+
+			//Project
+			frm.add_custom_button((cur_frm.doc.project), function() {				
+				cur_frm.reload_doc()
+				//frappe.route_options = {"name": cur_frm.doc.sales_invoice, "customer":cur_frm.doc.student_name}
 				frappe.route_options = {"project_name": cur_frm.doc.name,"customer": cur_frm.doc.customer_reference}
 				frappe.set_route("List", "Project");
-			}, "Criar", true);
 
-			frm.add_custom_button(__("Ordens de Venda"), function() {
+			});
+			
+			//Sales Order
+			frm.add_custom_button((cur_frm.doc.sales_order), function() {				
 				cur_frm.reload_doc()
+				//frappe.route_options = {"name": cur_frm.doc.sales_invoice, "customer":cur_frm.doc.student_name}
 				frappe.route_options = {"project": cur_frm.doc.name, "customer": cur_frm.doc.customer_reference}
 				frappe.set_route("List", "Sales Order");
-			}, "Criar", true);
+
+			});
+
+			//frm.add_custom_button(__("Projecto"), function() {
+			//	cur_frm.reload_doc()
+			//	frappe.route_options = {"project_name": cur_frm.doc.name,"customer": cur_frm.doc.customer_reference}
+			//	frappe.set_route("List", "Project");
+			//}, "Criar", true);
+
+			//frm.add_custom_button(__("Ordens de Venda"), function() {
+			//	cur_frm.reload_doc()
+			//	frappe.route_options = {"project": cur_frm.doc.name, "customer": cur_frm.doc.customer_reference}
+			//	frappe.set_route("List", "Sales Order");
+			//}, "Criar", true);
 
 
 		}
@@ -166,10 +206,79 @@ frappe.ui.form.on("Ficha de Processo","funds_request_currency",function(frm,cdt,
 	}
 });
 
+
+frappe.ui.form.on("Ficha de Processo","valor_fob",function(frm,cdt,cdn){
+	//Calcula valor_cif mercadoria
+	console.log('valor fob')
+	cur_frm.doc.valor_cif_mercadoria = cur_frm.doc.valor_fob
+	if (cur_frm.doc.frete){
+		cur_frm.doc.valor_cif_mercadoria += cur_frm.doc.frete
+	}
+
+	if (cur_frm.doc.valor_seguro){
+		cur_frm.doc.valor_cif_mercadoria += cur_frm.doc.valor_seguro
+	}
+	cur_frm.refresh_fields('valor_cif_mercadoria');
+
+
+});
+
+
+frappe.ui.form.on("Ficha de Processo","valor_seguro",function(frm,cdt,cdn){
+	//Calcula valor_cif mercadoria
+	console.log('valor fob')
+	cur_frm.doc.valor_cif_mercadoria = cur_frm.doc.valor_fob
+	if (cur_frm.doc.frete){
+		cur_frm.doc.valor_cif_mercadoria += cur_frm.doc.frete
+	}
+
+	if (cur_frm.doc.valor_seguro){
+		cur_frm.doc.valor_cif_mercadoria += cur_frm.doc.valor_seguro
+	}
+
+	cur_frm.refresh_fields('valor_cif_mercadoria');
+
+
+});
+
+frappe.ui.form.on("Ficha de Processo","frete",function(frm,cdt,cdn){
+	//Calcula valor_cif mercadoria
+	console.log('valor fob')
+	cur_frm.doc.valor_cif_mercadoria = cur_frm.doc.valor_fob
+	if (cur_frm.doc.frete){
+		cur_frm.doc.valor_cif_mercadoria += cur_frm.doc.frete
+	}
+
+	if (cur_frm.doc.valor_seguro){
+		cur_frm.doc.valor_cif_mercadoria += cur_frm.doc.valor_seguro
+	}
+
+	cur_frm.refresh_fields('valor_cif_mercadoria');
+
+
+});
+
+frappe.ui.form.on("Ficha de Processo","valor_cif_mercadoria",function(frm,cdt,cdn){
+	//Calcula valor_aduaneiro
+	if (cur_frm.doc.taxa_cambio_alfandega){
+		cur_frm.doc.valor_aduaneiro = cur_frm.doc.valor_cif_mercadoria * cur_frm.doc.taxa_cambio_alfandega
+	}else{
+		cur_frm.doc.valor_aduaneiro = cur_frm.doc.valor_cif_mercadoria * cur_frm.doc.taxa_cambio_bna
+	}	
+	cur_frm.refresh_fields('valor_aduaneiro');
+
+
+});
+
 frappe.ui.form.on("Ficha de Processo","commodity",function(frm,cdt,cdn){
 	//Calcula valor_aduaneiro
 	if (cur_frm.doc.valor_cif_mercadoria && (cur_frm.doc.valor_aduaneiro == 0 || cur_frm.doc.valor_aduaneiro == undefined )){
-		cur_frm.doc.valor_aduaneiro = cur_frm.doc.valor_cif_mercadoria * cur_frm.doc.taxa_cambio_bna
+		if (cur_frm.doc.taxa_cambio_alfandega){
+			cur_frm.doc.valor_aduaneiro = cur_frm.doc.valor_cif_mercadoria * cur_frm.doc.taxa_cambio_alfandega
+		}else{
+			cur_frm.doc.valor_aduaneiro = cur_frm.doc.valor_cif_mercadoria * cur_frm.doc.taxa_cambio_bna
+		}	
+
 		cur_frm.refresh_fields('valor_aduaneiro');
 	}
 });
