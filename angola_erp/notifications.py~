@@ -7,10 +7,11 @@ from __future__ import unicode_literals
 def get_notification_config():
 	return { "for_doctype":
 		{
-			"Atendimento Bar": {"status_atendimento": 'Ocupado'},
-			"Mesas": {"status_mesa": 'Ocupada'},
+			"Atendimento Bar": {"status_atendimento": "Ocupado"},
+			"Mesas": {"status_mesa": "Ocupada"},
 			"Gestao de Quartos": {"status_quarto": "Ocupado"},
 			"Reservas": {"reservation_status": "Nova"},
+			"Ficha de Processo": {"status_process":['in',"Aberto","Em Curso"]},
 
 		}
 	}

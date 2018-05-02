@@ -20,7 +20,7 @@ frappe.listview_settings['Ficha de Processo'] = {
 
 	onload: function(listview){
 		frappe.route_options = {
-			"status_process":['in','Aberto,Em Curso']
+			"status_process":['in',"Aberto,Em Curso"]
 		};
 	},	
 	

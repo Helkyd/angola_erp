@@ -38,10 +38,17 @@ def validate(doc,method):
 	totaldespesas_noretencaofonte =0
 	totaldescontos_linha = 0
 
+	impostoselotransit = []
+	totalimpostoselotrans = 0
+	impostoselotranspercentagem = 0
+	metadedovalor = False
+
 	percentagem = 0
 	
 	
 	ii=0
+
+	numISelo = 0	#contador Imposto de Selo
 
 	for x in lista_retencoes:
 		if x.descricao =='Retencao na Fonte':
@@ -50,11 +57,24 @@ def validate(doc,method):
 		elif (x.descricao =='IPC') or (x.descricao =='Imposto de Consumo'):
 			print ('IPC % ', x.percentagem)
 			percentagem = x.percentagem
+		elif ('Imposto de Selo' in x.descricao):
+
+			print ('Imposto de Selo % ', x.percentagem)
+			print (x.descricao)
+			print ('metade '), x.metade_do_valor
+			impostoselotransit.append([x.descricao, x.percentagem, x.metade_do_valor])
+
+			#impostoselotranspercentagem = x.percentagem
+			#if (x.metade_do_valor):
+			#	metadedovalor = True	
+
+
+
 
 
 	for i in doc.get("items"):			
 		if i.item_code != None:
-			prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
+			prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte,imposto_de_selo,que_imposto_de_selo FROM `tabItem` WHERE item_code = %s """, i.item_code , as_dict=True)
 			if prod[0].imposto_de_consumo ==1:
 				print ("IMPOSTO CONSUMO")
 				if percentagem == 0:
@@ -69,6 +89,43 @@ def validate(doc,method):
 				totalservicos_retencaofonte += totalbaseretencaofonte
 			else:
 				totaldespesas_noretencaofonte += i.amount		
+
+			if prod[0].imposto_de_selo ==1:
+				print ("IMPOSTO DE SELO TRANS")
+				print ("IMPOSTO DE SELO TRANS")
+				for x1 in impostoselotransit:
+					print 'loop no imposto selo'
+					print x1
+					print x1[0]
+					print x1[1]
+					print x1[2]
+					if x1[0] == prod[0].que_imposto_de_selo:
+						print 'Imposto CORRETO!!!!!'
+						print 'Imposto CORRETO!!!!!'
+						print 'Imposto CORRETO!!!!!'
+
+						if x1[2] == 1:	#metade do valor TRUE
+							print 'METADE DO VALOR!!!'
+							metadedovalor = True
+						else:
+							metadedovalor = False
+
+						impostoselotranspercentagem = x1[1]
+						
+						print (flt(i.amount) * x1[1])
+						print ('Selo % ',((i.amount * impostoselotranspercentagem) / 100))
+						break
+				print 'continua....'
+				print metadedovalor
+				#i.retencao_na_fonte = (i.amount * retencaopercentagem) / 100
+				if (metadedovalor):
+					totalimpostoselotrans += ((i.amount/2) * impostoselotranspercentagem) / 100
+					i.imposto_de_selo_trans = ((i.amount/2) * impostoselotranspercentagem) / 100
+				else:
+					totalimpostoselotrans += (i.amount * impostoselotranspercentagem) / 100
+					i.imposto_de_selo_trans = (i.amount * impostoselotranspercentagem) / 100
+				print totalimpostoselotrans
+
 
 			totalgeralimpostoconsumo += i.imposto_de_consumo					
 			totalgeralretencaofonte +=  i.retencao_na_fonte
@@ -89,7 +146,7 @@ def validate(doc,method):
 				i.actual_batch_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 				if i.actual_qty == 0:
 					print 'ACTUAL QTY ZEROOOOOOOO'
-					i.actual_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
+					#i.actual_qty = get_batch_qty(i.batch_no,i.warehouse,i.item_code)['actual_batch_qty']
 
 	
 			#Total Desconto Linha
@@ -102,6 +159,9 @@ def validate(doc,method):
 
 	#Save Descontos linha
 	doc.total_desconto_linha = totaldescontos_linha
+
+	#Save Imposto de Selo Trans
+	doc.total_imposto_selo_trans = totalimpostoselotrans
 
 	#Calcula_despesas Ticked
 	

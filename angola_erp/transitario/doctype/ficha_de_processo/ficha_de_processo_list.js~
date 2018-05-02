@@ -16,7 +16,7 @@ frappe.listview_settings['Ficha de Processo'] = {
 		
 		}
 	},
-	colwidths: {"subject": 4, "status_process": 2,"Nome do Cliente": 2},
+	colwidths: {"subject": 4, "indicator": 2,"Nome do Cliente": 2},
 
 	onload: function(listview){
 		frappe.route_options = {
