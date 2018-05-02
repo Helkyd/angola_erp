@@ -9,14 +9,14 @@ prj1= cur_frm.call({method:"get_projecto_status_completed",args:{}})
 frappe.ui.form.on('Ficha de Processo', {
 
 	before_save: function(frm){
-		show_alert("antes de salvar",2)
+		frappe.show_alert("antes de salvar",2)
 		if (frm.doc.docstatus ==1) {
 			cur_frm.doc.status_process = 'Em Curso'
 		}
 	},
 
 	after_cancel: function(frm){
-		show_alert("vai cancelar o processo",1)
+		frappe.show_alert("vai cancelar o processo",1)
 		cur_frm.doc.status_process ='Cancelado'	
 		cur_frm.save()
 	},
@@ -184,7 +184,6 @@ var close_ficha_processo = function(){
 	//cur_frm.cscript.update_status_process("Close", "Fechado");
 }
 
-
 frappe.ui.form.on("Ficha de Processo","process_number",function(frm,cdt,cdn){
 	if (cur_frm.doc.taxa_cambio_bna == 0 || cur_frm.doc.taxa_cambio_bna == undefined ) {
 		if (taxacambio.responseJSON == undefined){
@@ -199,6 +198,21 @@ frappe.ui.form.on("Ficha de Processo","process_number",function(frm,cdt,cdn){
 		}
 		cur_frm.refresh_fields('taxa_cambio_bna');
 	}
+
+	if (cur_frm.doc.process_number.length < 4){
+		if (cur_frm.doc.process_number.length == 1){
+			frappe.model.set_value(cdt,cdn,'process_number','000' + cur_frm.doc.process_number)
+		}else if (cur_frm.doc.process_number.length == 2){
+			frappe.model.set_value(cdt,cdn,'process_number','00' + cur_frm.doc.process_number)
+		}else if (cur_frm.doc.process_number.length == 3){
+			frappe.model.set_value(cdt,cdn,'process_number','0' + cur_frm.doc.process_number)
+		}
+	}
+	if (isNaN(cur_frm.doc.process_number)){
+		frappe.model.set_value(cdt,cdn,'process_number',01)
+		frappe.show_alert('Numero de Processo tem que ter somente digitos')
+	}
+
 
 });
 
@@ -220,7 +234,7 @@ frappe.ui.form.on("Ficha de Processo","funds_request_currency",function(frm,cdt,
 
 		}else{
 			//Tem que ir buscar o cambio based on the currency selected
-			show_alert("Taxa cambio...aguarde",1) 	
+			frappe.show_alert("Taxa cambio...aguarde",1) 	
 		}
 	}
 });
@@ -305,31 +319,31 @@ frappe.ui.form.on("Ficha de Processo","commodity",function(frm,cdt,cdn){
 
 frappe.ui.form.on("Ficha de Processo","taxa_cambio_company",function(frm,cdt,cdn){
 	if (!isNumber(cur_frm.doc.broker_request_customs)){
-		alert("Somente numeros")
+		frappe.show_alert("Somente numeros")
 	}
 });
 
 frappe.ui.form.on("Ficha de Processo","invoice_currency_roe",function(frm,cdt,cdn){
 	if (!isNumber(cur_frm.doc.broker_request_customs)){
-		alert("Somente numeros")
+		frappe.show_alert("Somente numeros")
 	}
 });
 
 frappe.ui.form.on("Ficha de Processo","credit_customer_value",function(frm,cdt,cdn){
 	if (!isNumber(cur_frm.doc.broker_request_customs)){
-		alert("Somente numeros")
+		frappe.show_alert("Somente numeros")
 	}
 });
 
 frappe.ui.form.on("Ficha de Processo","broker_funds",function(frm,cdt,cdn){
 	if (!isNumber(cur_frm.doc.broker_request_customs)){
-		alert("Somente numeros")
+		frappe.show_alert("Somente numeros")
 	}
 });
 
 frappe.ui.form.on("Ficha de Processo","broker_request_customs",function(frm,cdt,cdn){
 	if (!isNumber(cur_frm.doc.broker_request_customs)){
-		alert("Somente numeros")
+		frappe.show_alert("Somente numeros")
 	}
 });
 
@@ -376,20 +390,20 @@ frappe.ui.form.on('Ficha de Processo','status_process',function(frm,cdt,cdn){
 	//When changed to EM CURSO ... copies the info to Project and create the tasks.
 	if (cur_frm.doc.status_process == 'Em Curso'){
 		if (frm.docname.substring(0,3)=="New" || frm.docname.substring(0,3)=="Nov"){
-			alert("Nao se esqueca de salvar primeiro o registo antes de mudar o Status para Em Curso\nDepois de Salvo podera mudar o status e criar o Projecto com as tarefas")
+			frappe.show_alert("Nao se esqueca de salvar primeiro o registo antes de mudar o Status para Em Curso\nDepois de Salvo podera mudar o status e criar o Projecto com as tarefas")
 			cur_frm.doc.status_process = "Aberto"
 			cur_frm.reload_doc()	
 		}else{
-			show_alert("Os servicos do Cliente serao criados e incluidos como Projecto!!!",2)
+			frappe.show_alert("Os servicos do Cliente serao criados e incluidos como Projecto!!!",2)
 		}
 	}else if (cur_frm.doc.status_process == 'Fechado'){
 		//Verifica se o Projecto ja esta completed.
 		if (prj.responseJSON.message == "Completed"){
 			//Pode fechar a Obra ... transfer the list of Material added to Material_obra
-			show_alert("Ficha de Processo pode ser fechado !!!",3)
+			frappe.show_alert("Ficha de Processo pode ser fechado !!!",3)
 		}else{
 			//Ooooopppssss still oopen
-			alert("O Projecto " + cur_frm.doc.process_number + " ainda nao esta fechado ou concluido.\nPor favor rever as tarefas alocadas.")
+			frappe.show_alert("O Projecto " + cur_frm.doc.process_number + " ainda nao esta fechado ou concluido.\nPor favor rever as tarefas alocadas.")
 			cur_frm.doc.status_process = "Em Curso"
 			cur_frm.reload_doc()	
 

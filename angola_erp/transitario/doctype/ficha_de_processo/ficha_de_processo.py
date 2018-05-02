@@ -4,22 +4,70 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, msgprint, throw
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from datetime import datetime, timedelta
 from frappe.utils import cstr, get_datetime, getdate, cint, get_datetime_str
 
-
 class FichadeProcesso(Document):
 
 	def autoname(self):
 
-		self.name = make_autoname(self.process_number + '-' + '.###')
+		print(self.process_number)
+		print(len(self.serie_tipo))
+		#print(make_autoname(self.serie_tipo))
+		#print('Serie ', make_autoname(self.serie_tipo)[0:len(self.serie_tipo)-1])
+		if len(self.serie_tipo) == 10:
+			self.process_number = make_autoname(self.serie_tipo)[0:len(self.serie_tipo)-2] + self.process_number
+		else:
+			if (self.serie_tipo == "ASTXXXX-"):
+				#replace xxx by YEAR
+				print 'AQUIIIII'
+				print self.serie_tipo[0:3]
+				print self.serie_tipo[0:3] + self.process_number + "-" + format(datetime.now(),"%Y")
+				self.process_number = self.serie_tipo[0:3] + self.process_number + "-" + format(datetime.now(),"%Y")
+			else:
+				self.process_number = make_autoname(self.serie_tipo)[0:len(self.serie_tipo)-1] + self.process_number
+		print ('numero ', self.process_number)
+		self.name = self.process_number	#make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
+
+		#self.name = make_autoname(self.process_number + '-' + '.###')
 		#self.usuario= frappe.session.user
 
 
 	def validate(self):
+
+		#Check numero processo is Number and 4 digits.
+		if len(self.process_number) < 4:
+			if len(self.process_number) == 1:
+				self.process_number = '000' + self.process_number
+			elif len(self.process_number) == 2:
+				self.process_number ='00' + self.process_number
+			elif len(self.process_number) == 3:
+				self.process_number ='0' + self.process_number
+	
+		elif len(self.process_number) > 4:
+			if len(self.serie_tipo) == 10:
+				if len(self.process_number) != ((len(self.serie_tipo)-2)+4):
+					msgprint('Numero de Processo tem que ter somente 4 digitos')
+					self.process_number =None
+					frappe.validated = False
+
+			else:
+				if (self.serie_tipo == "ASTXXXX-"):
+					print 'passou'
+				elif len(self.process_number) != ((len(self.serie_tipo)-1)+4):
+					msgprint('Numero de Processo tem que ter somente 4 digitos')
+					self.process_number =None
+					frappe.validated = False
+
+		elif len(self.process_number) == '0000':
+			frappe.show('Numero de Processo nao pode ser 0000')
+			self.process_number = None
+			frappe.validated = False
+
+
 		print "tamanho ", len(self.servicos_processo)
 		
 		if len(self.servicos_processo) == 0:

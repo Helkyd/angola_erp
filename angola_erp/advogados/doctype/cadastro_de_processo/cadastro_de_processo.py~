@@ -20,8 +20,8 @@ class CadastrodeProcesso(Document):
 		print(self.numero_de_processo)
 		print(len(self.serie_tipo))
 		print(make_autoname(self.serie_tipo))
-		print(make_autoname(self.serie_tipo)[0:12])
-		self.numero_de_processo = self.numero_de_processo + make_autoname(self.serie_tipo)[0:12] # 'FO/' + '.YYYY./.#####')
+		print(make_autoname(self.serie_tipo)[0:13])
+		self.numero_de_processo = self.numero_de_processo + make_autoname(self.serie_tipo)[0:13] # 'FO/' + '.YYYY./.#####')
 		self.name = self.numero_de_processo	#make_autoname(self.numero_de_processo + '/' + '.YYYY./.#####')
 
 
