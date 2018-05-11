@@ -108,23 +108,24 @@ def get_taxa_ipc():
 def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
 	#locate account 34130000 or plano contif 2.80.20.20.30 - Ret Fonte a Pagar - Imposto Industrial
 	print (empresa).encode('utf-8')
-	if (fornclien == 'Supplier'):
-		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%'  """,(empresa),as_dict=True)
-		print " LISTA CONTAB TAXA RETENCAO conta 3413"
-	else:
-		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3414%%'  """,(empresa),as_dict=True)
-		print " LISTA CONTAB TAXA RETENCAO conta 3414"
-	print j	
-
-	# ****************** Still missing aqui qual a conta para o cliente e para fornecedor
-	if (j==[]):
-		#Plano CONTIF
-		j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '2.80.20.20.30%%' """,(empresa),as_dict=True)
-
-		print " LISTA CONTAB TAXA RETENCAO conta 2.80.20.20.20"
+	if (empresa):
+		if (fornclien == 'Supplier'):
+			j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%'  """,(empresa),as_dict=True)
+			print " LISTA CONTAB TAXA RETENCAO conta 3413"
+		else:
+			j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3414%%'  """,(empresa),as_dict=True)
+			print " LISTA CONTAB TAXA RETENCAO conta 3414"
 		print j	
 
-	return j
+		# ****************** Still missing aqui qual a conta para o cliente e para fornecedor
+		if (j==[]):
+			#Plano CONTIF
+			j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '2.80.20.20.30%%' """,(empresa),as_dict=True)
+
+			print " LISTA CONTAB TAXA RETENCAO conta 2.80.20.20.20"
+			print j	
+
+	return j if (j) else None
 
 @frappe.whitelist()
 def get_compras_taxa_retencao():
