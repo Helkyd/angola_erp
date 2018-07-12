@@ -20,7 +20,7 @@ def validate(doc,method):
 	print doc.docstatus
 	
 	print doc.referente_ao_mes.encode('utf-8') 
-	print _(frappe.utils.datetime.datetime.now().strftime("%B"))
+	print "MES ", _(frappe.utils.datetime.datetime.now().strftime("%B"))
 
 	if not doc.referente_ao_mes:
 		#acrescenta o mes corrente ....
@@ -74,6 +74,16 @@ def criar_faturavenda(doc):
 			print type(doc.components[0].amount)
 			valor = flt(doc.components[0].amount)
 			print type(valor) #doc.round_floats_in(valor)
+
+			print doc.name
+			print doc.student_name
+			print doc.referente_ao_mes
+			print centrocusto
+			print contalucro
+			print contadespesas
+			print armazemdefault
+			print acc
+			print valor
 
 			projecto = frappe.get_doc({
 				"doctype": "Sales Invoice",
