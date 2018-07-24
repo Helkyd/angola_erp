@@ -317,8 +317,10 @@ def set_fee_pago(propina,fatura):
 
 	if pago.outstanding_amount:
 		#PAID
-
-		frappe.db.set_value("Fees", propina, "paid_amount", pago.total_amount)
+		if pago.grand_total:
+			frappe.db.set_value("Fees", propina, "paid_amount", pago.grand_total)
+		else:
+			frappe.db.set_value("Fees", propina, "paid_amount", pago.total_amount)
 		frappe.db.set_value("Fees", propina, "outstanding_amount", 0)
 		frappe.db.set_value("Fees", propina, "sales_invoice", fatura)
 #		pago.paid_amount = pago.total_amount
@@ -375,6 +377,8 @@ def estudante_enroll(source_name):
 	cliente.customer_group = 'Individual'
 	cliente.territory = 'Angola'
 	cliente.language = 'pt'
+	print "ALUNO GENDER"
+	print _(student.gender)
 
 	cliente.save()
 

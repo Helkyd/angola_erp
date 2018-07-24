@@ -125,7 +125,7 @@ def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
 			print " LISTA CONTAB TAXA RETENCAO conta 2.80.20.20.20"
 			print j	
 
-	return j else None
+	return j if (j) else None
 
 @frappe.whitelist()
 def get_compras_taxa_retencao():
@@ -375,6 +375,8 @@ def estudante_enroll(source_name):
 	cliente.customer_group = 'Individual'
 	cliente.territory = 'Angola'
 	cliente.language = 'pt'
+	print "ALUNO GENDER"
+	print _(student.gender)
 
 	cliente.save()
 

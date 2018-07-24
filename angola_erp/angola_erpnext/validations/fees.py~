@@ -82,10 +82,12 @@ def criar_faturavenda(doc):
 			print contalucro
 			print contadespesas
 			print armazemdefault
+			print acc
+			print valor
 
 			projecto = frappe.get_doc({
 				"doctype": "Sales Invoice",
-				#"propina": doc.name,
+				"propina": doc.name,
 				"customer": doc.student_name,	
 				"posting_date": frappe.utils.nowdate(),
 				"due_date": datalimite,
