@@ -242,11 +242,24 @@ def validate(doc,method):
 				print "SEM DESPESAS MAS CALCULA IPC"
 				ai.charge_type = "Actual"
 				ai.tax_amount = totalgeralimpostoconsumo
+				ai.total = totalgeralimpostoconsumo + doc.net_total
 
 
 
 
 	print "VALOR POR EXTENSO"
+
+	print totalgeralimpostoconsumo
+
+	#Save Total Taxes and Charges if IPC exists
+	doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
+	doc.total_taxes_and_charges = totalgeralimpostoconsumo
+	
+	doc.grand_total = totalgeralimpostoconsumo + doc.net_total
+	doc.rounded_total = doc.grand_total
+	doc.base_grand_total = doc.grand_total
+	doc.base_rounded_total = doc.grand_total
+	doc.outstanding_amount = doc.grand_total
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
