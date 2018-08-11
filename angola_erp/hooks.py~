@@ -177,7 +177,8 @@ scheduler_events = {
 		"angola_erp.gestao_residencial.doctype.api.verifica_check_in",
 		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida" #Saida dos Quartos
  	],
- 	"daily": [
+# 	"daily": [
+	"hourly": [
 # 		"angola_erp.tasks.daily"
 		"angola_erp.util.cambios.atualizar_cambios"	#Exchange rates updates for AOA
 # 	],
