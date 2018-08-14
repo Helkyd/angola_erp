@@ -96,6 +96,20 @@ def caixa_movimentos_in(start,caixa,fecho):
 
 @frappe.whitelist()
 def get_taxa_ipc():
+	#IPC to temp account 37710000
+
+	#locate account 37710000 instead of 34210000
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3771%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA TAXE IPC conta 3771"
+	print j	
+
+	return j
+
+@frappe.whitelist()
+def get_taxa_ipc_1():
+	#Original
+
 	#locate account 34210000
 	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
@@ -103,6 +117,7 @@ def get_taxa_ipc():
 	print j	
 
 	return j
+
 
 @frappe.whitelist()
 def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
