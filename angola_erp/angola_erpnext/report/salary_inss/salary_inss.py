@@ -124,11 +124,19 @@ def execute(filters=None):
 			if (ss_ded_map1.get(ss.name, {}).get(d) == 'INSS') and (inss_status ==0):
 				inss_status = 1
 				inss_pessoal = inss_pessoal + flt(ss_ded_map.get(ss.name, {}).get(d))
+				print 'INSSS'
+				print inss_pessoal
 
 		row += [ss.total_deduction, ss.net_pay]
-
+#		if inss_status == 1:
+		print inss_pessoal
+		print encargo_inss
+		if inss_pessoal == 0: encargo_inss = 0
 		encargo_inss = (encargo_inss * 0.08)			
 		inss_pessoal = (inss_pessoal + encargo_inss)
+#		else:
+#			encargo_inss = 0
+#			inss_pessoal = 0
 
 		row += [encargo_inss]
 		row += [inss_pessoal]
