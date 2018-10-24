@@ -76,7 +76,7 @@ def criar_faturavenda(doc):
 			print type(valor) #doc.round_floats_in(valor)
 
 			print doc.name
-			print doc.student_name
+			print doc.student_name.encode('utf-8')
 			print doc.referente_ao_mes
 			print centrocusto
 			print contalucro.encode('utf-8')
