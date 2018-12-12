@@ -121,6 +121,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	add_bank_gl_entries2(doc, gl_entries)
 
 	#doc.add_deductions_gl_entries(gl_entries)
+	add_deductions_gl_entries(doc, gl_entries)
 
 	make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
