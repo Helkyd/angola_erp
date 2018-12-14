@@ -121,8 +121,11 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	add_bank_gl_entries2(doc, gl_entries)
 
 	#doc.add_deductions_gl_entries(gl_entries)
-	add_deductions_gl_entries(doc, gl_entries)
+	#add_deductions_gl_entries(doc, gl_entries)
 
+	print "make_gl_entries"
+	print "make_gl_entries"
+	print "make_gl_entries"
 	make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
 
@@ -230,6 +233,7 @@ def add_bank_gl_entries1(doc, gl_entries):
 	#		})
 	#	)
 
+	print "add_bank_gl_entries1"
 	print "BANK GL"
 	print "BANK GL"
 	print valor_IPC
@@ -248,7 +252,7 @@ def add_bank_gl_entries1(doc, gl_entries):
 #Imposto de Selo
 def add_party_gl_entries2(doc, gl_entries):
 	
-
+	print "add_party_gl_entries2"
 	print "VERIFICA SE TEM IS TEMP"
 	print "VERIFICA SE TEM IS TEMP"
 	centro_custo = frappe.get_value("Company",doc.company,"cost_center")
@@ -333,6 +337,11 @@ def add_bank_gl_entries2(doc, gl_entries):
 		)
 
 def add_deductions_gl_entries(doc, gl_entries):
+
+	print "add_deductions_gl_entries"
+	print "add_deductions_gl_entries"
+	print "add_deductions_gl_entries"
+
 	for d in doc.get("deductions"):
 		if d.amount:
 			account_currency = get_account_currency(d.account)
