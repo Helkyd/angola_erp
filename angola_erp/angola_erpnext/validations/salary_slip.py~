@@ -51,7 +51,8 @@ def validate(doc,method):
 
 	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
-	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+	#Half day Injustificada
+	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
 	#Still need to COUNT for Present during Holiday
 	fiscal_year = get_fiscal_year(doc.start_date, company=doc.company)[0]
@@ -665,7 +666,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 		#print tab_detalhes
 
 		for r in tab_detalhes:
-			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') or (r.abbr == 'IH') or (r.abbr == 'SDF') or (r.abbr == 'DU') or (r.abbr == 'ST') :
+			if (r.abbr == 'SB') or (r.abbr == 'HE') or  (r.abbr == 'PA') or (r.abbr == 'PP') or (r.abbr == 'IH') or (r.abbr == 'SDF') or (r.abbr == 'DU') or (r.abbr == 'ST') or (r.abbr == 'PAT') or (r.abbr == 'SN'):
 				salario_iliquido = salario_iliquido + flt(r.amount)
 #			elif (r.abbr == 'SA') or (r.abbr == 'ABF'):
 #				salario_iliquido = salario_iliquido - flt(r.amount)
