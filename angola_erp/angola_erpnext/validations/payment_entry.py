@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 #Helkyd 
-#Modified 20-12-2018
+#Modified 26-12-2018
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
@@ -73,13 +73,33 @@ def on_submit(doc,method):
 
 
 	#Busca percentagem IPC e Imposto de Selo
+
 	global retencoes_ipc
 	
-	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` where name like 'ipc' """,as_dict=True)
+	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'ipc' """,as_dict=True)
 
 	global retencoes_is 
 
-	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+
+
+	#Busca percentagem Imposto Industrial
+	
+	#Ainda por fazer 
+	global ii_temp
+
+	#ii_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '7531%%'  """,(doc.company), as_dict=True)
+
+	global ii_
+	#Imposto por conta
+	ii_ = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3412%%'  """,(doc.company), as_dict=True)
+
+	#FIM Ainda por fazer 
+
+	global retencoes_ii
+	
+	retencoes_ii = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like '%industrial%' """,as_dict=True)
+
 
 	global valor_IPC
 
@@ -122,10 +142,20 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		add_bank_gl_entries1(doc, gl_entries)
 
 
-	# 3471 (C) IPC to 7531 (D)
-	#IS always 
-	add_party_gl_entries2(doc, gl_entries)
-	add_bank_gl_entries2(doc, gl_entries)
+	#Verify if isencao 
+	if retencoes_is[0].isencao == 0:
+		# 3471 (C) IPC to 7531 (D)
+		#IS always 
+		add_party_gl_entries2(doc, gl_entries)
+		add_bank_gl_entries2(doc, gl_entries)
+
+	#Imposto Industrial
+	# 3412 (C) to XXXX (D)	
+	if retencoes_ii[0].isencao == 0:
+		print "IMPOSTO INDUSTRIAL"
+		print "IMPOSTO INDUSTRIAL"
+		print "IMPOSTO INDUSTRIAL"
+		print "IMPOSTO INDUSTRIAL"
 
 	#doc.add_deductions_gl_entries(gl_entries)
 	#add_deductions_gl_entries(doc, gl_entries)
