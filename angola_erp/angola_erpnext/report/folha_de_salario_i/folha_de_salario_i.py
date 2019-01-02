@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import nowdate, cstr, flt, cint, now, getdate
 from frappe import throw, _
-from frappe.utils import formatdate
+from frappe.utils import formatdate, encode
 
 def execute(filters=None):
 
@@ -74,7 +74,7 @@ def get_columns(salary_slips):
 		where sc.name=sd.salary_component and sd.amount != 0 and sd.parent in (%s) order by sd.idx, sd.abbr """ %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
 		print 'COMPONENT SALAR'
-		print component.salary_component
+		print component.salary_component.encode('utf-8')
 		salary_components[_(component.type)].append(component.salary_component)
 		salary_components1[_(component.type)].append(component.salary_component_abbr)
 

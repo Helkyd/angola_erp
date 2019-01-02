@@ -2,6 +2,8 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
+#Date Changed: 09/11/2018
+
 from __future__ import unicode_literals
 
 from frappe.model.document import Document

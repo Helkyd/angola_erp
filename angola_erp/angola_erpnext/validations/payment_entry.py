@@ -2,6 +2,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+#Helkyd 
+#Modified 26-12-2018
+
 from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
@@ -70,13 +73,33 @@ def on_submit(doc,method):
 
 
 	#Busca percentagem IPC e Imposto de Selo
+
 	global retencoes_ipc
 	
-	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` where name like 'ipc' """,as_dict=True)
+	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'ipc' """,as_dict=True)
 
 	global retencoes_is 
 
-	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+
+
+	#Busca percentagem Imposto Industrial
+	
+	#Ainda por fazer 
+	global ii_temp
+
+	#ii_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '7531%%'  """,(doc.company), as_dict=True)
+
+	global ii_
+	#Imposto por conta
+	ii_ = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3412%%'  """,(doc.company), as_dict=True)
+
+	#FIM Ainda por fazer 
+
+	global retencoes_ii
+	
+	retencoes_ii = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like '%industrial%' """,as_dict=True)
+
 
 	global valor_IPC
 
@@ -95,6 +118,10 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	if doc.payment_type in ("Receive", "Pay") and not doc.get("party_account_field"):
 		doc.setup_party_account_field()
 
+	#Check if more than one payment ....
+
+	
+	
 	gl_entries = []
 
 	# 3771 (D) IPC to 3421 (C)
@@ -107,7 +134,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 			print tempIPC.taxes_and_charges
 			if tempIPC.taxes_and_charges:
 				global valor_IPC
-				valor_IPC = tempIPC.total_taxes_and_charges
+				valor_IPC += tempIPC.total_taxes_and_charges
 				calculaIPC = True
 
 	if calculaIPC:
@@ -115,13 +142,27 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		add_bank_gl_entries1(doc, gl_entries)
 
 
-	# 3471 (C) IPC to 7531 (D)
-	#IS always 
-	add_party_gl_entries2(doc, gl_entries)
-	add_bank_gl_entries2(doc, gl_entries)
+	#Verify if isencao 
+	if retencoes_is[0].isencao == 0:
+		# 3471 (C) IPC to 7531 (D)
+		#IS always 
+		add_party_gl_entries2(doc, gl_entries)
+		add_bank_gl_entries2(doc, gl_entries)
+
+	#Imposto Industrial
+	# 3412 (C) to XXXX (D)	
+	if retencoes_ii[0].isencao == 0:
+		print "IMPOSTO INDUSTRIAL"
+		print "IMPOSTO INDUSTRIAL"
+		print "IMPOSTO INDUSTRIAL"
+		print "IMPOSTO INDUSTRIAL"
 
 	#doc.add_deductions_gl_entries(gl_entries)
+	#add_deductions_gl_entries(doc, gl_entries)
 
+	print "make_gl_entries"
+	print "make_gl_entries"
+	print "make_gl_entries"
 	make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
 
@@ -172,9 +213,13 @@ def add_party_gl_entries1(doc, gl_entries):
 		})
 
 		dr_or_cr = "credit" #if doc.party_type in ["Customer", "Student"] else "debit"
+		
+		allocated_amount_in_company_currency = 0
 
+		gle = party_gl_dict.copy()		
 		for d in doc.get("references"):
-			gle = party_gl_dict.copy()
+#			gle = party_gl_dict.copy()
+
 #			gle.update({
 #				"against_voucher_type": d.reference_doctype,
 #				"against_voucher": d.reference_name
@@ -182,27 +227,36 @@ def add_party_gl_entries1(doc, gl_entries):
 			print "IPC "
 			tempIPC = frappe.get_doc(d.reference_doctype, d.reference_name)
 			print tempIPC.total_taxes_and_charges
-			if d.outstanding_amount == 0:
-				print "POE O IPC"
-				print tempIPC.total_taxes_and_charges
-#				valor_IPC = tempIPC.total_taxes_and_charges
-#				print valor_IPC
-				print (flt(tempIPC.total_taxes_and_charges) * flt(d.exchange_rate),doc.precision("paid_amount")) 
-				allocated_amount_in_company_currency = tempIPC.total_taxes_and_charges # (flt(tempIPC.total_taxes_and_charges) * flt(d.exchange_rate),doc.precision("paid_amount")) 
+			if tempIPC.total_taxes_and_charges:	#<>0
+				if d.outstanding_amount == 0:
+					print "POE O IPC"
+					print tempIPC.total_taxes_and_charges
+	#				valor_IPC = tempIPC.total_taxes_and_charges
+	#				print valor_IPC
+					print (flt(tempIPC.total_taxes_and_charges) * flt(d.exchange_rate),doc.precision("paid_amount")) 
+					allocated_amount_in_company_currency += tempIPC.total_taxes_and_charges # (flt(tempIPC.total_taxes_and_charges) * flt(d.exchange_rate),doc.precision("paid_amount")) 
 
-				#print (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ipc[0].percentagem) / 100
-				#allocated_amount_in_company_currency = (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ipc[0].percentagem) / 100
+					#print (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ipc[0].percentagem) / 100
+					#allocated_amount_in_company_currency = (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ipc[0].percentagem) / 100
 
-				gle.update({
-					dr_or_cr + "_in_account_currency": tempIPC.total_taxes_and_charges,
-					dr_or_cr: allocated_amount_in_company_currency
-				})
+#					gle.update({
+#						dr_or_cr + "_in_account_currency": tempIPC.total_taxes_and_charges,					
+#						dr_or_cr: allocated_amount_in_company_currency
+#					})
 
-				gl_entries.append(gle)
-			else:
-				global valor_IPC
+#					gl_entries.append(gle)
+				else:
+					global valor_IPC
 
-				valor_IPC = 0
+					valor_IPC = 0
+		#Update	
+		gle.update({
+			dr_or_cr + "_in_account_currency": tempIPC.total_taxes_and_charges,					
+			dr_or_cr: allocated_amount_in_company_currency
+		})
+
+		gl_entries.append(gle)
+
 
 #		if doc.unallocated_amount:
 #			base_unallocated_amount = base_unallocated_amount = doc.unallocated_amount * \
@@ -229,6 +283,7 @@ def add_bank_gl_entries1(doc, gl_entries):
 	#		})
 	#	)
 
+	print "add_bank_gl_entries1"
 	print "BANK GL"
 	print "BANK GL"
 	print valor_IPC
@@ -247,7 +302,7 @@ def add_bank_gl_entries1(doc, gl_entries):
 #Imposto de Selo
 def add_party_gl_entries2(doc, gl_entries):
 	
-
+	print "add_party_gl_entries2"
 	print "VERIFICA SE TEM IS TEMP"
 	print "VERIFICA SE TEM IS TEMP"
 	centro_custo = frappe.get_value("Company",doc.company,"cost_center")
@@ -273,9 +328,12 @@ def add_party_gl_entries2(doc, gl_entries):
 		})
 
 		dr_or_cr = "credit" #if doc.party_type in ["Customer", "Student"] else "debit"
+		
+		allocated_amount_in_company_currency = 0
 
+		gle = party_gl_dict.copy()		
 		for d in doc.get("references"):
-			gle = party_gl_dict.copy()
+#			gle = party_gl_dict.copy()
 #			gle.update({
 #				"against_voucher_type": d.reference_doctype,
 #				"against_voucher": d.reference_name
@@ -284,14 +342,16 @@ def add_party_gl_entries2(doc, gl_entries):
 			print "valor Pago ", doc.paid_amount
 			print doc.received_amount
 			print (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
+			print (flt(flt(doc.paid_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
 			allocated_amount_in_company_currency = (flt(flt(doc.paid_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
+			#allocated_amount_in_company_currency += (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
 
-			gle.update({
-				dr_or_cr + "_in_account_currency": (doc.paid_amount * retencoes_is[0].percentagem) / 100,
-				dr_or_cr: allocated_amount_in_company_currency
-			})
+		gle.update({
+			dr_or_cr + "_in_account_currency": (doc.paid_amount * retencoes_is[0].percentagem) / 100,			
+			dr_or_cr: allocated_amount_in_company_currency
+		})
 
-			gl_entries.append(gle)
+		gl_entries.append(gle)
 
 #		if doc.unallocated_amount:
 #			base_unallocated_amount = base_unallocated_amount = doc.unallocated_amount * \
@@ -332,6 +392,11 @@ def add_bank_gl_entries2(doc, gl_entries):
 		)
 
 def add_deductions_gl_entries(doc, gl_entries):
+
+	print "add_deductions_gl_entries"
+	print "add_deductions_gl_entries"
+	print "add_deductions_gl_entries"
+
 	for d in doc.get("deductions"):
 		if d.amount:
 			account_currency = get_account_currency(d.account)
