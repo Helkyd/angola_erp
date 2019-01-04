@@ -88,7 +88,7 @@ def on_submit(doc,method):
 	#Ainda por fazer
 	global ii_temp
 
-	#ii_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '7531%%'  """,(doc.company), as_dict=True)
+	ii_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3419%%'  """,(doc.company), as_dict=True)
 
 	global ii_
 	#Imposto por conta
