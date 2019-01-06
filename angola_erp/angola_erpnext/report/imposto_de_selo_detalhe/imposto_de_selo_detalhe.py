@@ -97,10 +97,10 @@ def get_invoices(filters, additional_query_columns):
 
 
 	#added POS invoices to report
-	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Pagamento, paid_amount as Total, (paid_amount*1/100) as Selo, payment_type from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Pagamento, paid_amount as Total, (paid_amount*1/100) as Selo, payment_type from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
 
-	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Factura, paid_amount as Total, (paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Factura, paid_amount as Total, (paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
 	return Facturas + FacturasPOS
 
