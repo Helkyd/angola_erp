@@ -96,7 +96,26 @@ def get_invoices(filters, additional_query_columns):
 	#	conditions, filters, as_dict=1)	
 
 
-	return frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') %
-		conditions, filters, as_dict=1)	
+	#added POS invoices to report
+	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
 
+	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+
+	TotalFacturas = 0
+	TotalFacturasIS = 0
+	tfact = Facturas + FacturasPOS
+
+	for x in tfact:
+		print x
+		print x.Total
+		TotalFacturas += x.Total
+		TotalFacturasIS += x.Selo
+
+	
+	print TotalFacturas
+	print TotalFacturasIS
+
+	return frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date) UNION select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+
+	#return Facturas + FacturasPOS

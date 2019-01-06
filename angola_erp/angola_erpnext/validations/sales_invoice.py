@@ -11,13 +11,16 @@ from angola_erp.util.angola import get_taxa_ipc
 
 import erpnext
 
-from frappe.utils import money_in_words, flt
+from frappe.utils import money_in_words, flt, cint
 from frappe.utils import cstr, getdate, date_diff
 ## from erpnext.setup.utils import get_company_currency
 from num2words import num2words
 
 from erpnext.stock.get_item_details import get_batch_qty
 
+####
+# Helkyd modified 06-01-2019
+####
 def validate(doc,method):
 
 	taxavenda= cambios("BNA")
@@ -268,5 +271,91 @@ def validate(doc,method):
 	else:
 		doc.in_words = money_in_words(doc.rounded_total, company_currency)
 
+
+def on_submit(doc,method):
+	#Imposto de Selo
+	if doc.is_pos:
+		print "Pagamento do IS no POS"
+		print "Pagamento do IS no POS"
+		print "Pagamento do IS no POS"
+		print "Pagamento do IS no POS"
+		print "Pagamento do IS no POS"
+
+		global is_temp
+
+		is_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '7531%%'  """,(doc.company), as_dict=True)
+
+		global is_
+
+		is_ = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3471%%'  """,(doc.company), as_dict=True)
+
+		global retencoes_is
+
+		retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+
+		centro_custo = frappe.get_value("Company",doc.company,"cost_center")
+
+
+		gl_entries = []
+
+		#for payment_mode in doc.payments:
+		#	if payment_mode.amount:
+
+		# POS, make payment entries
+		print "Pagamento....CREDITO"
+		print "Pagamento....CREDITO"
+		print "Pagamento....CREDITO"
+
+		gl_entries.append(
+			doc.get_gl_dict({
+				"account": is_[0].name,
+				"against": is_temp[0].name,
+				"credit": (doc.rounded_total * retencoes_is[0].percentagem) / 100,
+				"credit_in_account_currency": (doc.rounded_total * retencoes_is[0].percentagem) / 100, 
+				"cost_center": centro_custo,
+
+				#"party_type": "Customer",
+				#"party": self.customer,
+				#"against": payment_mode.account,
+				#"credit": payment_mode.base_amount,
+				#"credit_in_account_currency": payment_mode.base_amount \
+				#	if self.party_account_currency==self.company_currency \
+				#	else payment_mode.amount,
+				#"against_voucher": self.return_against if cint(self.is_return) else self.name,
+				#"against_voucher_type": self.doctype,
+
+			}, doc.party_account_currency)
+		)
+
+		#payment_mode_account_currency = get_account_currency(payment_mode.account)
+		gl_entries.append(
+			doc.get_gl_dict({
+
+				"account": is_temp[0].name,
+				"account_currency": is_temp[0].account_currency,
+				"against": is_[0].name,
+				"debit_in_account_currency": (doc.rounded_total * retencoes_is[0].percentagem) / 100,
+				"debit": (doc.rounded_total * retencoes_is[0].percentagem) / 100,
+				"cost_center": centro_custo,
+
+				#"account": payment_mode.account,
+				#"against": self.customer,
+				#"debit": payment_mode.base_amount,
+				#"debit_in_account_currency": payment_mode.base_amount \
+				#	if payment_mode_account_currency==self.company_currency \
+				#	else payment_mode.amount
+			}, doc.party_account_currency)
+		)
+
+		if gl_entries:
+			from erpnext.accounts.general_ledger import make_gl_entries
+
+			# if POS and amount is written off, updating outstanding amt after posting all gl entries
+			update_outstanding = "No" if (cint(doc.is_pos) or doc.write_off_account) else "Yes"
+
+			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2),
+				update_outstanding=update_outstanding, merge_entries=False)
+
+			#make_gl_entries(gl_entries, cancel=cancel, adv_adj=0)
 
 

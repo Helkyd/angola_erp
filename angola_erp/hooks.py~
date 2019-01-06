@@ -160,6 +160,17 @@ doc_events = {
 
 	},
 
+	"Payment Entry": {
+		"on_submit": "angola_erp.angola_erpnext.validations.payment_entry.on_submit",
+
+	},
+
+	"Patient": {
+		"after_insert": "angola_erp.angola_erpnext.validations.patient.after_insert",
+
+	},
+
+
 #	"System Settings": {
 #		"validate": "angola_erp.angola_erpnext.validations.system_settings.validate",
 

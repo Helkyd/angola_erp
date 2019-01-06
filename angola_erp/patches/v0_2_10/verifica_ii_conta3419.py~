@@ -25,6 +25,7 @@ def execute():
 				"report_type": "Balance Sheet",
 				"owner": "administrator",
 				"account_name": "34190000 - I Industrial - Pagamentos por Conta Temp.",
+				"account_type": "Temporary",
 				"freeze_account": "No",
 				"root_type": "Asset",
 				"docstatus": 0,
