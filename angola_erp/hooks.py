@@ -136,6 +136,11 @@ doc_events = {
 
 	},
 
+	"Sales Invoice": {
+		"on_submit": "angola_erp.angola_erpnext.validations.sales_invoice.on_submit",
+
+	},
+
 	"Quotation": {
 		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",
 
@@ -162,6 +167,11 @@ doc_events = {
 
 	"Payment Entry": {
 		"on_submit": "angola_erp.angola_erpnext.validations.payment_entry.on_submit",
+
+	},
+
+	"Patient": {
+		"after_insert": "angola_erp.angola_erpnext.validations.patient.after_insert",
 
 	},
 

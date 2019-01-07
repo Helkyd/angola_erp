@@ -50,7 +50,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		
 
 		row = [
-			inv.Ano, mes2_ , inv.Dia, inv.name, inv.Total, inv.Selo
+			inv.Ano, mes2_ , inv.Dia, inv.Pagamento, inv.Factura , inv.Total, inv.Selo
 		]
 
 		if additional_query_columns:
@@ -68,7 +68,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
 	columns = [
-		_("Ano") + "::80", _("Mes") + "::80", _("Dia") + "::80", _("Payment Entry") + ":Link/Payment Entry:80"
+		_("Ano") + "::80", _("Mes") + "::80", _("Dia") + "::80", _("Payment Entry") + ":Link/Payment Entry:80", _("Sales Invoice") + ":Link/Sales Invoice:80"
 	]
 
 	columns = columns + [_("Total") + ":Currency/currency:120"] + [_("Imp. Selo 1%") + ":Currency/currency:120"]
@@ -94,6 +94,13 @@ def get_invoices(filters, additional_query_columns):
 	#wrong changed as should be based on PAID/Received cash
 	#return frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name, base_grand_total as Total, (base_grand_total*1/100) as Selo from `tabSales Invoice` where docstatus =1 and outstanding_amount = 0 %s order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') %
 	#	conditions, filters, as_dict=1)	
-	return frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name, paid_amount as Total, (paid_amount*1/100) as Selo, payment_type from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
+
+	#added POS invoices to report
+	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Pagamento, paid_amount as Total, (paid_amount*1/100) as Selo, payment_type from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+
+
+	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Factura, paid_amount as Total, (paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+
+	return Facturas + FacturasPOS
 
