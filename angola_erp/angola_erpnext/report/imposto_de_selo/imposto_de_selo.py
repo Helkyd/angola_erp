@@ -13,57 +13,60 @@ def execute(filters=None):
 def _execute(filters, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = frappe._dict({})
 
-	invoice_list = get_invoices(filters, additional_query_columns)
+	if filters.get("company"):
+		invoice_list = get_invoices(filters, additional_query_columns)
 
-	print 'Invoice List'
-	print invoice_list
-	print additional_query_columns
-	columns = get_columns(invoice_list, additional_table_columns)
+		print 'Invoice List'
+		print invoice_list
+		print additional_query_columns
+		columns = get_columns(invoice_list, additional_table_columns)
 
-	if not invoice_list:
-		msgprint(_("No record found"))
-		return columns, invoice_list
+		if not invoice_list:
+			msgprint(_("No record found"))
+			return columns, invoice_list
 
-	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+		company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
 
-	mes2_ = 0
+		mes2_ = 0
 
 
-	data = []
-	for inv in invoice_list:
+		data = []
+		for inv in invoice_list:
 
-		#acrescenta o mes corrente ....
-		if inv.Mes == 1: mes2_ = 'Janeiro'
-		if inv.Mes == 2: mes2_ = 'Fevereiro'
-		if inv.Mes == 3: mes2_ = 'Marco'
-		if inv.Mes == 4: mes2_ = 'Abril'
-		if inv.Mes == 5: mes2_ = 'Maio'
-		if inv.Mes == 6: mes2_ = 'Junho'
-		if inv.Mes == 7: mes2_ = 'Julho'
-		if inv.Mes == 8: mes2_ = 'Agosto'
-		if inv.Mes == 9: mes2_ = 'Setembro'
-		if inv.Mes == 10: mes2_ = 'Outubro'
-		if inv.Mes == 11: mes2_ = 'Novembro'
-		if inv.Mes == 12: mes2_ = 'Dezembro'
+			#acrescenta o mes corrente ....
+			if inv.Mes == 1: mes2_ = 'Janeiro'
+			if inv.Mes == 2: mes2_ = 'Fevereiro'
+			if inv.Mes == 3: mes2_ = 'Marco'
+			if inv.Mes == 4: mes2_ = 'Abril'
+			if inv.Mes == 5: mes2_ = 'Maio'
+			if inv.Mes == 6: mes2_ = 'Junho'
+			if inv.Mes == 7: mes2_ = 'Julho'
+			if inv.Mes == 8: mes2_ = 'Agosto'
+			if inv.Mes == 9: mes2_ = 'Setembro'
+			if inv.Mes == 10: mes2_ = 'Outubro'
+			if inv.Mes == 11: mes2_ = 'Novembro'
+			if inv.Mes == 12: mes2_ = 'Dezembro'
 
-		#print mes2_.encode('utf-8') 
+			#print mes2_.encode('utf-8') 
 		
 
-		row = [
-			inv.Ano, mes2_ , inv.Total, inv.Selo
-		]
+			row = [
+				inv.Ano, mes2_ , inv.Total, inv.Selo
+			]
 
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.append(inv.get(col))
+			if additional_query_columns:
+				for col in additional_query_columns:
+					row.append(inv.get(col))
 
 
-		# total tax, grand total, outstanding amount & rounded total
-		row += [inv.Total]
+			# total tax, grand total, outstanding amount & rounded total
+			row += [inv.Total]
 
-		data.append(row)
-
-	return columns, data
+			data.append(row)
+	
+		return columns, data
+	else:
+		frappe.throw(_("Selecione a Empresa primeiro."))
 
 def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
