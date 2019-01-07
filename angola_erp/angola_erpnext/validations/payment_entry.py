@@ -137,29 +137,31 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 				valor_IPC += tempIPC.total_taxes_and_charges
 				calculaIPC = True
 
-	if calculaIPC:
+	if calculaIPC and doc.party_type != _("Employee"):
+		print "IPC EMPLOYEE"
 		add_party_gl_entries1(doc, gl_entries)
 		add_bank_gl_entries1(doc, gl_entries)
 
+	if doc.party_type != _("Supplier") and doc.party_type != _("Employee"):
+		print "II EMPLOYEE"
+		#Verify if isencao
+		if retencoes_is[0].isencao == 0:
+			# 3471 (C) IPC to 7531 (D)
+			#IS always
+			add_party_gl_entries2(doc, gl_entries)
+			add_bank_gl_entries2(doc, gl_entries)
 
-	#Verify if isencao
-	if retencoes_is[0].isencao == 0:
-		# 3471 (C) IPC to 7531 (D)
-		#IS always
-		add_party_gl_entries2(doc, gl_entries)
-		add_bank_gl_entries2(doc, gl_entries)
-
-	#Imposto Industrial
-	# 3412 (C) to 3419 (D)
-	if retencoes_ii[0].isencao == 0:
-		#somente if retencoes_is[0].isencao == 1
-		if retencoes_is[0].isencao == 1:
-			print "IMPOSTO INDUSTRIAL"
-			print "IMPOSTO INDUSTRIAL"
-			print "IMPOSTO INDUSTRIAL"
-			print "IMPOSTO INDUSTRIAL"
-			add_party_gl_entries3(doc, gl_entries)
-			add_bank_gl_entries3(doc, gl_entries)
+		#Imposto Industrial
+		# 3412 (C) to 3419 (D)
+		if retencoes_ii[0].isencao == 0:
+			#somente if retencoes_is[0].isencao == 1
+			if retencoes_is[0].isencao == 1:
+				print "IMPOSTO INDUSTRIAL"
+				print "IMPOSTO INDUSTRIAL"
+				print "IMPOSTO INDUSTRIAL"
+				print "IMPOSTO INDUSTRIAL"
+				add_party_gl_entries3(doc, gl_entries)
+				add_bank_gl_entries3(doc, gl_entries)
 
 
 	#doc.add_deductions_gl_entries(gl_entries)

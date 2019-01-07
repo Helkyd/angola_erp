@@ -137,25 +137,32 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 				valor_IPC += tempIPC.total_taxes_and_charges
 				calculaIPC = True
 
-	if calculaIPC:
+	if calculaIPC and doc.party_type != _("Employee"):
+		print "IPC EMPLOYEE"
 		add_party_gl_entries1(doc, gl_entries)
 		add_bank_gl_entries1(doc, gl_entries)
 
+	if doc.party_type not in _("Supplier", "Employee"):
+		print "II EMPLOYEE"
+		#Verify if isencao
+		if retencoes_is[0].isencao == 0:
+			# 3471 (C) IPC to 7531 (D)
+			#IS always
+			add_party_gl_entries2(doc, gl_entries)
+			add_bank_gl_entries2(doc, gl_entries)
 
-	#Verify if isencao
-	if retencoes_is[0].isencao == 0:
-		# 3471 (C) IPC to 7531 (D)
-		#IS always
-		add_party_gl_entries2(doc, gl_entries)
-		add_bank_gl_entries2(doc, gl_entries)
+		#Imposto Industrial
+		# 3412 (C) to 3419 (D)
+		if retencoes_ii[0].isencao == 0:
+			#somente if retencoes_is[0].isencao == 1
+			if retencoes_is[0].isencao == 1:
+				print "IMPOSTO INDUSTRIAL"
+				print "IMPOSTO INDUSTRIAL"
+				print "IMPOSTO INDUSTRIAL"
+				print "IMPOSTO INDUSTRIAL"
+				add_party_gl_entries3(doc, gl_entries)
+				add_bank_gl_entries3(doc, gl_entries)
 
-	#Imposto Industrial
-	# 3412 (C) to 3419 (D)
-	if retencoes_ii[0].isencao == 0:
-		print "IMPOSTO INDUSTRIAL"
-		print "IMPOSTO INDUSTRIAL"
-		print "IMPOSTO INDUSTRIAL"
-		print "IMPOSTO INDUSTRIAL"
 
 	#doc.add_deductions_gl_entries(gl_entries)
 	#add_deductions_gl_entries(doc, gl_entries)
@@ -387,6 +394,99 @@ def add_bank_gl_entries2(doc, gl_entries):
 				"against": is_[0].name,
 				"debit_in_account_currency": (doc.received_amount * retencoes_is[0].percentagem) / 100,
 				"debit": (doc.base_received_amount * retencoes_is[0].percentagem) / 100,
+				"cost_center": centro_custo
+			})
+		)
+
+
+#Imposto Industrial
+def add_party_gl_entries3(doc, gl_entries):
+
+	print "add_party_gl_entries3"
+	print "VERIFICA SE TEM IIndustrial TEMP"
+	print "VERIFICA SE TEM IIndustrial TEMP"
+	centro_custo = frappe.get_value("Company",doc.company,"cost_center")
+
+	if ii_temp:
+		print "TEM IIndustrial TEMP"
+		print "TEM IIndustrial TEMP"
+		print "TEM IIndustrial TEMP"
+
+		#if doc.payment_type=="Receive":
+		#	against_account = doc.paid_to
+		#else:
+		#	against_account = doc.paid_from
+
+
+		party_gl_dict = doc.get_gl_dict({
+			"account": ii_[0].name,
+			#"party_type": doc.party_type,
+			#"party": doc.party,
+			"against": ii_temp[0].name,
+			"account_currency": ii_[0].account_currency,
+			"cost_center": centro_custo
+		})
+
+		dr_or_cr = "credit" #if doc.party_type in ["Customer", "Student"] else "debit"
+
+		allocated_amount_in_company_currency = 0
+
+		gle = party_gl_dict.copy()
+		for d in doc.get("references"):
+#			gle = party_gl_dict.copy()
+#			gle.update({
+#				"against_voucher_type": d.reference_doctype,
+#				"against_voucher": d.reference_name
+#			})
+			print "IPC "
+			print "valor Pago ", doc.paid_amount
+			print doc.received_amount
+			print (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ii[0].percentagem) / 100
+			print (flt(flt(doc.paid_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ii[0].percentagem) / 100
+			allocated_amount_in_company_currency = (flt(flt(doc.paid_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_ii[0].percentagem) / 100
+			#allocated_amount_in_company_currency += (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
+
+		gle.update({
+			dr_or_cr + "_in_account_currency": (doc.paid_amount * retencoes_ii[0].percentagem) / 100,
+			dr_or_cr: allocated_amount_in_company_currency
+		})
+
+		gl_entries.append(gle)
+
+#		if doc.unallocated_amount:
+#			base_unallocated_amount = base_unallocated_amount = doc.unallocated_amount * \
+#				(doc.source_exchange_rate if doc.payment_type=="Receive" else doc.target_exchange_rate)
+
+#			gle = party_gl_dict.copy()
+
+#			gle.update({
+#				dr_or_cr + "_in_account_currency": doc.unallocated_amount,
+#				dr_or_cr: base_unallocated_amount
+#			})
+
+#			gl_entries.append(gle)
+
+def add_bank_gl_entries3(doc, gl_entries):
+	centro_custo = frappe.get_value("Company",doc.company,"cost_center")
+
+	#if doc.payment_type in ("Pay", "Internal Transfer"):
+	#	gl_entries.append(
+	#		doc.get_gl_dict({
+	#			"account": doc.paid_from,
+	#			"account_currency": doc.paid_from_account_currency,
+	#			"against": doc.party if doc.payment_type=="Pay" else doc.paid_to,
+	#			"credit_in_account_currency": doc.paid_amount,
+	#			"credit": doc.base_paid_amount
+	#		})
+	#	)
+	if doc.payment_type in ("Receive", "Internal Transfer"):
+		gl_entries.append(
+			doc.get_gl_dict({
+				"account": ii_temp[0].name,
+				"account_currency": ii_temp[0].account_currency,
+				"against": ii_[0].name,
+				"debit_in_account_currency": (doc.received_amount * retencoes_ii[0].percentagem) / 100,
+				"debit": (doc.base_received_amount * retencoes_ii[0].percentagem) / 100,
 				"cost_center": centro_custo
 			})
 		)
