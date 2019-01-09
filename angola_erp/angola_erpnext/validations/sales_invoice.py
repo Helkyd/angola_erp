@@ -19,9 +19,16 @@ from num2words import num2words
 from erpnext.stock.get_item_details import get_batch_qty
 
 ####
-# Helkyd modified 06-01-2019
+# Helkyd modified 09-01-2019
 ####
+
 def validate(doc,method):
+	
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
 
 	taxavenda= cambios("BNA")
 	lista_retencoes = get_lista_retencoes()

@@ -21,7 +21,14 @@ from erpnext.stock.get_item_details import get_batch_qty
 ####
 # Helkyd modified 06-01-2019
 ####
+
 def validate(doc,method):
+	
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
+	print "+VALIDAR SALES INVOICE+"
 
 	taxavenda= cambios("BNA")
 	lista_retencoes = get_lista_retencoes()
@@ -298,53 +305,54 @@ def on_submit(doc,method):
 
 		gl_entries = []
 
-		for payment_mode in doc.payments:
-			if payment_mode.amount:
-				# POS, make payment entries
-				print "Pagamento....CREDITO"
-				print "Pagamento....CREDITO"
-				print "Pagamento....CREDITO"
+		#for payment_mode in doc.payments:
+		#	if payment_mode.amount:
 
-				gl_entries.append(
-					doc.get_gl_dict({
-						"account": is_[0].name,
-						"against": is_temp[0].name,
-						"credit": (payment_mode.base_amount * retencoes_is[0].percentagem) / 100,
-						"credit_in_account_currency": (payment_mode.base_amount * retencoes_is[0].percentagem) / 100, 
-						"cost_center": centro_custo,
+		# POS, make payment entries
+		print "Pagamento....CREDITO"
+		print "Pagamento....CREDITO"
+		print "Pagamento....CREDITO"
 
-						#"party_type": "Customer",
-						#"party": self.customer,
-						#"against": payment_mode.account,
-						#"credit": payment_mode.base_amount,
-						#"credit_in_account_currency": payment_mode.base_amount \
-						#	if self.party_account_currency==self.company_currency \
-						#	else payment_mode.amount,
-						#"against_voucher": self.return_against if cint(self.is_return) else self.name,
-						#"against_voucher_type": self.doctype,
+		gl_entries.append(
+			doc.get_gl_dict({
+				"account": is_[0].name,
+				"against": is_temp[0].name,
+				"credit": (doc.rounded_total * retencoes_is[0].percentagem) / 100,
+				"credit_in_account_currency": (doc.rounded_total * retencoes_is[0].percentagem) / 100, 
+				"cost_center": centro_custo,
 
-					}, doc.party_account_currency)
-				)
+				#"party_type": "Customer",
+				#"party": self.customer,
+				#"against": payment_mode.account,
+				#"credit": payment_mode.base_amount,
+				#"credit_in_account_currency": payment_mode.base_amount \
+				#	if self.party_account_currency==self.company_currency \
+				#	else payment_mode.amount,
+				#"against_voucher": self.return_against if cint(self.is_return) else self.name,
+				#"against_voucher_type": self.doctype,
 
-				#payment_mode_account_currency = get_account_currency(payment_mode.account)
-				gl_entries.append(
-					doc.get_gl_dict({
+			}, doc.party_account_currency)
+		)
 
-						"account": is_temp[0].name,
-						"account_currency": is_temp[0].account_currency,
-						"against": is_[0].name,
-						"debit_in_account_currency": (payment_mode.base_amount * retencoes_is[0].percentagem) / 100,
-						"debit": (payment_mode.base_amount * retencoes_is[0].percentagem) / 100,
-						"cost_center": centro_custo,
+		#payment_mode_account_currency = get_account_currency(payment_mode.account)
+		gl_entries.append(
+			doc.get_gl_dict({
 
-						#"account": payment_mode.account,
-						#"against": self.customer,
-						#"debit": payment_mode.base_amount,
-						#"debit_in_account_currency": payment_mode.base_amount \
-						#	if payment_mode_account_currency==self.company_currency \
-						#	else payment_mode.amount
-					}, doc.party_account_currency)
-				)
+				"account": is_temp[0].name,
+				"account_currency": is_temp[0].account_currency,
+				"against": is_[0].name,
+				"debit_in_account_currency": (doc.rounded_total * retencoes_is[0].percentagem) / 100,
+				"debit": (doc.rounded_total * retencoes_is[0].percentagem) / 100,
+				"cost_center": centro_custo,
+
+				#"account": payment_mode.account,
+				#"against": self.customer,
+				#"debit": payment_mode.base_amount,
+				#"debit_in_account_currency": payment_mode.base_amount \
+				#	if payment_mode_account_currency==self.company_currency \
+				#	else payment_mode.amount
+			}, doc.party_account_currency)
+		)
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries

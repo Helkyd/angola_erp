@@ -132,15 +132,13 @@ doc_events = {
 
 	},
 	"Sales Invoice": {
-		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
-
-	},
-
-	"Sales Invoice": {
 		"on_submit": "angola_erp.angola_erpnext.validations.sales_invoice.on_submit",
 
 	},
+	"Sales Invoice": {
+		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
 
+	},
 	"Quotation": {
 		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",
 
@@ -149,27 +147,22 @@ doc_events = {
 		"validate": "angola_erp.angola_erpnext.validations.purchase_invoice.validate",
 
 	},
-
 	"Purchase Order": {
 		"validate": "angola_erp.angola_erpnext.validations.purchase_order.validate",
 
 	},
-
 	"Fees": {
 		"validate": "angola_erp.angola_erpnext.validations.fees.validate",
 
 	},
-
 	"Program Enrollment": {
 		"validate": "angola_erp.angola_erpnext.validations.program_enrollment.validate",
 
 	},
-
 	"Payment Entry": {
 		"on_submit": "angola_erp.angola_erpnext.validations.payment_entry.on_submit",
 
 	},
-
 	"Patient": {
 		"after_insert": "angola_erp.angola_erpnext.validations.patient.after_insert",
 
