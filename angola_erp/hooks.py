@@ -132,11 +132,8 @@ doc_events = {
 
 	},
 	"Sales Invoice": {
-		"on_submit": "angola_erp.angola_erpnext.validations.sales_invoice.on_submit",
-
-	},
-	"Sales Invoice": {
 		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
+		"on_submit": "angola_erp.angola_erpnext.validations.sales_invoice.on_submit",
 
 	},
 	"Quotation": {
