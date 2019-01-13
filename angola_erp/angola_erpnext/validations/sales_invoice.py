@@ -279,6 +279,16 @@ def validate(doc,method):
 		doc.in_words = money_in_words(doc.rounded_total, company_currency)
 
 
+def before_submit(doc,method):
+
+	#Fees to be paid by Sales Invoice
+	for prop_ in doc.get("propina"):
+		frappe.db.set_value("Fees",prop_.propina, "sales_invoice", doc.name)
+		#frappe.db.set_value("Fees",prop_.propina, "outstanding_amount", 0)
+		frappe.db.commit()
+	
+
+
 def on_submit(doc,method):
 	#Imposto de Selo
 	if doc.is_pos:

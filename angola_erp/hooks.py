@@ -11,6 +11,9 @@ app_color = "grey"
 app_email = "hcesar@gmail.com"
 app_license = "MIT"
 fixtures = ["Custom Field","Custom Script"]
+
+error_report_email = "angolaerp@angolaerp.co.ao"
+
 #fixtures = ["Custom Field","Custom Script","IRT","INSS","Subsidios","Retencoes","Salary Component"]
 
 # Includes in <head>
@@ -134,7 +137,7 @@ doc_events = {
 	"Sales Invoice": {
 		"validate": "angola_erp.angola_erpnext.validations.sales_invoice.validate",
 		"on_submit": "angola_erp.angola_erpnext.validations.sales_invoice.on_submit",
-
+		"before_submit": "angola_erp.angola_erpnext.validations.sales_invoice.before_submit",
 	},
 	"Quotation": {
 		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",

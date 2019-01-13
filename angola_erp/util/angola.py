@@ -2,7 +2,7 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 09/11/2018
+#Date Changed: 12/01/2019
 
 from __future__ import unicode_literals
 
@@ -506,3 +506,37 @@ def get_versao_erp():
 	print frappe.get_attr("erpnext"+".__version__")
 
 	return frappe.get_attr("erpnext"+".__version__")
+
+@frappe.whitelist()
+def cancel_gl_entry_fee(fee_number):
+	"""Cancel the GL Entry made by FEE... ONLY if user makes SALES INVOICE LATER FOR ALL GROUP OF Fees...
+
+	:param fee_number.
+	"""
+
+	print "Cancela GL ENTRY NO FEE"
+	print "Cancela GL ENTRY NO FEE"
+	frappe.db.sql('''UPDATE `tabGL Entry` set docstatus = 2 where voucher_no = %s''', (fee_number), as_dict=1)
+
+	print "APAGA GL ENTRY NO FEE"
+	print "APAGA GL ENTRY NO FEE"
+	frappe.db.sql('''DELETE from `tabGL Entry` where voucher_no = %s''', (fee_number), as_dict=1)
+
+
+@frappe.whitelist()
+def get_dominios_activos():
+	"""Returns Active domains .... 
+
+	:param .
+	"""
+
+	print "DOMINIOS ACTIVOS"
+	print "DOMINIOS ACTIVOS"
+	print "DOMINIOS ACTIVOS"
+	print "DOMINIOS ACTIVOS"
+	tmp = frappe.get_single('Domain Settings')
+	
+	return frappe.cache().get_value('active_domains',tmp)
+
+
+

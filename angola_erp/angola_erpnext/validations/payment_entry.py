@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 #Helkyd
-#Modified 04-01-2019
+#Modified 12-01-2019
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
@@ -24,6 +24,7 @@ from angola_erp.util.angola import get_lista_retencoes
 from angola_erp.util.angola import get_taxa_retencao
 from angola_erp.util.angola import get_taxa_ipc
 
+from angola_erp.util.angola import cancel_gl_entry_fee
 
 def setup_party_account_field(doc):
 	doc.party_account_field = None
@@ -52,6 +53,26 @@ def on_submit(doc,method):
 	print 'ENTRADA PAGAMENTO  - NO SUBMIT '
 	print 'ENTRADA PAGAMENTO  - NO SUBMIT '
 	print 'ENTRADA PAGAMENTO  - NO SUBMIT '
+
+
+	#++++++++++ FEEs
+	#Cancel GL 
+	#Deve primeiro cancelar a GL entry feita para criar a Factura...
+	for refs in doc.get("references"):
+		print refs.reference_name
+		factura = frappe.get_doc("Sales Invoice", refs.reference_name)
+		print factura
+		for prop in factura.get("propina"):
+			print prop.propina
+			cancel_gl_entry_fee(prop.propina)
+
+			#Agora clear outstanding from Fees	
+			frappe.db.set_value("Fees",prop.propina, "paid_amount", prop.valor)
+			frappe.db.set_value("Fees",prop.propina, "outstanding_amount", 0)
+			frappe.db.commit()
+		
+			
+	#++++++++++ FEES
 
 	global ipc_temp
 
@@ -318,7 +339,7 @@ def add_party_gl_entries2(doc, gl_entries):
 		print "TEM IS TEMP"
 		print "TEM IS TEMP"
 		print "TEM IS TEMP"
-
+		print centro_custo
 		#if doc.payment_type=="Receive":
 		#	against_account = doc.paid_to
 		#else:
@@ -339,6 +360,8 @@ def add_party_gl_entries2(doc, gl_entries):
 		allocated_amount_in_company_currency = 0
 
 		gle = party_gl_dict.copy()
+	
+		#References for Sales Invoice or Fees
 		for d in doc.get("references"):
 #			gle = party_gl_dict.copy()
 #			gle.update({
@@ -353,6 +376,7 @@ def add_party_gl_entries2(doc, gl_entries):
 			allocated_amount_in_company_currency = (flt(flt(doc.paid_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
 			#allocated_amount_in_company_currency += (flt(flt(d.allocated_amount) * flt(d.exchange_rate),doc.precision("paid_amount")) * retencoes_is[0].percentagem) / 100
 
+		
 		gle.update({
 			dr_or_cr + "_in_account_currency": (doc.paid_amount * retencoes_is[0].percentagem) / 100,
 			dr_or_cr: allocated_amount_in_company_currency
