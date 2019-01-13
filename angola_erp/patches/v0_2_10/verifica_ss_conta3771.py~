@@ -9,7 +9,7 @@ def execute():
 		empresa_abbr = frappe.get_doc('Company', empresa_default).abbr		
 
 		#Accounting 3771 Imposto Consumo Temporario
-		iii = frappe.db.sql("""select name from `tabAccount` where name like '3771%' and company = %s """,(empresa_default),as_dict=True)
+		iii = frappe.db.sql("""select name from `tabAccount` where name like '3771%%' and company = %s """,(empresa_default),as_dict=True)
 		print(iii)
 		if len(iii) == 0:
 			#Nao tem; must create
