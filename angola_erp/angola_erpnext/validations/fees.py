@@ -14,6 +14,10 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from frappe.utils import encode
 
 
+
+#Modified 12-01-2019
+
+
 def validate(doc,method):
 	doc.calculate_total()
 	print "propinas"
@@ -40,7 +44,10 @@ def validate(doc,method):
 		# doc.referente_ao_mes = doc.referente_ao_mes[int(frappe.utils.formatdate(frappe.utils.nowdate(),'M'))]
 
 	if doc.docstatus == 1 and doc.outstanding_amount > 0:
-		criar_faturavenda(doc)
+
+		#Por enquanto nao cria a Factura ...
+		print "Por enquanto nao cria a Factura ..."
+		#criar_faturavenda(doc)
 
 
 def criar_faturavenda(doc):

@@ -2,6 +2,8 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
+#Date Changed: 12/01/2019
+
 from __future__ import unicode_literals
 
 from frappe.model.document import Document
@@ -96,6 +98,20 @@ def caixa_movimentos_in(start,caixa,fecho):
 
 @frappe.whitelist()
 def get_taxa_ipc():
+	#IPC to temp account 37710000
+
+	#locate account 37710000 instead of 34210000
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3771%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA TAXE IPC conta 3771"
+	print j	
+
+	return j
+
+@frappe.whitelist()
+def get_taxa_ipc_1():
+	#Original
+
 	#locate account 34210000
 	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
 
@@ -103,6 +119,7 @@ def get_taxa_ipc():
 	print j	
 
 	return j
+
 
 @frappe.whitelist()
 def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
@@ -489,3 +506,35 @@ def get_versao_erp():
 	print frappe.get_attr("erpnext"+".__version__")
 
 	return frappe.get_attr("erpnext"+".__version__")
+
+@frappe.whitelist()
+def cancel_gl_entry_fee(fee_number):
+	"""Cancel the GL Entry made by FEE... ONLY if user makes SALES INVOICE LATER FOR ALL GROUP OF Fees...
+
+	:param fee_number.
+	"""
+
+	print "Cancela GL ENTRY NO FEE"
+	print "Cancela GL ENTRY NO FEE"
+	print "Cancela GL ENTRY NO FEE"
+	print "Cancela GL ENTRY NO FEE"
+	frappe.db.sql('''UPDATE `tabGL Entry` set docstatus = 2 where voucher_no = %s''', (fee_number), as_dict=1)
+
+
+@frappe.whitelist()
+def get_dominios_activos():
+	"""Returns Active domains .... 
+
+	:param .
+	"""
+
+	print "DOMINIOS ACTIVOS"
+	print "DOMINIOS ACTIVOS"
+	print "DOMINIOS ACTIVOS"
+	print "DOMINIOS ACTIVOS"
+	tmp = frappe.get_single('Domain Settings')
+	
+	return frappe.cache().get_value('active_domains',tmp)
+
+
+
