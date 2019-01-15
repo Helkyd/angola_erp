@@ -67,6 +67,7 @@ def on_submit(doc,method):
 			cancel_gl_entry_fee(prop.propina)
 
 			#Agora clear outstanding from Fees	
+			frappe.db.set_value("Fees",prop.propina, "paid_amount", prop.valor)
 			frappe.db.set_value("Fees",prop.propina, "outstanding_amount", 0)
 			frappe.db.commit()
 		
