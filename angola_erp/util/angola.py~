@@ -516,9 +516,11 @@ def cancel_gl_entry_fee(fee_number):
 
 	print "Cancela GL ENTRY NO FEE"
 	print "Cancela GL ENTRY NO FEE"
-	print "Cancela GL ENTRY NO FEE"
-	print "Cancela GL ENTRY NO FEE"
 	frappe.db.sql('''UPDATE `tabGL Entry` set docstatus = 2 where voucher_no = %s''', (fee_number), as_dict=1)
+
+	print "APAGA GL ENTRY NO FEE"
+	print "APAGA GL ENTRY NO FEE"
+	frappe.db.sql('''DELETE from `tabGL Entry` where voucher_no = %s''', (fee_number), as_dict=1)
 
 
 @frappe.whitelist()
