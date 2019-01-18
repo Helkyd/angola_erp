@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-
+	print "Patch conta 3771"
 	empresa_default = frappe.get_doc('Global Defaults').default_company
 	print(empresa_default)
 	if empresa_default:
@@ -32,7 +32,8 @@ def execute():
 				"docstatus": 0
 			})
 			dados.insert()
-
+	
+		print "Patch conta Seguranca Social"
 		ii = frappe.db.sql("""select name from `tabCost Center` where name like '%Seguranca Social%' """)
 		if len(ii) == 0:
 			#Nao tem; must create

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, encode
 from frappe import _
 
 from frappe import translate
@@ -49,7 +49,7 @@ def execute(filters=None):
 			mes2_ = ss.start_date.strftime("%B")
 
 		print mes_
-		print mes2_
+		print mes2_.encode('utf-8')
 		
 		row = [ss.employee_name, mes2_]
 

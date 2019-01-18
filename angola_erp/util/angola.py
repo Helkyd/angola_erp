@@ -534,9 +534,13 @@ def get_dominios_activos():
 	print "DOMINIOS ACTIVOS"
 	print "DOMINIOS ACTIVOS"
 	print "DOMINIOS ACTIVOS"
-	tmp = frappe.get_single('Domain Settings')
+
+	tmp = frappe.get_single('Domain Settings').active_domains
+
+	#frappe.get_single('Domain Settings')
+
 	if tmp:
-		return frappe.cache().get_value('active_domains',tmp)
+		return tmp #frappe.cache().get_value('active_domains',tmp)
 	else:
 		return None
 
