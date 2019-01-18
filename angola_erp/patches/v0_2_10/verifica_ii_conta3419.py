@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-
+	print "Patch Industrial"
 	ii = frappe.db.sql("""select name from `tabRetencoes` where name like '%industrial%' """)
 	if len(ii) ==0:
 		#Nao tem; must create
@@ -13,6 +13,7 @@ def execute():
 		})
 		doc.insert()
 
+	print "Patch conta 3419"
 	#Accounting 3419 Imposto Industrial Temporario
 	empresa_default = frappe.get_doc('Global Defaults').default_company
 	if empresa_default:

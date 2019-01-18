@@ -4,7 +4,7 @@ import frappe
 def execute():
 
 	ii = frappe.db.sql("""select name from `tabRetencoes` where name like '%industrial%' """)
-	if not ii:
+	if len(ii) ==0:
 		#Nao tem; must create
 		doc = frappe.get_doc({
 			"doctype" : "Retencoes",
@@ -19,7 +19,7 @@ def execute():
 		empresa_abbr = frappe.get_doc('Company', empresa_default).abbr
 		iii = frappe.db.sql("""select name from `tabAccount` where name like '%3419%' and company = %s """,(empresa_default),as_dict=True)
 
-		if not iii:
+		if len(iii) ==0:
 			#Nao tem; must create
 			dados = frappe.get_doc({
 				"doctype": "Account",

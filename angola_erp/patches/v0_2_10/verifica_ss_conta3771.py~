@@ -34,7 +34,7 @@ def execute():
 			dados.insert()
 
 		ii = frappe.db.sql("""select name from `tabCost Center` where name like '%Seguranca Social%' """)
-		if not ii:
+		if len(ii) == 0:
 			#Nao tem; must create
 			doc = frappe.get_doc({
 				"doctype" : "Cost Center",
