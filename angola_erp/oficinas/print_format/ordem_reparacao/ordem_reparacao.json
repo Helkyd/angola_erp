@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 1, 
+ "creation": "2019-01-19 23:41:25.758405", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Ordem de Reparacao", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "format_data": "[{\"fieldname\": \"print_heading_template\", \"fieldtype\": \"Custom HTML\", \"options\": \"<h1 align=\\\"center\\\" style=\\\"margin-right: 0px;\\\" dir=\\\"ltr\\\">Ordem de Repara\\u00e7\\u00e3o</h1><p align=\\\"left\\\"><label>Numero de Ordem</label>: {{doc.numero_ordem}}</p>\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_nome_cliente\", \"label\": \"Nome do Cliente\"}, {\"print_hide\": 0, \"fieldname\": \"or_email_cliente\", \"label\": \"Email do Cliente\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_client_number\", \"label\": \"Contacto Telefonico\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"numero_ordem\", \"label\": \"Numero de Ordem\"}, {\"print_hide\": 0, \"fieldname\": \"or_date\", \"label\": \"Data da Ordem\"}, {\"print_hide\": 0, \"fieldname\": \"or_status\", \"label\": \"Estado da OR\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_matricula\", \"label\": \"Matricula do Veiculo\"}, {\"print_hide\": 0, \"fieldname\": \"or_numero_chassi\", \"label\": \"Numero do Chassi\"}, {\"print_hide\": 0, \"fieldname\": \"or_nivel_combustivel\", \"label\": \"Nivel Combustivel\"}, {\"print_hide\": 0, \"fieldname\": \"or_previsao_entrega\", \"label\": \"Previs\\u00e3o Entrega\"}, {\"print_hide\": 0, \"fieldname\": \"or_kms_saida\", \"label\": \"Kms Saida\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_marca_veiculo\", \"label\": \"Marca do Veiculo\"}, {\"print_hide\": 0, \"fieldname\": \"or_numero_motor\", \"label\": \"Numero do Motor\"}, {\"print_hide\": 0, \"fieldname\": \"or_documentos_veiculo\", \"label\": \"Documentos do Veiculo\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_modelo_veiculo\", \"label\": \"Modelo do Veiculo\"}, {\"print_hide\": 0, \"fieldname\": \"or_kms_entrada\", \"label\": \"Kms Entrada\"}, {\"print_hide\": 0, \"fieldname\": \"or_ano_veiculo\", \"label\": \"Ano\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_macaco\", \"label\": \"Macaco\"}, {\"print_hide\": 0, \"fieldname\": \"or_chave_rodas\", \"label\": \"Chave de Rodas\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_triangulo\", \"label\": \"Triangulo\"}, {\"print_hide\": 0, \"fieldname\": \"or_extintor\", \"label\": \"Extintor\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_ferramentas\", \"label\": \"Ferramentas\"}, {\"print_hide\": 0, \"fieldname\": \"or_pneu_socorro\", \"label\": \"Pneu de Socorro\"}, {\"fieldtype\": \"Column Break\"}, {\"print_hide\": 0, \"fieldname\": \"or_porca_seguranca\", \"label\": \"Porca de Seguran\\u00e7a\"}, {\"fieldtype\": \"Section Break\", \"label\": \"\"}, {\"fieldtype\": \"Column Break\"}, {\"visible_columns\": [{\"print_hide\": 0, \"fieldname\": \"avcliente_descricao\", \"print_width\": \"\"}], \"print_hide\": 0, \"fieldname\": \"or_avarias_corrigir\", \"label\": \"Descri\\u00e7\\u00e3o Avarias / Trabalhos a Efectuar\"}, {\"print_hide\": 0, \"fieldname\": \"or_obs_cliente\", \"label\": \"Observa\\u00e7\\u00f5es do Cliente\"}, {\"print_hide\": 0, \"fieldname\": \"or_terms\", \"label\": \"Termos\"}, {\"print_hide\": 0, \"fieldname\": \"or_operador\", \"label\": \"Operador\"}]", 
+ "idx": 0, 
+ "line_breaks": 1, 
+ "modified": "2019-01-19 23:48:45.414799", 
+ "modified_by": "Administrator", 
+ "module": "Oficinas", 
+ "name": "Ordem Reparacao", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 1, 
+ "standard": "Yes"
+}

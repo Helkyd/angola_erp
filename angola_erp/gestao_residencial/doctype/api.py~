@@ -44,6 +44,8 @@ def get_gestao_quartos_check(quarto):
 def verifica_check_in():
 
 		# loop no Doc a procura de quartos com limite da DATA de ENTRADA.
+	if not (frappe.db.sql(""" select disabled from `tabRole` where name ='Gestao Residencial User' and disabled =1 """)):
+	
 
 		for d in frappe.db.sql("""SELECT codigo,numero_quarto,check_in,check_out,reservation_status, pay_advance FROM `tabReservas` WHERE reservation_status = "Nova" and check_in <=%s """, frappe.utils.now(), as_dict=True):
 			print "RESERVAS +++++++++++++++++++++++++++++++"
@@ -71,8 +73,9 @@ def verifica_check_in():
 @frappe.whitelist()
 def verifica_hora_saida():
 
+	if not (frappe.db.sql(""" select disabled from `tabRole` where name ='Gestao Residencial User' and disabled =1 """)):
 		print "HORA SAIDA QUARTOS CCCCCCCCCCCCCCCCCCCCCCCC"
-
+		
 		# loop no Doc a procura de quartos com limite da DATA de ENTRADA.
 
 		for d in frappe.db.sql("""SELECT name,numero_quarto,hora_entrada,hora_saida,status_quarto FROM `tabGestao de Quartos` WHERE status_quarto = "Ocupado" or status_quarto = 'Ativo' and hora_saida <=%s """, frappe.utils.now(), as_dict=True):
