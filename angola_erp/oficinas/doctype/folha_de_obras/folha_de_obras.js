@@ -86,15 +86,35 @@ frappe.ui.form.on('Folha de Obras', {
 
 		//teste para pegar as avarias
 		console.log('teste pegar avarias')
-		if (cur_frm.doc.numero_obra != undefined){
-			prj= cur_frm.call({method:"get_projecto_status",args:{"prj":cur_frm.doc.numero_obra}})
+		if (ordens1 != undefined){
+			if (ordens1.responseJSON){
+				if (frm.doc.avarias_cliente == undefined){
+					for (var x = 0; x < ordens1.responseJSON.message.length;x++){
+						if (ordens1.responseJSON.message[x].Parent == cur_frm.doc.ordem_reparacao){
+							var av = frm.add_child("avarias_cliente")
+							av.avcliente_descricao = ordens1.responseJSON.message[x].avcliente_descricao
+
+						}
+					}
+					frm.refresh_field("avarias_cliente")
+				}
+			}
+		}else if (ordens != undefined){
+			if (ordens.responseJSON){
+				if (frm.doc.avarias_cliente == undefined){
+					for (var x = 0; x < ordens.responseJSON.message.length;x++){
+						if (ordens.responseJSON.message[x].Parent == cur_frm.doc.ordem_reparacao){
+							var av = frm.add_child("avarias_cliente")
+							av.avcliente_descricao = ordens.responseJSON.message[x].avcliente_descricao
+
+						}
+					}
+					frm.refresh_field("avarias_cliente")
+					//cur_frm.doc.avarias_cliente = cur_frm.doc.avarias_cliente + '\n'
+				}
+
+			}
 		}
-
-		if (cur_frm.doc.ordem_reparacao != undefined){
-			ordens1= cur_frm.call({method:"get_avaria_cliente",args:{"cdt":cur_frm.doc.ordem_reparacao}})
-		}
-
-
 	}
 });
 
@@ -110,7 +130,7 @@ frappe.ui.form.on('Folha de Obras','ordem_reparacao',function(frm,cdt,cdn){
 		if (ordens1 != undefined){
 			for (var x = 0; x < ordens1.responseJSON.message.length;x++){
 				if (ordens1.responseJSON.message[x].Parent == cur_frm.doc.ordem_reparacao){
-					av = frm.add_child("avarias_cliente")
+					var av = frm.add_child("avarias_cliente")
 					av.avcliente_descricao = ordens1.responseJSON.message[x].avcliente_descricao
 
 				}
@@ -120,7 +140,7 @@ frappe.ui.form.on('Folha de Obras','ordem_reparacao',function(frm,cdt,cdn){
 		}else if (ordens != undefined){
 			for (var x = 0; x < ordens.responseJSON.message.length;x++){
 				if (ordens.responseJSON.message[x].Parent == cur_frm.doc.ordem_reparacao){
-					av = frm.add_child("avarias_cliente")
+					var av = frm.add_child("avarias_cliente")
 					av.avcliente_descricao = ordens.responseJSON.message[x].avcliente_descricao
 
 				}

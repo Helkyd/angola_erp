@@ -6,14 +6,19 @@ frappe.ui.form.on('Veiculos', {
 	
 		cur_frm.toggle_enable("veiculo_operador",false)
 		cur_frm.toggle_enable("veiculo_ultima_revisao",false)
+	},
+
+	validate: function(frm){
+		//validation of plates
+		if (cur_frm.doc.matricula.length < 8 ){
+			frappe.show_alert('Matricula tem que ter 11 ou 8 digitos')	
+			validated = false
+		} else if (cur_frm.doc.matricula.length < 11 && cur_frm.doc.matricula.length != 8){
+			frappe.show_alert('Matricula tem que ter 11 ou 8 digitos')
+			validated = false
+		}
 	}
 		
-});
-
-frappe.ui.form.on('Veiculos', {
-	refresh: function(frm) {
-
-	}
 });
 
 
@@ -52,6 +57,36 @@ frappe.ui.form.on('Veiculos','veiculo_potencia',function(frm,cdt,cdn){
 frappe.ui.form.on('Veiculos','veiculo_cor',function(frm,cdt,cdn){
 	//accept only Letras
 
+});
+
+frappe.ui.form.on('Veiculos','matricula',function(frm,cdt,cdn){
+	//check for lenght and format... 
+	//ld0101ld
+	if (cur_frm.doc.matricula.length < 8 ){
+		frappe.show_alert('Matricula tem que ter 11 ou 8 digitos')	
+	} else if (cur_frm.doc.matricula.length < 11 && cur_frm.doc.matricula.length != 8){
+		frappe.show_alert('Matricula tem que ter 11 ou 8 digitos')
+	}
+	//format the plate	
+	console.log('plates')
+	if (cur_frm.doc.matricula.length == 8 ){
+		var tmp_plate = ""
+		for (x in cur_frm.doc.matricula) {
+
+			if (x == 1 || x == 3 || x == 5 ){
+				tmp_plate += x + "-"
+
+			} else {
+				tmp_plate += cur_frm.doc.matricula[x]
+			}
+
+		}
+		cur_frm.doc.matricula = tmp_plate
+		cur_frm.refresh_fields('matricula');
+
+	}else if (cur_frm.doc.matricula.length = 11 ){
+		console.log('Nao faz nada...esta certo')
+	}
 });
 
 

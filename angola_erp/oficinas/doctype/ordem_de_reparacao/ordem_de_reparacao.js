@@ -12,6 +12,14 @@ frappe.ui.form.on('Ordem de Reparacao', {
 		cur_frm.toggle_enable("or_numero_chassi",false)
 		cur_frm.toggle_enable("or_numero_motor",false)
 		cur_frm.toggle_enable("or_ano_veiculo",false)
+
+		if (cur_frm.doc.pertence_empresa == 0) {
+			cur_frm.get_field('or_nome_cliente').df.reqd = true
+			cur_frm.get_field('or_terms').df.reqd = true
+
+		}
+		cur_frm.get_field('or_matricula').df.reqd = true
+
 	}
 		
 });
@@ -19,7 +27,12 @@ frappe.ui.form.on('Ordem de Reparacao', {
 frappe.ui.form.on('Ordem de Reparacao', {
 	refresh: function(frm) {
 
+		if (cur_frm.doc.pertence_empresa == 0) {
+			cur_frm.get_field('or_nome_cliente').df.reqd = true
+			cur_frm.get_field('or_terms').df.reqd = true
 
+		}
+		cur_frm.get_field('or_matricula').df.reqd = true
 
 		if (cur_frm.doc.or_status == 'Em Curso'){
 			cur_frm.toggle_enable("or_operador",false)
@@ -92,7 +105,31 @@ frappe.ui.form.on('Ordem de Reparacao', {
 	}
 });
 
+frappe.ui.form.on('Ordem de Reparacao','pertence_empresa',function(frm,cdt,cdn){
+
+	cur_frm.toggle_enable("or_client_number",false)
+	cur_frm.toggle_enable("or_email_cliente",false)
+
+	cur_frm.set_value("or_nome_cliente", "")
+	cur_frm.set_value("or_matricula", "")
+
+	cur_frm.fields_dict['or_matricula'].get_query = function(doc){
+		return{
+			filters:{
+				"pertence_empresa":cur_frm.doc.pertence_empresa,
+			},
+				
+		}
+	}
+
+});
+
 frappe.ui.form.on('Ordem de Reparacao','or_nome_cliente',function(frm,cdt,cdn){
+
+	cur_frm.toggle_enable("or_client_number",true)
+	cur_frm.toggle_enable("or_email_cliente",true)
+
+	cur_frm.get_field('or_terms').df.reqd = true
 
 	frappe.model.set_value(cdt,cdn,'or_operador',frappe.session.user)
 	if (cur_frm.doc.or_nome_cliente){
@@ -113,10 +150,12 @@ frappe.ui.form.on('Ordem de Reparacao','or_nome_cliente',function(frm,cdt,cdn){
 
 frappe.ui.form.on('Ordem de Reparacao','or_matricula',function(frm,cdt,cdn){
 	
-	veiculos_('Veiculos',cur_frm.doc.or_matricula)
-	cur_frm.refresh_fields('or_marca_veiculo');
-
-
+	if (cur_frm.doc.or_nome_cliente || cur_frm.doc.pertence_empresa){
+		if (cur_frm.doc.or_matricula != ""){
+			veiculos_('Veiculos',cur_frm.doc.or_matricula)
+			cur_frm.refresh_fields('or_marca_veiculo');
+		}
+	}
 });
 
 

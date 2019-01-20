@@ -46,7 +46,33 @@ def get_data():
 			"icon": "/assets/angola_erp/images/gym.svg",
 			"type": "module",
 			"label": _("Ginasio")
-		}
+		},
+		{
+			"module_name": "Oficinas",
+			"color": "grey",
+			"icon": "/assets/angola_erp/images/oficina.svg",
+			"type": "module",
+			"label": _("Oficinas")
+		},
+		{
+		   "_doctype": "Folha de Obras", 
+		   "color": "grey", 
+		   "icon": "/assets/angola_erp/images/folhaobra.ico", 
+		   "label": "Folha de Obras", 
+		   "link": "List/Folha de Obras", 
+		   "module_name": "Folha de Obras", 
+		   "type": "link"
+		  },
+		 {
+		   "_doctype": "Ordem de Reparacao", 
+		   "color": "grey", 
+		   "icon": "/assets/angola_erp/images/ordemreparar.svg", 
+		   "label": "Ordem de Reparacao", 
+		   "link": "List/Ordem de Reparacao", 
+		   "module_name": "Ordem de Reparacao", 
+		   "type": "link"
+		  }
+
 
 
 
