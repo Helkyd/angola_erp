@@ -62,8 +62,8 @@ def get_data():
 		   "link": "List/Folha de Obras", 
 		   "module_name": "Folha de Obras", 
 		   "type": "link"
-		  },
-		 {
+	        },
+		{
 		   "_doctype": "Ordem de Reparacao", 
 		   "color": "grey", 
 		   "icon": "/assets/angola_erp/images/ordemreparar.svg", 
@@ -71,9 +71,14 @@ def get_data():
 		   "link": "List/Ordem de Reparacao", 
 		   "module_name": "Ordem de Reparacao", 
 		   "type": "link"
-		  }
-
-
+		},
+		{
+			"module_name": "Contractos Rent",
+			"color": "grey",
+			"icon": "octicon octicon-checklist",
+			"type": "module",
+			"label": _("Contractos Rent")
+		},
 
 
 

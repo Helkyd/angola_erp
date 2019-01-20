@@ -545,4 +545,20 @@ def get_dominios_activos():
 		return None
 
 
+@frappe.whitelist()
+def get_cliente_address(cliente):
+	print("GET CLIENTE ENDERENCO!!!")
+	
+	print("GET CLIENTE ENDERENCO!!!")
+	print("GET CLIENTE ENDERENCO!!!")
 
+	clientes = frappe.get_doc("Customer",cliente)
+	if clientes:
+		link1 = frappe.get_all('Dynamic Link',filters={'link_doctype':'Customer','link_name':cliente,'parenttype':'Address'}, fields=['parent'])
+		if link1:
+			print('get Clientes Endereco')
+			print(frappe.get_doc('Address',link1[0].parent).address_line1)
+			print(frappe.get_doc('Address',link1[0].parent).phone)
+			endereco = frappe.get_doc('Address',link1[0].parent)
+			return endereco
+	
