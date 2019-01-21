@@ -43,6 +43,7 @@ frappe.ui.form.on('Contractos Rent','nome_do_cliente',function(frm,cdt,cdn){
 
 	}
 
+	cur_frm.toggle_enable("status_contracto",false)
 	cur_frm.toggle_enable("operador",false)
 	frappe.model.set_value(cdt,cdn,'operador',frappe.session.user)
 
@@ -57,7 +58,7 @@ frappe.ui.form.on('Contractos Rent','nome_do_cliente',function(frm,cdt,cdn){
 frappe.ui.form.on('Contractos Rent','matricula',function(frm,cdt,cdn){
 	console.log('matricula')
 	if (cur_frm.doc.nome_do_cliente){
-		if (cur_frm.doc.matricula != ""){
+		if (cur_frm.doc.matricula != undefined){
 			veiculos_('Vehicle',cur_frm.doc.matricula)
 			cur_frm.refresh_fields('marca_modelo');
 		}

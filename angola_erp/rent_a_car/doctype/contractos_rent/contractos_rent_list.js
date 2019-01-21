@@ -4,12 +4,19 @@
 
 // render
 frappe.listview_settings['Contractos Rent'] = {
-	add_fields: ["nome_do_cliente"],
+	add_fields: ["status_contracto"],
 
 	get_indicator: function(doc) {
 
+		if (doc.status_contracto == "Activo" ) {
+			return [__(doc.status_contracto ), "green"]
+		} else if (doc.status_contracto == "Terminou" ) {
+			return [__(doc.status_contracto ), "orage"]
+		}
 	},
-	colwidths: {"Nome do Cliente": 5},
+	colwidths: {"subject": 1, "indicator": 1.1},
+
+
 
 	
 };

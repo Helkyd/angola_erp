@@ -33,6 +33,13 @@ class ContractosRent(Document):
 			frappe.throw(_("Numero da Carta de Condução é necessária!!!"))
 			validated = False
 
+		#verifica se a viatura esta em Stand-by
+		is_free = frappe.get_doc("Vehicle",self.matricula)
+		if not is_free.entrada_ou_saida == "Stand-by":
+			frappe.throw(_("Esta viatura já está alugada, não é possivel continuar!!!"))
+			validated = False	
+		
+
 
 	def on_submit(self):
 
@@ -41,12 +48,21 @@ class ContractosRent(Document):
 		
 	def on_cancel(self):
 		#set the car leased on Vehicle so no one can rent....
-		print("submeter .... tem que CANCeLAR leased no Vehicle ...")
-		frappe.db.set_value("Vehicle",self.matricula, "veiculo_alugado", 0)
-		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Entrada")
-		frappe.db.commit()
-
 		self.docstatus = 2	#cancela o submeter
+
+	def before_cancel(self):
+		#only cancel if no Ficha Tecnica submitted
+
+		has_ficha = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':['like', self.contracto_numero],'docstatus':1},fields=['matricula_veiculo','contracto_numero'])
+		if has_ficha:
+			frappe.throw(_('Ficha Tecnica da Viatura existente. Por favor cancelar primeiro'))
+			validaded = False
+		else:
+			print("submeter .... tem que CANCeLAR leased no Vehicle ...")
+			frappe.db.set_value("Vehicle",self.matricula, "veiculo_alugado", 0)
+			frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Stand-by")
+			frappe.db.commit()
+
 
 	def before_submit(self):
 		#set the car leased on Vehicle so no one can rent....

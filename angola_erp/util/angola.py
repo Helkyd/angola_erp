@@ -570,3 +570,40 @@ def get_all_contracto_numero():
 	if link1:
 		return link1
 				
+
+
+@frappe.whitelist()
+def checkin_ficha_tecnica(source_name, target_doc = None):
+
+	#Copy a Ficha Tecnica para o mesmo....
+	fichatecnica = get_mapped_doc("Ficha Tecnica da Viatura", source_name,
+		{"Ficha Tecnica da Viatura": {
+			"doctype": "Ficha Tecnica da Viatura",
+			"field_map": {
+				"name": "name",
+
+			}
+		}}, target_doc,ignore_permissions=True)
+
+	return fichatecnica
+
+
+@frappe.whitelist()
+def actualiza_ficha_tecnica(source_name):
+
+	ficha = frappe.db.sql("""select name, matricula_veiculo, entrada_ou_saida_viatura from `tabFicha Tecnica da Viatura` WHERE entrada_ou_saida_viatura = "Saida" and matricula_veiculo = %s """, (source_name), as_dict=False)
+
+	if ficha:
+		ficha1 = frappe.get_doc("Ficha Tecnica da Viatura",ficha.name)
+		print(ficha.name)
+		print(ficha.name)
+		print(ficha.name)
+		ficha.status_viatura = "Devolvido"
+		ficha.save()		
+		
+		#atualiza o carro
+		print('carro')
+		carro = frappe.get_doc("Vehicle", ficha.matricula_veiculo)
+		carro.veiculo_alugado = 0
+		carro.save()		
+
