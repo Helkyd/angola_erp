@@ -43,7 +43,7 @@ class ContractosRent(Document):
 		#set the car leased on Vehicle so no one can rent....
 		print("submeter .... tem que CANCeLAR leased no Vehicle ...")
 		frappe.db.set_value("Vehicle",self.matricula, "veiculo_alugado", 0)
-
+		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Entrada")
 		frappe.db.commit()
 
 		self.docstatus = 2	#cancela o submeter
@@ -54,6 +54,7 @@ class ContractosRent(Document):
 		#carro = frappe.get_doc("Vehicle",self.matricula)
 
 		frappe.db.set_value("Vehicle",self.matricula, "veiculo_alugado", 1)
+		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Stand-by")
 		frappe.db.commit()
 
 

@@ -19,7 +19,7 @@ class FichaTecnicadaViatura(Document):
 		self.ficha_numero = make_autoname(self.naming_series)
 		self.name = self.ficha_numero
 		self.docstatus = 0
-		frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Stand-by")
+		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Stand-by")
 		frappe.db.commit()
 
 
@@ -39,7 +39,7 @@ class FichaTecnicadaViatura(Document):
 		
 	def on_cancel(self):
 		#set the car leased on Vehicle so no one can rent....
-		frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Entrada")
+		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Entrada")
 		frappe.db.commit()
 
 		self.docstatus = 2	#cancela o submeter
@@ -47,7 +47,7 @@ class FichaTecnicadaViatura(Document):
 
 	def before_submit(self):
 		#set carro as Saida
-		frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Saida")
+		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Saida")
 		frappe.db.commit()
 
 

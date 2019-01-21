@@ -37,6 +37,7 @@ class ContractosRent(Document):
 	def on_submit(self):
 
 		self.docstatus = 1
+
 		
 	def on_cancel(self):
 		#set the car leased on Vehicle so no one can rent....

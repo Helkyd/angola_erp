@@ -66,7 +66,6 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','matricula_veiculo',function(frm,cd
 		}
 
 		cur_frm.refresh_fields('marca_veiculo');
-		cur_frm.trigger('entrada_ou_saida_viatura')
 	}
 });
 

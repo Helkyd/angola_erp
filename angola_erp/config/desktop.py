@@ -50,14 +50,22 @@ def get_data():
 		{
 			"module_name": "Oficinas",
 			"color": "grey",
-			"icon": "/assets/angola_erp/images/oficina.svg",
+			"icon": "/assets/angola_erp/images/diagnostico.svg",
 			"type": "module",
 			"label": _("Oficinas")
 		},
 		{
+			"module_name": "Contractos Rent",
+			"color": "grey",
+			"icon": "octicon octicon-checklist",
+			"type": "module",
+			"label": _("Contractos Rent")
+		},
+
+		{
 		   "_doctype": "Folha de Obras", 
 		   "color": "grey", 
-		   "icon": "/assets/angola_erp/images/folhaobra.ico", 
+		   "icon": "/assets/angola_erp/images/folhaobra.svg", 
 		   "label": "Folha de Obras", 
 		   "link": "List/Folha de Obras", 
 		   "module_name": "Folha de Obras", 
@@ -71,15 +79,7 @@ def get_data():
 		   "link": "List/Ordem de Reparacao", 
 		   "module_name": "Ordem de Reparacao", 
 		   "type": "link"
-		},
-		{
-			"module_name": "Contractos Rent",
-			"color": "grey",
-			"icon": "octicon octicon-checklist",
-			"type": "module",
-			"label": _("Contractos Rent")
-		},
-
+		}
 
 
 	]
