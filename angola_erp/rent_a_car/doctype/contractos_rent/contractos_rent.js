@@ -121,6 +121,7 @@ var veiculos_ = function(frm,cdt,cdn){
 			//cur_frm.doc.or_modelo_veiculo = carro.modelo
 			cur_frm.doc.cor = carro.color
 			cur_frm.doc.combustivel = carro.fuel_type
+			cur_frm.doc.kms_out = carro.last_odometer
 
 		}
 		

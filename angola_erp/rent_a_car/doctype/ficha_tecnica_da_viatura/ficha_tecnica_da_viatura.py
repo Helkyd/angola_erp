@@ -83,6 +83,7 @@ class FichaTecnicadaViatura(Document):
 
 			#set carro as Saida
 			frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Stand-by")
+			frappe.db.set_value("Vehicle",self.matricula_veiculo, "veiculo_alugado", 0)
 			frappe.db.commit()
 
 			#set contracto as Terminado.
@@ -90,7 +91,18 @@ class FichaTecnicadaViatura(Document):
 			frappe.db.commit()
 
 			#procura a Ficha de SAIDA para por como 
-			
+			fichasaida = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':self.contracto_numero,'docstatus':1,'entrada_ou_saida_viatura': 'Saida'},fields=['name','contracto_numero'])			
+
+			print(fichasaida[0].name)
+			print(fichasaida)
+	
+			if fichasaida:
+				x = frappe.get_doc('Ficha Tecnica da Viatura',fichasaida[0].name)
+				x.status_viatura = 'Devolvida'	
+				#x.save()		
+
+			#NAO SERVE AQUI...
+
 
 			self.status_viatura = 'Devolvida'
 			self.docstatus = 1

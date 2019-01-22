@@ -43,6 +43,7 @@ frappe.ui.form.on('Contractos Rent','nome_do_cliente',function(frm,cdt,cdn){
 
 	}
 
+	cur_frm.toggle_enable("status_contracto",false)
 	cur_frm.toggle_enable("operador",false)
 	frappe.model.set_value(cdt,cdn,'operador',frappe.session.user)
 

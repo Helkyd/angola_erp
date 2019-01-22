@@ -25,9 +25,9 @@ class ContractosRent(Document):
 
 	def validate(self):
 		#validar data de nascimento, carta de conducao
-		if not self.data_nascimento_cliente:
-			frappe.throw(_("Data de Nascimento é necessária!!!"))
-			validated = False
+		#if not self.data_nascimento_cliente:
+		#	frappe.throw(_("Data de Nascimento é necessária!!!"))
+			#validated = False
 		
 		if not self.carta_conducao_cliente:
 			frappe.throw(_("Numero da Carta de Condução é necessária!!!"))

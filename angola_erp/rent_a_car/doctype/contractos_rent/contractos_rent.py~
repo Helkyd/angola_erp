@@ -27,7 +27,7 @@ class ContractosRent(Document):
 		#validar data de nascimento, carta de conducao
 		if not self.data_nascimento_cliente:
 			frappe.throw(_("Data de Nascimento é necessária!!!"))
-			validated = False
+			#validated = False
 		
 		if not self.carta_conducao_cliente:
 			frappe.throw(_("Numero da Carta de Condução é necessária!!!"))
@@ -53,7 +53,7 @@ class ContractosRent(Document):
 	def before_cancel(self):
 		#only cancel if no Ficha Tecnica submitted
 
-		has_ficha = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':['like', self.contracto_numero],'docstatus':1},fields=['matricula','contracto_numero'])
+		has_ficha = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':['like', self.contracto_numero],'docstatus':1},fields=['matricula_veiculo','contracto_numero'])
 		if has_ficha:
 			frappe.throw(_('Ficha Tecnica da Viatura existente. Por favor cancelar primeiro'))
 			validaded = False
