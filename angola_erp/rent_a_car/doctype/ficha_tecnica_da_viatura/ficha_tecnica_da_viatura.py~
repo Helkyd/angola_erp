@@ -99,7 +99,10 @@ class FichaTecnicadaViatura(Document):
 			if fichasaida:
 				x = frappe.get_doc('Ficha Tecnica da Viatura',fichasaida[0].name)
 				x.status_viatura = 'Devolvida'	
-				x.save()		
+				#x.save()		
+
+			#NAO SERVE AQUI...
+
 
 			self.status_viatura = 'Devolvida'
 			self.docstatus = 1

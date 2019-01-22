@@ -73,4 +73,21 @@ class ContractosRent(Document):
 		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Stand-by")
 		frappe.db.commit()
 
+	def before_save(self):
+	
+		#procura a Ficha de SAIDA para por como 
 
+		##### Nunca sera usado ... mas por enquanto fica aqui..
+		fichasaida = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':self.contracto_numero,'docstatus':1,'entrada_ou_saida_viatura': 'Saida'},fields=['name','contracto_numero'])			
+
+		print('status contract')
+		print(self.status_contracto)
+		print('status contract')
+
+		
+		print(fichasaida)
+
+		if fichasaida:
+			if self.status_contracto == "Terminou":
+				frappe.db.set_value('Ficha Tecnica da Viatura',fichasaida[0].name)
+				frappe.db.commit()

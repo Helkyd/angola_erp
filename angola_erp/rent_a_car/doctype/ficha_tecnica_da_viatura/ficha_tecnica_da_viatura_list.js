@@ -10,15 +10,25 @@ frappe.listview_settings['Ficha Tecnica da Viatura'] = {
 
 		if (doc.entrada_ou_saida_viatura == "Entrada" ) {
 			return [__(doc.entrada_ou_saida_viatura ), "green"]
-		} else if (doc.entrada_ou_saida_viatura == "Saida" ) {
+		} else if (doc.entrada_ou_saida_viatura == "Saida" && doc.status_viatura == "Alugada" ) {
 			return [__(doc.status_viatura ), "red"]
-		} else if (doc.entrada_ou_saida_viatura== "Stand-by" ) {
-			return [__(doc.entrada_ou_saida_viatura ), "orange"]
+		} else if (doc.status_viatura== "Stand-by" ) {
+			return [__(doc.status_viatura ), "orange"]
 		
+		} else if (doc.status_viatura== "Devolvida" ) {
+			return [__(doc.status_viatura ), "grey"]
+
 		}
 	},
 	colwidths: {"subject": 1, "indicator": 1.1},
 
+	onload: function(listview){
+		frappe.route_options = {
+			'docstatus':['!=',2],
+			'status_viatura':'Alugada'
+
+		};
+	},
 
 };
 

@@ -97,9 +97,8 @@ class FichaTecnicadaViatura(Document):
 			print(fichasaida)
 	
 			if fichasaida:
-				x = frappe.get_doc('Ficha Tecnica da Viatura',fichasaida[0].name)
-				x.status_viatura = 'Devolvida'	
-				#x.save()		
+				frappe.db.set_value("Ficha Tecnica da Viatura",fichasaida[0].name, "status_viatura", "Devolvida")
+				frappe.db.commit()
 
 			#NAO SERVE AQUI...
 

@@ -25,8 +25,8 @@ class ContractosRent(Document):
 
 	def validate(self):
 		#validar data de nascimento, carta de conducao
-		if not self.data_nascimento_cliente:
-			frappe.throw(_("Data de Nascimento é necessária!!!"))
+		#if not self.data_nascimento_cliente:
+		#	frappe.throw(_("Data de Nascimento é necessária!!!"))
 			#validated = False
 		
 		if not self.carta_conducao_cliente:
@@ -73,4 +73,18 @@ class ContractosRent(Document):
 		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Stand-by")
 		frappe.db.commit()
 
+	def before_save(self):
+		#procura a Ficha de SAIDA para por como 
+		fichasaida = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':self.contracto_numero,'docstatus':1,'entrada_ou_saida_viatura': 'Saida'},fields=['name','contracto_numero'])			
 
+		print('status contract')
+		print(self.status_contracto)
+		print('status contract')
+
+		
+		print(fichasaida)
+
+		if fichasaida:
+			if self.status_contracto == "Terminou":
+				frappe.db.set_value('Ficha Tecnica da Viatura',fichasaida[0].name)
+				frappe.db.commit()
