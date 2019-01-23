@@ -60,9 +60,10 @@ def on_submit(doc,method):
 	#Deve primeiro cancelar a GL entry feita para criar a Factura...
 	tem_Educacao = False;
 	tmp = frappe.get_single('Domain Settings')
-	for dominios in frappe.cache().get_value('active_domains',tmp):
-		if dominios == "Education":
-			tem_Educacao = True;
+	if tmp:
+		for dominios in frappe.cache().get_value('active_domains',tmp):
+			if dominios == "Education":
+				tem_Educacao = True;
 
 	if tem_Educacao:
 		print "TEM DOMINIO EDUCACAO SELECT"
