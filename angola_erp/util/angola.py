@@ -545,4 +545,60 @@ def get_dominios_activos():
 		return None
 
 
+@frappe.whitelist()
+def get_cliente_address(cliente):
+
+	clientes = frappe.get_doc("Customer",cliente)
+	if clientes:
+		link1 = frappe.get_all('Dynamic Link',filters={'link_doctype':'Customer','link_name':cliente,'parenttype':'Address'}, fields=['parent'])
+		if link1:
+			endereco = frappe.get_doc('Address',link1[0].parent)
+			return endereco
+
+
+@frappe.whitelist()
+def get_contracto_numero(matricula):
+
+	link1 =  frappe.model.frappe.get_all('Contractos Rent',filters={'matricula':matricula,'docstatus':1},fields=['contracto_numero','local_de_saida','local_previsto_entrada','data_de_saida','devolucao_prevista'])
+	if link1:
+		return link1
+
+@frappe.whitelist()
+def get_all_contracto_numero():
+
+	link1 =  frappe.model.frappe.get_all('Contractos Rent',filters={'matricula':['like', '%'],'docstatus':1},fields=['matricula','contracto_numero','local_de_saida','local_previsto_entrada','data_de_saida','devolucao_prevista','kms_out','combustivel','deposito_out'])
+	if link1:
+		return link1
+				
+
+
+@frappe.whitelist()
+def checkin_ficha_tecnica(source_name, target_doc = None):
+
+	#Copy a Ficha Tecnica para o mesmo....
+	fichatecnica = get_mapped_doc("Ficha Tecnica da Viatura", source_name,
+		{"Ficha Tecnica da Viatura": {
+			"doctype": "Ficha Tecnica da Viatura",
+			"field_map": {
+				"name": "name",
+
+			}
+		}}, target_doc,ignore_permissions=True)
+
+	return fichatecnica
+
+
+@frappe.whitelist()
+def actualiza_ficha_tecnica(source_name):
+
+	ficha = frappe.db.sql("""select name, matricula_veiculo, entrada_ou_saida_viatura from `tabFicha Tecnica da Viatura` WHERE entrada_ou_saida_viatura = "Saida" and matricula_veiculo = %s """, (source_name), as_dict=False)
+
+	if ficha:
+		print(ficha[0][0])
+		ficha1 = frappe.get_doc("Ficha Tecnica da Viatura",ficha[0][0])
+	
+		print('aquiaaaaaaa')
+
+		ficha1.status_viatura = "Devolvida"
+		ficha1.save()		
 

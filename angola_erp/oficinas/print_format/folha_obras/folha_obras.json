@@ -1,0 +1,22 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2019-01-19 23:33:52.169157", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Folha de Obras", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "\n<p> <br></>\n<h3><div class=\"text-center\"> {{ \"FOLHA DE OBRA\" }} </div></h3>\n</p>\n<div class=\"row\">\n\t<div class=\"col-md-10 text-left\"><b>Obra N\u00ba {{ doc.numero_obra}}</b></div>\n</div>\n<div class=\"row\">\n\t<div class=\"col-md-3 text-left\"><b>Data:</b></div>\n\t<div class=\"col-md-9\">{{ doc.get_formatted(\"data_abertura\") }} </div>\n</div>\n<div class=\"row\">\n\t<div class=\"col-md-3 text-left\"><b>Estado:</b></div>\n\t<div class=\"col-md-9\">{{ doc.fo_status }}</div>\n\t<div class=\"col-md-3 text-left\"><b>Operador:</b></div>\n\t<div class=\"col-md-9\">{{ doc.fo_operador}}</div>\n\t\n</div>\n\n\n\n\n<table class=\"table table-sm no-border\">\n  <tbody>\n\t<tr>\n\t\t<td class=text-left\"><b>Cliente: {{ doc.nome_cliente }}</b></td>\n\t\t<td class=text-left\"><b>Telefone:</b> {{ doc.cliente_telefone}}</td>\n\t\t<td class=text-left\"><b>Email:</b> {{ doc.email_cliente }}</td>\n\t</tr>\n\t<tr>\n\t\t<td class=text-left\"><b>Matricula: {{ doc.matricula_veiculo }}</b></td>\n\t\t<td class=text-left\"><b>Marca:</b> {{ doc.marca_veiculo}}</td>\n\t\t<td class=text-left\"><b>Modelo:</b> {{ doc.modelo_veiculo }}</td>\n\t\t<td class=text-left\"><b>Numero de Chassi:</b> {{ doc.numero_chassi}}</td>\n\t\t<td class=text-left\"><b>Numero de Motor:</b> {{ doc.numero_motor}}</td>\n\t</tr>\n\t<tr>\n\t\t<td class=text-left\"><b>KMs entrada:</b> {{ doc.kms_entrada}}</td>\n\t\n\t\t<td class=text-left\"><b>Previs\u00e3o Entrega:</b> {{ doc.data_previsao_saida}}</td>\n\t</tr>\n\n\n\t</tbody>\n</table>\n{% if doc.avarias_cliente%}\n<table class=\"table table-condensed cart \">\n\t<tbody>\n\t\t<tr>\n\t\t\t<th>Sr</th>\n\t\t\t<th>Descricao Avaria</th>\n\t\t</tr>\n\t\t{%- for row in doc.avarias_cliente -%}\n\t\t<tr>\n\t\t\t<td style=\"width: 2%;\">{{ row.idx }}</td>\n\t\t\t<td style=\"width: 10%;\">\n\t\t\t\t{{ row.avcliente_descricao}}\n\t\t\t</td>\n\t\t</tr>\n\t\t{%- endfor -%}\t\t\n\t</tbody>\t\n</table>\n\n<table class=\"table table-condensed no-border\">\n\t<tbody>\n\t\t<tr>\n\t\t\t<td class=\"text-left\" style=\"width: 10%\"><b>Observa\u00e7\u00f5es do Cliente:</b> </td>\n\t\t\t<td>{{ doc.obs_cliente}}</td>\n\t\t\t\n\t\t</tr>\n\t</tbody>\n</table>\n{% endif %}\n", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2019-01-20 02:31:05.885033", 
+ "modified_by": "Administrator", 
+ "module": "Oficinas", 
+ "name": "Folha Obras", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}

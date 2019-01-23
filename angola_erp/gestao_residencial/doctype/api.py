@@ -216,3 +216,15 @@ def get_alertapbx():
 		elif (pbxtemp.field == "reception_number"):
 			numerorececao = pbxtemp.value
 
+
+@frappe.whitelist()
+def get_avaria_cliente(cdt):
+	print frappe.get_all("Avarias_Cliente",filters={'Parent':cdt},fields=['Parent','avcliente_descricao'])	
+	return frappe.get_all("Avarias_Cliente",filters={'Parent':cdt},fields=['Parent','avcliente_descricao'])
+
+@frappe.whitelist()
+def get_avarias_clientes():
+	print frappe.get_all("Avarias_Cliente",filters={'Parent':['!=','']},fields=['Parent','avcliente_descricao'])
+	return frappe.get_all("Avarias_Cliente",filters={'Parent':['!=','']},fields=['Parent','avcliente_descricao'])
+
+
