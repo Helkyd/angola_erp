@@ -6,12 +6,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe import throw
+from frappe.utils import nowdate, flt, now
 from frappe.utils import formatdate, encode
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from datetime import datetime, timedelta
 from frappe.utils import cstr, get_datetime, getdate, cint, get_datetime_str
 
+from angola_erp.util.angola import get_dominios_activos
 
 class ContractosRent(Document):
 
@@ -39,6 +41,8 @@ class ContractosRent(Document):
 			frappe.throw(_("Esta viatura já está alugada, não é possivel continuar!!!"))
 			validated = False	
 		
+		#Teste
+		criar_faturavenda(self)	
 
 
 	def on_submit(self):
@@ -73,8 +77,20 @@ class ContractosRent(Document):
 		frappe.db.set_value("Vehicle",self.matricula, "entrada_ou_saida", "Stand-by")
 		frappe.db.commit()
 
+		#Criar a Factura para pgar Caucao.
+		print('CRIAR FACTURA PARA CAUCAO')
+		print('CRIAR FACTURA PARA CAUCAO')
+		print('CRIAR FACTURA PARA CAUCAO')
+		print('CRIAR FACTURA PARA CAUCAO')
+		print('CRIAR FACTURA PARA CAUCAO')
+		#criar_faturavenda(self)
+
+
 	def before_save(self):
+	
 		#procura a Ficha de SAIDA para por como 
+
+		##### Nunca sera usado ... mas por enquanto fica aqui..
 		fichasaida = frappe.model.frappe.get_all('Ficha Tecnica da Viatura',filters={'contracto_numero':self.contracto_numero,'docstatus':1,'entrada_ou_saida_viatura': 'Saida'},fields=['name','contracto_numero'])			
 
 		print('status contract')
@@ -88,3 +104,92 @@ class ContractosRent(Document):
 			if self.status_contracto == "Terminou":
 				frappe.db.set_value('Ficha Tecnica da Viatura',fichasaida[0].name)
 				frappe.db.commit()
+
+
+
+def criar_faturavenda(doc):
+
+	print "Verifica Sales Invoice ...."
+	print frappe.get_value("Global Defaults",None,"default_company")
+	
+	#if NONE should ask to select or select the first one....
+	#or maybe on the form should have the company to select....
+	empresa = frappe.get_value("Global Defaults",None,"default_company")	
+
+	if not empresa:		#Only for Testing ....
+		empresa = '2MS - Comercio e Representacoes, Lda'
+
+	empresa_abbr = frappe.get_value("Company",empresa,"abbr")
+
+	centrocusto = frappe.get_value("Company",empresa,"cost_center")
+
+	contalucro =  frappe.get_value("Company",empresa,"default_income_account")
+	contadespesas =   frappe.get_value("Company",empresa,"default_expense_account")
+
+	armazemdefault = frappe.get_value('Stock Settings',None,'default_warehouse')
+
+	accs = frappe.db.sql("""SELECT name from tabAccount where account_name like '31121000%%' and company = %s """,(empresa),as_dict=True)
+	acc = accs[0]['name']
+
+	datalimite = frappe.utils.nowdate()	#Today Date
+
+	#criarprojeto = False
+	#if frappe.db.sql("""select name from `tabSales Invoice` WHERE propina =%s """,(doc.name), as_dict=False) ==():
+
+	criarprojeto = True
+
+	if criarprojeto == True: 
+		print "Criar Sales Invoice ...."
+		#print doc.components[0].fees_category.encode('utf-8')
+		#print type(doc.components[0].amount)
+
+		#get from Item ....
+		
+		valor = flt(200000)
+
+		#print type(valor) #doc.round_floats_in(valor)
+
+		print doc.name
+		print doc.nome_do_cliente.encode('utf-8')
+		print centrocusto
+		print contalucro.encode('utf-8')
+		print contadespesas.encode('utf-8')
+
+		print armazemdefault
+		print acc
+		print valor
+
+		tem_Educa = get_dominios_activos()
+		tem_educacao = False
+		for x in tem_Educa:
+			print(x.domain)
+			if x.domain == 'Education':
+				tem_educacao = True
+
+
+		sales_invoice = frappe.new_doc("Sales Invoice")
+		sales_invoice.customer = doc.nome_do_cliente
+		sales_invoice.propina = doc.name
+		sales_invoice.due_date = datalimite
+		sales_invoice.company = empresa
+		sales_invoice.is_pos = '0'
+		sales_invoice.debit_to = acc
+		sales_invoice.status = 'Draft'
+
+		item_line = sales_invoice.append("items")
+		item_line.item_code = "Pagamento Caucao"
+		item_line.item_name = "Pagamento Caucao"
+		item_line.description = "Pagamento Caucao "
+		item_line.qty = 1
+		item_line.uom = "Unidade"
+		item_line.conversion_factor = 1
+		item_line.income_account = contalucro.encode('utf-8')
+		item_line.rate = valor
+		item_line.amount = valor
+		item_line.warehouse = armazemdefault
+		item_line.expense_account = contadespesas
+		item_line.cost_center = centrocusto
+		#sales_invoice.set_missing_values()
+		#return sales_invoice
+		sales_invoice.save(ignore_permissions=True)
+

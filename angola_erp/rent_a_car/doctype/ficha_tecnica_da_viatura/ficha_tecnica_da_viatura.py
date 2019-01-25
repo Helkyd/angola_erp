@@ -24,8 +24,15 @@ class FichaTecnicadaViatura(Document):
 			self.docstatus = 0
 
 		else:
+
 			frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Stand-by")
 			frappe.db.commit()
+			print('primeiro registo...')
+			print('primeiro registo...')
+			print('primeiro registo...')
+			print('primeiro registo...')
+
+			self.docstatus = 0
 
 
 
@@ -50,7 +57,12 @@ class FichaTecnicadaViatura(Document):
 
 	def on_submit(self):
 
-		self.docstatus = 1
+		#self.docstatus = 1
+		print('on submit')
+		print('on submit')
+		print('on submit')
+		print('on submit')
+		print('on submit')
 
 		
 	def on_cancel(self):
@@ -107,6 +119,8 @@ class FichaTecnicadaViatura(Document):
 			self.docstatus = 1
 		else:
 			#set carro as Saida
+			print('before submit')
+			print('saida')
 			frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Saida")
 			frappe.db.commit()
 			self.status_viatura = 'Alugada'

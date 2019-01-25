@@ -559,7 +559,7 @@ def get_cliente_address(cliente):
 @frappe.whitelist()
 def get_contracto_numero(matricula):
 
-	link1 =  frappe.model.frappe.get_all('Contractos Rent',filters={'matricula':matricula,'docstatus':1},fields=['contracto_numero','local_de_saida','local_previsto_entrada','data_de_saida','devolucao_prevista'])
+	link1 =  frappe.model.frappe.get_all('Contractos Rent',filters={'matricula':matricula,'docstatus':1,'status_contracto':'Activo'},fields=['contracto_numero','local_de_saida','local_previsto_entrada','data_de_saida','devolucao_prevista'])
 	if link1:
 		return link1
 
@@ -602,3 +602,10 @@ def actualiza_ficha_tecnica(source_name):
 		ficha1.status_viatura = "Devolvida"
 		ficha1.save()		
 
+
+@frappe.whitelist()
+def get_termos(source_name):
+	termos = frappe.db.sql("""select name, terms from `tabTerms and Conditions` WHERE name = %s """, (source_name), as_dict=False)
+	print(termos)
+ 	if termos:
+		return termos

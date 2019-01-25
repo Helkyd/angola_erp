@@ -87,7 +87,7 @@ def criar_faturavenda(doc):
 			print doc.referente_ao_mes
 			print centrocusto
 			print contalucro.encode('utf-8')
-			print contadespesas
+			print contadespesas.encode('utf-8')
 			print armazemdefault
 			print acc
 			print valor

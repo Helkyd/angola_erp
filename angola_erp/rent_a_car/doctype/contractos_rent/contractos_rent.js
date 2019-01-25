@@ -27,7 +27,24 @@ frappe.ui.form.on('Contractos Rent', {
 				cur_frm.refresh_fields('morada_cliente')
 			}
 		}
+
+		if (cur_frm.doc.docstatus == 1) {
+			if(cur_frm.doc.status_contracto == "Activo") {
+				console.log('adiciona botao')
+				frm.add_custom_button(__('Gerar Factura'), function() {
+					agora_entrada = true
+					botao_checkin = false
+
+					criarFacturas = cur_frm.call({method:"angola_erp.angola_erp.angola_erp.rent_a_car.doctype.contractos_rent.criar_faturavenda",args:{frm:cur_frm}})
+
+			}else{
+				console.log('limpa botoes')
+				frm.clear_custom_buttons()
+			}
+
+		}
 	},
+
 
 
 
@@ -111,6 +128,15 @@ frappe.ui.form.on('Contractos Rent','local_de_saida',function(frm,cdt,cdn){
 });
 
 
+frappe.ui.form.on('Contractos Rent','grupo',function(frm,cdt,cdn){
+	console.log('grpuos')
+	if (cur_frm.doc.grupo){
+		tarifario_("Tarifas",frm)
+
+	}
+
+});
+
 
 
 var veiculos_ = function(frm,cdt,cdn){
@@ -122,6 +148,43 @@ var veiculos_ = function(frm,cdt,cdn){
 			cur_frm.doc.cor = carro.color
 			cur_frm.doc.combustivel = carro.fuel_type
 			cur_frm.doc.kms_out = carro.last_odometer
+
+		}
+		
+		cur_frm.refresh_fields();
+
+	});
+
+
+}
+
+
+
+var termos_ = function(frm,cdt,cdn){
+	frappe.model.with_doc(frm, cdt, function() { 
+		var termos1 = frappe.model.get_doc(frm,cdt)
+		if (termos1){
+			cur_frm.doc.termos = termos1.terms
+
+		}
+		
+		cur_frm.refresh_fields();
+
+	});
+
+
+}
+
+
+var tarifario_ = function(frm,cdt,cdn){
+	frappe.model.with_doc(frm, cdt, function() { 
+		var termos1 = frappe.model.get_doc(frm,cdt)
+		if (termos1){
+			console.log ('Dias')
+			console.log(frappe.utils.date_diff(frappe.utils.now(),doc.devolucao_prevista))
+
+			cur_frm.doc.valor_pdia = termos1.basico_dia
+			cur_frm.doc.total_dia = termos1.basico_dia * (frappe.utils.date_diff(frappe.utils.now(),doc.devolucao_prevista))
 
 		}
 		
