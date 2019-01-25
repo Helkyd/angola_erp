@@ -57,7 +57,7 @@ def get_data():
 		{
 			"module_name": "Rent-a-Car",
 			"color": "green",
-			"icon": "octicon octicon-checklist",
+			"icon": "/assets/angola_erp/images/rent-a-car.svg",
 			"type": "module",
 			"label": _("Rent-a-Car")
 		},

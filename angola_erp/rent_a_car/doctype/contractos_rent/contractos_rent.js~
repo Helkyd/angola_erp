@@ -34,9 +34,9 @@ frappe.ui.form.on('Contractos Rent', {
 				frm.add_custom_button(__('Gerar Factura'), function() {
 					agora_entrada = true
 					botao_checkin = false
-					frappe.model.open_mapped_doc({method:"angola_erp.angola_erp.angola_erp.rent_a_car.doctype.contractos_rent.criar_faturavenda",frm:cur_frm})
+					criarFacturas = cur_frm.call({method:"angola_erp.angola_erp.angola_erp.rent_a_car.doctype.contractos_rent.criar_faturavenda",args:{frm:cur_frm}})
 
-				});
+				})
 
 			}else{
 				console.log('limpa botoes')
@@ -45,7 +45,6 @@ frappe.ui.form.on('Contractos Rent', {
 
 		}
 	},
-
 
 
 
@@ -67,7 +66,9 @@ frappe.ui.form.on('Contractos Rent','nome_do_cliente',function(frm,cdt,cdn){
 
 
 	frappe.model.set_value(cdt,cdn,'data_de_saida',moment(cur_frm.doc.data_do_contracto).add(3,'hours'));
-	frappe.model.set_value(cdt,cdn,'devolucao_prevista',frappe.datetime.add_days(cur_frm.doc.data_do_contracto, 3));
+	//frappe.model.set_value(cdt,cdn,'devolucao_prevista',frappe.datetime.add_days(cur_frm.doc.data_do_contracto, 3));
+	
+	frappe.model.set_value(cdt,cdn,'devolucao_prevista',frappe.datetime.add_days(moment(cur_frm.doc.data_do_contracto).add(3,'hours'), 3));
 
 
 
@@ -79,6 +80,10 @@ frappe.ui.form.on('Contractos Rent','matricula',function(frm,cdt,cdn){
 		if (cur_frm.doc.matricula != undefined){
 			veiculos_('Vehicle',cur_frm.doc.matricula)
 			cur_frm.refresh_fields('marca_modelo');
+
+			if (cur_frm.doc.grupo != undefined){
+				tarifario_("Tarifas",cur_frm.doc.grupo)
+			}
 		}
 	}
 });
@@ -131,13 +136,20 @@ frappe.ui.form.on('Contractos Rent','local_de_saida',function(frm,cdt,cdn){
 
 frappe.ui.form.on('Contractos Rent','grupo',function(frm,cdt,cdn){
 	console.log('grpuos')
-	if (cur_frm.doc.grupo){
-		tarifario_("Tarifas",frm)
-
-	}
 
 });
 
+
+frappe.ui.form.on('Contractos Rent','devolucao_prevista',function(frm,cdt,cdn){
+	console.log('DEVOLUCAO PREVISTA')
+	if (cur_frm.doc.develocao_prevista && cur_frm.doc.data_de_saida) {
+		console.log(moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+
+		cur_frm.refresh_field('total_dias')
+	}
+
+});
 
 
 var veiculos_ = function(frm,cdt,cdn){
@@ -149,7 +161,9 @@ var veiculos_ = function(frm,cdt,cdn){
 			cur_frm.doc.cor = carro.color
 			cur_frm.doc.combustivel = carro.fuel_type
 			cur_frm.doc.kms_out = carro.last_odometer
-
+			cur_frm.doc.grupo = carro.grupo
+			//trigger tarifas
+			tarifario_("Tarifas",carro.grupo)
 		}
 		
 		cur_frm.refresh_fields();
@@ -179,13 +193,19 @@ var termos_ = function(frm,cdt,cdn){
 
 var tarifario_ = function(frm,cdt,cdn){
 	frappe.model.with_doc(frm, cdt, function() { 
-		var termos1 = frappe.model.get_doc(frm,cdt)
-		if (termos1){
-			console.log ('Dias')
-			console.log(frappe.utils.date_diff(frappe.utils.now(),doc.devolucao_prevista))
+		var tarifarios = frappe.model.get_doc(frm,cdt)
+		if (tarifarios){
+			console.log ('PREcos dos Grupos')
+			console.log(moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
 
-			cur_frm.doc.valor_pdia = termos1.basico_dia
-			cur_frm.doc.total_dia = termos1.basico_dia * (frappe.utils.date_diff(frappe.utils.now(),doc.devolucao_prevista))
+			cur_frm.doc.p_km = tarifarios.preco_por_km
+			cur_frm.doc.fim_de_semana = tarifarios.especial_fim_de_semana
+			cur_frm.doc.seguro_cdw = tarifarios.seguro_cdw
+			cur_frm.doc.seguro_tlw = tarifarios.seguro_tlw
+			cur_frm.doc.preco_dia_basico = tarifarios.preco_por_dia
+
+			//cur_frm.doc.valor_pdia = termos1.basico_dia
+			cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
 
 		}
 		
