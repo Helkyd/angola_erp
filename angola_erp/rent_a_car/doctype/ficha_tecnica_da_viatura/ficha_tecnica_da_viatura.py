@@ -55,6 +55,17 @@ class FichaTecnicadaViatura(Document):
 				frappe.throw(_("Esta viatura já está alugada, não é possivel continuar!!!"))
 				validated = False	
 
+	def before_save(self):
+
+		if self.entrada_ou_saida_viatura == "Entrada":
+			print('valor a pgar#')
+			print('valor a pgar#')
+			print (self.preco_dia_basico * (self.data_entrada_estacao.day - self.data_saida_estacao.day))
+			self.total_dias = self.preco_dia_basico * (self.data_entrada_estacao.day - self.data_saida_estacao.day)
+
+
+
+
 	def on_submit(self):
 
 		#self.docstatus = 1

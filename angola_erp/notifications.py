@@ -13,7 +13,9 @@ def get_notification_config():
 			"Reservas": {"reservation_status": "Nova"},
 			"Ficha de Processo": {"status_process":['in',"Aberto,Em Curso"]},
 			"Folha de Obras": {"fo_status": ['in','Aberta, Em Curso']},
-			"Ordem de Reparacao": {"or_status": ['in','Aberta, Em Curso']}
+			"Ordem de Reparacao": {"or_status": ['in','Aberta, Em Curso']},
+			"Ficha Tecnica da Viatura": {"status_viatura": ['in','Alugada']},
+			"Contractos Rent": {"status_contracto": ['in','Activo']}
 
 		}
 	}

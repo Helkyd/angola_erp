@@ -34,7 +34,13 @@ frappe.ui.form.on('Contractos Rent', {
 				frm.add_custom_button(__('Gerar Factura'), function() {
 					agora_entrada = true
 					botao_checkin = false
-					criarFacturas = cur_frm.call({method:"angola_erp.angola_erp.angola_erp.rent_a_car.doctype.contractos_rent.criar_faturavenda",args:{frm:cur_frm}})
+			
+					// for now disable... just cal SI
+//					criarFacturas = cur_frm.call({method:"angola_erp.angola_erp.angola_erp.rent_a_car.doctype.contractos_rent.criar_faturavenda",args:{frm:cur_frm}})
+					//frappe.route_options = {"name": cur_frm.doc.sales_invoice, "customer":cur_frm.doc.customer_name}
+					//frappe.set_route("Form", "Sales Invoice",cur_frm.doc.sales_invoice);
+					frappe.route_options = {"contractos_rent": cur_frm.doc.name, "customer": cur_frm.doc.nome_do_cliente}
+					frappe.set_route("List", "Sales Invoice");
 
 				})
 
@@ -44,6 +50,7 @@ frappe.ui.form.on('Contractos Rent', {
 			}
 
 		}
+		cur_frm.toggle_enable("total_dias",false)
 	},
 
 

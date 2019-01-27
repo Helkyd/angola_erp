@@ -48,6 +48,10 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 		}
 
 */
+		cur_frm.toggle_enable('total_dias',false)
+		cur_frm.toggle_enable('preco_dia_basico',false)
+		cur_frm.toggle_enable("data_estimada_entrada_estacao",false)
+		cur_frm.toggle_enable("grupo",false)
 		if (cur_frm.doc.docstatus == 0){
 
 			if (cur_frm.doc.entrada_ou_saida_viatura == 'Saida'){
@@ -70,7 +74,7 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 				cur_frm.toggle_enable("data_saida_estacao",false)
 				cur_frm.toggle_enable("kms_saida",false)
 				cur_frm.toggle_enable("combustivel_saida",false)
-
+				cur_frm.toggle_enable("data_estimada_entrada_viatura",false)
 				cur_frm.fields_dict['matricula_veiculo'].get_query = function(doc){
 					return{
 						filters:{
@@ -80,6 +84,10 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 				
 					}
 				}	
+
+				if (cur_frm.doc.grupo != undefined){
+					tarifario_("Tarifas",cur_frm.doc.grupo)
+				}
 
 
 			}		
@@ -237,7 +245,9 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','matricula_veiculo',function(frm,cd
 					console.log("ENCONTROU A MATRICULA")
 					cur_frm.doc.contracto_numero = contractoS_.responseJSON.message[x].contracto_numero
 					cur_frm.doc.estacao_viatura = contractoS_.responseJSON.message[x].local_de_saida
-					cur_frm.doc.data_entrada_estacao = contractoS_.responseJSON.message[x].devolucao_prevista
+
+					cur_frm.doc.data_estimada_entrada_estacao = contractoS_.responseJSON.message[x].devolucao_prevista
+					//cur_frm.doc.grupo = contractoS_.reponseJSON.message[x].grupo
 					cur_frm.doc.data_saida_estacao = contractoS_.responseJSON.message[x].data_de_saida
 					cur_frm.doc.kms_saida = contractoS_.responseJSON.message[x].kms_out
 					cur_frm.doc.combustivel_saida = contractoS_.responseJSON.message[x].deposito_out
@@ -264,7 +274,13 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','matricula_veiculo',function(frm,cd
 			cur_frm.toggle_enable('chapa_viatura',true)
 			cur_frm.toggle_enable('estofo_manchado',true)
 			cur_frm.toggle_enable('estofo_queimado',true)
+
 		}
+
+		if (cur_frm.doc.grupo != undefined){
+			tarifario_("Tarifas",cur_frm.doc.grupo)
+		}
+
 		cur_frm.refresh_fields('marca_veiculo');
 		cur_frm.trigger('entrada_ou_saida_viatura')
 	}
@@ -339,6 +355,9 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','entrada_ou_saida_viatura',function
 		cur_frm.toggle_enable("kms_saida",false)
 		cur_frm.toggle_enable("combustivel_saida",false)
 
+		cur_frm.set_value("data_entrada_estacao",frappe.datetime.now_datetime())
+		cur_frm.refresh_fields('data_entrada_estacao')
+
 		cur_frm.fields_dict['matricula_veiculo'].get_query = function(doc){
 			return{
 				filters:{
@@ -352,9 +371,33 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','entrada_ou_saida_viatura',function
 
 	}
 
+	if (cur_frm.doc.grupo != undefined){
+		tarifario_("Tarifas",cur_frm.doc.grupo)
+	}
+
+
+});
+
+frappe.ui.form.on('Ficha Tecnica da Viatura','data_entrada_estacao',function(frm,cdt,cdn){
+
+	console.log('DEVOLUCAO NO DIA .....')
+	if (cur_frm.doc.data_entrada_estacao && cur_frm.doc.data_saida_estacao) {
+		console.log(moment(cur_frm.doc.data_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.data_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+
+		cur_frm.refresh_field('total_dias')
+	}
+
 });
 
 
+frappe.ui.form.on('Ficha Tecnica da Viatura','combustivel_entrada',function(frm,cdt,cdn){
+	if (cur_frm.doc.combustivel_entrada != cur_frm.doc.combustivel_saida) {
+		frappe.show_alert('Talvez tenha que cobrar o Combustivel',3)
+	}
+
+
+});
 
 var veiculos_ = function(frm,cdt,cdn){
 	frappe.model.with_doc(frm, cdt, function() { 
@@ -363,8 +406,45 @@ var veiculos_ = function(frm,cdt,cdn){
 			cur_frm.doc.marca_veiculo = carro.make
 			cur_frm.doc.modelo_veiculo = carro.model
 			cur_frm.doc.cor_veiculo = carro.color
+			cur_frm.doc.grupo = carro.grupo
 			
 			//cur_frm.doc.combustivel = carro.fuel_type
+			if (carro.grupo != undefined){
+				tarifario_("Tarifas",carro.grupo)
+			}
+
+		}
+		
+		cur_frm.refresh_fields();
+
+	});
+
+
+}
+
+
+
+var tarifario_ = function(frm,cdt,cdn){
+	frappe.model.with_doc(frm, cdt, function() { 
+		var tarifarios = frappe.model.get_doc(frm,cdt)
+		if (tarifarios){
+			console.log ('PREcos dos Grupos')
+			console.log(moment(cur_frm.doc.data_estimada_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+
+			cur_frm.doc.por_km = tarifarios.preco_por_km
+			cur_frm.doc.fim_de_semana = tarifarios.especial_fim_de_semana
+			cur_frm.doc.seguro_cdw = tarifarios.seguro_cdw
+			cur_frm.doc.seguro_tlw = tarifarios.seguro_tlw
+			cur_frm.doc.preco_dia_basico = tarifarios.preco_por_dia
+
+			//cur_frm.doc.valor_pdia = termos1.basico_dia
+			if (cur_frm.doc.entrada_ou_saida_viatura == 'Saida'){
+				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.data_estimada_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+
+			}else{
+				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(frappe.datetime.now_datetime()).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+
+			}
 
 		}
 		
