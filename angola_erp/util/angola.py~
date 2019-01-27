@@ -692,10 +692,10 @@ def make_factura_venda(source_name, target_doc=None):
 		#if somaitems[idx].item_code == '120':
 			#print(type(somaitems))
 			#PRINT('aqui')		
-		for x in target_doc:
-			print('o TARGET')
-			print(x.item_code)
-			print(x.qty)
+		#for x in target_doc:
+		#	print('o TARGET')
+		#	print(x.item_code)
+		#	print(x.qty)
 
 
 		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
@@ -773,4 +773,11 @@ def make_factura_venda(source_name, target_doc=None):
 		#print(ii.base_amount)
 
 	return doc
+
+
+@frappe.whitelist()
+def get_car_lastmile(matricula):
+	### Returns last KM of the car registered...
+	print(frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False))
+	return frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False)
 

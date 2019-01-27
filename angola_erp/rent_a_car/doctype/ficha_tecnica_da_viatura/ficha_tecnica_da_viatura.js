@@ -7,6 +7,7 @@ var agora_entrada = false
 var botao_checkin = false
 var depoisDeSalvar = false
 
+var car_lastMile
 
 //cur_frm.add_fetch('tc_name', 'terms', 'termos');
 
@@ -63,9 +64,10 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 				cur_frm.get_field("kms_entrada").df.reqd = false
 				cur_frm.get_field("combustivel_entrada").df.reqd = false
 
-
+				cur_frm.toggle_enable("data_entrada_estacao",false)
 			}else {
 
+				cur_frm.toggle_enable("data_entrada_estacao",true)
 				cur_frm.toggle_enable("kms_entrada",true)
 				cur_frm.toggle_enable("combustivel_entrada",true)
 
@@ -355,6 +357,7 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','entrada_ou_saida_viatura',function
 		cur_frm.toggle_enable("kms_saida",false)
 		cur_frm.toggle_enable("combustivel_saida",false)
 
+		cur_frm.toggle_enable("data_entrada_estacao",true)
 		cur_frm.set_value("data_entrada_estacao",frappe.datetime.now_datetime())
 		cur_frm.refresh_fields('data_entrada_estacao')
 

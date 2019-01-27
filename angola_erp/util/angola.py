@@ -774,3 +774,11 @@ def make_factura_venda(source_name, target_doc=None):
 
 	return doc
 
+
+@frappe.whitelist()
+def get_car_lastmile(matricula):
+	### Returns last KM of the car registered...
+	print('verifica lastmile')
+	print(frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False))
+	return frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False)
+

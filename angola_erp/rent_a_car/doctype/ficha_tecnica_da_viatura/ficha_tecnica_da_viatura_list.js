@@ -9,7 +9,7 @@ frappe.listview_settings['Ficha Tecnica da Viatura'] = {
 	
 	get_indicator: function(doc) {
 
-		if (doc.data_estimada_entrada_estacao < frappe.datetime.nowdate() ) {
+		if (doc.data_estimada_entrada_estacao < frappe.datetime.nowdate() && doc.status_viatura != "Devolvida") {
 			return [__("Em Atraso" ), "blue"]
 		} else if (doc.entrada_ou_saida_viatura == "Entrada" ) {
 			return [__(doc.entrada_ou_saida_viatura ), "green"]

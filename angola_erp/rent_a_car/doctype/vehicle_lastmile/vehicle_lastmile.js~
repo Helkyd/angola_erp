@@ -7,10 +7,6 @@ frappe.ui.form.on('Vehicle_lastmile', {
 	}
 });
 
-frappe.ui.form.on('Vehicle_lastmile','matricula',function(frm,cdt,cdn){
-
-	veiculos_('Vehicle',cur_frm.doc.matricula)
-});
 
 
 var veiculos_ = function(frm,cdt,cdn){

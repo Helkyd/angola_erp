@@ -14,7 +14,7 @@ frappe.listview_settings['Ficha Tecnica da Viatura'] = {
 		} else if (doc.entrada_ou_saida_viatura == "Entrada" ) {
 			return [__(doc.entrada_ou_saida_viatura ), "green"]
 		} else if (doc.entrada_ou_saida_viatura == "Saida" && doc.status_viatura == "Alugada" ) {
-			return [__(doc.status_viatura + " " + (doc.data_estimada_entrada_estacao < frappe.datetime.nowdate())), "red"]
+			return [__(doc.status_viatura ), "red"]
 		} else if (doc.status_viatura== "Stand-by" ) {
 			return [__(doc.status_viatura ), "orange"]
 		

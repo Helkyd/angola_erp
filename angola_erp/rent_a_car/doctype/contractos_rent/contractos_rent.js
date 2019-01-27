@@ -4,7 +4,7 @@
 
 //clientes1 = cur_frm.call({method:"get_clientaddres",args:{}})
 var cliente_
-
+var car_lastMile
 
 frappe.ui.form.on('Contractos Rent', {
 
@@ -51,6 +51,16 @@ frappe.ui.form.on('Contractos Rent', {
 
 		}
 		cur_frm.toggle_enable("total_dias",false)
+		cur_frm.toggle_enable("p_km",false)
+		cur_frm.toggle_enable("fim_de_semana",false)
+		cur_frm.toggle_enable("preco_dia_basico",false)
+		
+
+		//if (cur_frm.doc.matricula && car_lastMile) {
+		//	if (car_lastMile.responseJSON != undefined) {							
+		//		cur_frm.doc.kms_out = car_lastMile.responseJSON.message[0]
+		//	}
+		//}
 	},
 
 
@@ -85,6 +95,7 @@ frappe.ui.form.on('Contractos Rent','matricula',function(frm,cdt,cdn){
 	console.log('matricula')
 	if (cur_frm.doc.nome_do_cliente){
 		if (cur_frm.doc.matricula != undefined){
+			car_lastMile = cur_frm.call({method:"angola_erp.util.angola.get_car_lastmile",args:{"matricula":cur_frm.doc.matricula}})
 			veiculos_('Vehicle',cur_frm.doc.matricula)
 			cur_frm.refresh_fields('marca_modelo');
 
@@ -143,6 +154,10 @@ frappe.ui.form.on('Contractos Rent','local_de_saida',function(frm,cdt,cdn){
 
 frappe.ui.form.on('Contractos Rent','grupo',function(frm,cdt,cdn){
 	console.log('grpuos')
+	if (cur_frm.doc.grupo != undefined){
+		tarifario_("Tarifas",cur_frm.doc.grupo)
+	}
+
 
 });
 
@@ -162,15 +177,31 @@ frappe.ui.form.on('Contractos Rent','devolucao_prevista',function(frm,cdt,cdn){
 var veiculos_ = function(frm,cdt,cdn){
 	frappe.model.with_doc(frm, cdt, function() { 
 		var carro = frappe.model.get_doc(frm,cdt)
+
+		//car_lastMile = cur_frm.call({method:"angola_erp.util.angola.get_car_lastmile",args:{"matricula":cur_frm.doc.matricula}})
+		//console.log('Ultimo KM ',car_lastMile)
+
 		if (carro){
 			cur_frm.doc.marca_modelo = carro.model
 			//cur_frm.doc.or_modelo_veiculo = carro.modelo
 			cur_frm.doc.cor = carro.color
 			cur_frm.doc.combustivel = carro.fuel_type
-			cur_frm.doc.kms_out = carro.last_odometer
+			//check if Vehicle_lastmile and use 
+			if (car_lastMile) {
+				if (car_lastMile.responseText != "{}") {				
+					cur_frm.doc.kms_out = car_lastMile.responseJSON.message[0]
+				}else{
+					cur_frm.doc.kms_out = carro.last_odometer
+
+				}
+			}else{
+				cur_frm.doc.kms_out = carro.last_odometer
+			}
 			cur_frm.doc.grupo = carro.grupo
 			//trigger tarifas
-			tarifario_("Tarifas",carro.grupo)
+			if (carro.grupo) {
+				tarifario_("Tarifas",carro.grupo)
+			}
 		}
 		
 		cur_frm.refresh_fields();
