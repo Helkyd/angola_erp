@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe import throw
-from frappe.utils import formatdate, encode
+from frappe.utils import formatdate, encode, date_diff
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from datetime import datetime, timedelta
@@ -24,8 +24,15 @@ class FichaTecnicadaViatura(Document):
 			self.docstatus = 0
 
 		else:
+
 			frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Stand-by")
 			frappe.db.commit()
+			print('primeiro registo...')
+			print('primeiro registo...')
+			print('primeiro registo...')
+			print('primeiro registo...')
+
+			self.docstatus = 0
 
 
 
@@ -48,9 +55,30 @@ class FichaTecnicadaViatura(Document):
 				frappe.throw(_("Esta viatura já está alugada, não é possivel continuar!!!"))
 				validated = False	
 
+		#if self.docstatus == 1:			
+		#	self.criar_carro_lastmile()
+
+
+	def before_save(self):
+
+		if self.entrada_ou_saida_viatura == "Entrada":
+			print('valor a pgar#')
+			print('valor a pgar#')
+			print(date_diff(self.data_saida_estacao,self.data_entrada_estacao))
+			print (self.preco_dia_basico * date_diff(self.data_entrada_estacao, self.data_saida_estacao))
+			self.total_dias = self.preco_dia_basico * date_diff(self.data_entrada_estacao, self.data_saida_estacao)
+
+
+
+
 	def on_submit(self):
 
-		self.docstatus = 1
+		#self.docstatus = 1
+		print('on submit')
+		print('on submit')
+		print('on submit')
+		print('on submit')
+		print('on submit')
 
 		
 	def on_cancel(self):
@@ -107,8 +135,37 @@ class FichaTecnicadaViatura(Document):
 			self.docstatus = 1
 		else:
 			#set carro as Saida
+			print('before submit')
+			print('saida')
 			frappe.db.set_value("Vehicle",self.matricula_veiculo, "entrada_ou_saida", "Saida")
 			frappe.db.commit()
+
+
 			self.status_viatura = 'Alugada'
 
+		self.criar_carro_lastmile()
+
+	def criar_carro_lastmile(self):
+
+		print "Criar o lastmile do carro ...."
+		print(self.entrada_ou_saida_viatura)
+		print(self.kms_saida)
+		print(self.kms_entrada)
+		
+		if self.entrada_ou_saida_viatura == "Entrada":
+
+			car_lastmile = frappe.get_doc({
+				"doctype": "Vehicle_lastmile",
+				"matricula": self.matricula_veiculo,
+				"ultimo_km": self.kms_entrada
+			})
+		else:
+			
+			car_lastmile = frappe.get_doc({
+				"doctype": "Vehicle_lastmile",
+				"matricula": self.matricula_veiculo,
+				"ultimo_km": self.kms_saida,
+			})
+		#car_lastmile.flags.ignore_validate = True
+		car_lastmile.insert()
 

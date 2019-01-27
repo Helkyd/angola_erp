@@ -287,7 +287,12 @@ def before_submit(doc,method):
 		#frappe.db.set_value("Fees",prop_.propina, "outstanding_amount", 0)
 		frappe.db.commit()
 	
-
+def before_save(doc,method):
+	#check if PO_NO lenght more than 140 chars
+	if doc.po_no:
+		if len(doc.po_no) > 140:
+			print("RETIRA As PO aqui ....")
+			doc.po_no = ""
 
 def on_submit(doc,method):
 	#Imposto de Selo

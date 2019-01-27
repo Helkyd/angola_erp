@@ -55,31 +55,12 @@ def get_data():
 			"label": _("Oficinas")
 		},
 		{
-			"module_name": "Contractos Rent",
-			"color": "grey",
-			"icon": "octicon octicon-checklist",
+			"module_name": "Rent-a-Car",
+			"color": "green",
+			"icon": "/assets/angola_erp/images/rent-a-car.svg",
 			"type": "module",
-			"label": _("Contractos Rent")
+			"label": _("Rent-a-Car")
 		},
-
-		{
-		   "_doctype": "Folha de Obras", 
-		   "color": "grey", 
-		   "icon": "/assets/angola_erp/images/folhaobra.svg", 
-		   "label": "Folha de Obras", 
-		   "link": "List/Folha de Obras", 
-		   "module_name": "Folha de Obras", 
-		   "type": "link"
-	        },
-		{
-		   "_doctype": "Ordem de Reparacao", 
-		   "color": "grey", 
-		   "icon": "/assets/angola_erp/images/ordemreparar.svg", 
-		   "label": "Ordem de Reparacao", 
-		   "link": "List/Ordem de Reparacao", 
-		   "module_name": "Ordem de Reparacao", 
-		   "type": "link"
-		}
 
 
 	]
