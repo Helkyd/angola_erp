@@ -17,6 +17,10 @@ from frappe.model.mapper import get_mapped_doc
 
 from frappe.email.doctype.email_group.email_group import add_subscribers
 
+from frappe.contacts.doctype.address.address import get_company_address # for make_facturas_venda
+from frappe.model.utils import get_fetch_values
+
+
 @frappe.whitelist()
 def check_caixa_aberto():
 
@@ -609,3 +613,164 @@ def get_termos(source_name):
 	print(termos)
  	if termos:
 		return termos
+
+
+def get_invoiced_qty_map(delivery_note):
+	"""returns a map: {dn_detail: invoiced_qty}"""
+	invoiced_qty_map = {}
+
+	for dn_detail, qty in frappe.db.sql("""select dn_detail, qty from `tabSales Invoice Item`
+		where delivery_note=%s and docstatus=1""", delivery_note):
+			if not invoiced_qty_map.get(dn_detail):
+				invoiced_qty_map[dn_detail] = 0
+			invoiced_qty_map[dn_detail] += qty
+
+	return invoiced_qty_map
+
+
+@frappe.whitelist()
+def make_factura_venda(source_name, target_doc=None):
+	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	
+	somaitems = []
+
+	def set_missing_values(source, target):
+		target.is_pos = 0
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
+
+		if len(target.get("items")) == 0:
+			frappe.throw(_("All these items have already been invoiced"))
+
+		target.run_method("calculate_taxes_and_totals")
+
+		# set company address
+		target.update(get_company_address(target.company))
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
+
+	def update_item(source_doc, target_doc, source_parent):
+		print(source_doc.item_code)
+		#print(source_doc.base_rate)
+		#print(target_doc.item_code)
+		idx = 0
+		adicionar = False
+		if somaitems:
+			for i in somaitems:	
+				print(i.item_code)
+				print(i.qty)
+				print(source_doc.item_code)
+				#print('soma ',somaitems[idx].item_code)
+				#if i.item_code == source_doc.item_code:
+				if i.item_code == source_doc.item_code:
+					print('EXISTE')
+					print('EXISTE')
+					print('EXISTE')
+					print('EXISTE')
+					print('EXISTE')
+					print('EXISTE')
+					#print(somaitems[idx].qty)
+					somaitems[idx] = 100 #source_doc.qty + i.qty
+					adicionar = False
+					print('deve somar')
+					print(i.qty)
+					#print(somaitems[idx].qty)	
+					#PRINT('aaa')
+				else:
+					#somaitems.append(source_doc)
+					adicionar = True
+			if adicionar == True:
+				somaitems.append(source_doc)
+				#somaitems = {source_doc}
+
+			idx += 1
+			
+						
+		else:
+			somaitems.append(source_doc)
+		#if somaitems[idx].item_code == '120':
+			#print(type(somaitems))
+			#PRINT('aqui')		
+		#for x in target_doc:
+		#	print('o TARGET')
+		#	print(x.item_code)
+		#	print(x.qty)
+
+
+		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		#target_doc.base_net_amount = source_doc.base_rate
+		if source_doc.serial_no and source_parent.per_billed > 0:
+			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
+				target_doc.qty, source_parent.name)
+
+	doc = get_mapped_doc("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Sales Invoice",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Delivery Note Item": {
+			"doctype": "Sales Invoice Item",
+			"field_map": {
+				"name": "dn_detail",
+				"parent": "delivery_note",
+				"so_detail": "so_detail",
+				"against_sales_order": "sales_order",
+				"serial_no": "serial_no",
+				"cost_center": "cost_center"
+			},
+			"postprocess": update_item,
+			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+		},
+
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges",
+			"add_if_empty": True
+		},
+		"Sales Team": {
+			"doctype": "Sales Team",
+			"field_map": {
+				"incentives": "incentives"
+			},
+			"add_if_empty": True
+		}
+	}, target_doc, set_missing_values)
+
+#		"Delivery Note Item": {
+#			"doctype": "Sales Invoice Item",
+#			"field_map": {
+#				"name": "dn_detail",
+#				"parent": "delivery_note",
+#				"so_detail": "so_detail",
+#				"against_sales_order": "sales_order",
+#				"serial_no": "serial_no",
+#				"cost_center": "cost_center"
+#			},
+#			"postprocess": update_item,
+#			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+#		},
+
+
+	print ("make_sales_invoice")
+	print ("make_sales_invoice")
+	print ("make_sales_invoice")
+	print doc
+
+
+
+		
+
+	print("ITEMS")	
+	for ii in list((somaitems)):
+		#if ii.item_code == '102':
+		print('codigo')
+		print(ii.item_code)
+		print('qtd')
+		print(ii.qty)
+		print(ii.base_rate)
+		#print(ii.base_amount)
+
+	return doc
+
