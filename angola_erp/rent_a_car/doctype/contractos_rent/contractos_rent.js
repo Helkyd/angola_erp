@@ -31,7 +31,8 @@ frappe.ui.form.on('Contractos Rent', {
 		if (cur_frm.doc.docstatus == 1) {
 			if(cur_frm.doc.status_contracto == "Activo") {
 				console.log('adiciona botao')
-				frm.add_custom_button(__('Gerar Factura'), function() {
+				frm.add_custom_button(__('Gerar Adiantamento'), function() {
+					frappe.show_alert('Deve gerar um adiantamento na Contabilidade...',3)
 					agora_entrada = true
 					botao_checkin = false
 			
@@ -166,7 +167,10 @@ frappe.ui.form.on('Contractos Rent','devolucao_prevista',function(frm,cdt,cdn){
 	console.log('DEVOLUCAO PREVISTA')
 	if (cur_frm.doc.devolucao_prevista && cur_frm.doc.data_de_saida) {
 		console.log(moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
-		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+		//cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (frappe.datetime.get_day_diff(cur_frm.doc.devolucao_prevista,cur_frm.doc.data_de_saida) + 1)
+
+
 
 		cur_frm.refresh_field('total_dias')
 	}
@@ -243,7 +247,9 @@ var tarifario_ = function(frm,cdt,cdn){
 			cur_frm.doc.preco_dia_basico = tarifarios.preco_por_dia
 
 			//cur_frm.doc.valor_pdia = termos1.basico_dia
-			cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+			//cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+
+			cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(cur_frm.doc.devolucao_prevista,cur_frm.doc.data_de_saida) + 1)
 
 		}
 		
