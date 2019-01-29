@@ -31,7 +31,8 @@ frappe.ui.form.on('Contractos Rent', {
 		if (cur_frm.doc.docstatus == 1) {
 			if(cur_frm.doc.status_contracto == "Activo") {
 				console.log('adiciona botao')
-				frm.add_custom_button(__('Gerar Factura'), function() {
+				frm.add_custom_button(__('Gerar Adiantamento'), function() {
+					frappe.show_alert('Deve gerar um adiantamento na Contabilidade...',3)
 					agora_entrada = true
 					botao_checkin = false
 			
@@ -188,7 +189,7 @@ var veiculos_ = function(frm,cdt,cdn){
 			cur_frm.doc.combustivel = carro.fuel_type
 			//check if Vehicle_lastmile and use 
 			if (car_lastMile) {
-				if (car_lastMile.responseJSON != undefined) {				
+				if (car_lastMile.responseText != "{}") {				
 					cur_frm.doc.kms_out = car_lastMile.responseJSON.message[0]
 				}else{
 					cur_frm.doc.kms_out = carro.last_odometer

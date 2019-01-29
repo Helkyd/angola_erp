@@ -193,3 +193,64 @@ def criar_faturavenda(doc):
 		#return sales_invoice
 		sales_invoice.save(ignore_permissions=True)
 
+
+
+def criar_adiantamento_caucao(doc):
+
+	print "Verifica Journal Entry ...."
+	print frappe.get_value("Global Defaults",None,"default_company")
+	
+	#if NONE should ask to select or select the first one....
+	#or maybe on the form should have the company to select....
+	empresa = frappe.get_value("Global Defaults",None,"default_company")	
+
+	if not empresa:		#Only for Testing ....
+		empresa = '2MS - Comercio e Representacoes, Lda'
+
+	empresa_abbr = frappe.get_value("Company",empresa,"abbr")
+
+	centrocusto = frappe.get_value("Company",empresa,"cost_center")
+
+	contalucro =  frappe.get_value("Company",empresa,"default_income_account")
+	contadespesas =   frappe.get_value("Company",empresa,"default_expense_account")
+
+	armazemdefault = frappe.get_value('Stock Settings',None,'default_warehouse')
+
+	accs = frappe.db.sql("""SELECT name from tabAccount where account_name like '31121000%%' and company = %s """,(empresa),as_dict=True)
+	acc = accs[0]['name']
+
+	datalimite = frappe.utils.nowdate()	#Today Date
+
+	#criarprojeto = False
+	#if frappe.db.sql("""select name from `tabSales Invoice` WHERE propina =%s """,(doc.name), as_dict=False) ==():
+
+	criarprojeto = True
+
+
+	print doc.name
+	print doc.nome_do_cliente.encode('utf-8')
+	print centrocusto
+	print contalucro.encode('utf-8')
+	print contadespesas.encode('utf-8')
+
+	print armazemdefault
+	print acc
+	print valor
+
+
+
+	journal_entry = frappe.new_doc("Journal Entry")
+	journal_entry.voucher_type = "Journal Entry"
+	journal_entry.posting_date = frappe.datetime.now()
+	journal_entry.company = empresa
+	journal_entry.check_no = self.contracto_numero
+
+	item_line = journal_entry.append("accounts")
+	item_line.account = acc
+	item_line.party_type = "Customer"
+	item_line.party = self.nome_do_cliente
+	item_line.cost_center = centrocusto
+	item_line.credit_in_account_currency = 200000
+	item_line.is_advance = "Yes"
+	journal_entry.save(ignore_permissions=True)
+

@@ -7,6 +7,7 @@ var agora_entrada = false
 var botao_checkin = false
 var depoisDeSalvar = false
 
+var car_lastMile
 
 //cur_frm.add_fetch('tc_name', 'terms', 'termos');
 
@@ -98,7 +99,7 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 
 		if (cur_frm.doc.matricula_veiculo) {
 
-			if(frm.doc.docstatus = 1 && cur_frm.doc.status_viatura == "Alugada") {
+			if(frm.doc.docstatus == 1 && cur_frm.doc.status_viatura == "Alugada") {
 				console.log('adiciona botao')
 				if (cur_frm.doc.entrada_ou_saida_viatura == "Saida"){
 					frm.add_custom_button(__('Check In Viatura'), function() {
@@ -194,7 +195,7 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 		depoisDeSalvar = true
 		botao_checkin = true
 	
-		if (frm.doc.docstatus = 1 && cur_frm.doc.entrada_ou_saida_viatura == "Entrada"){
+		if (frm.doc.docstatus == 1 && cur_frm.doc.entrada_ou_saida_viatura == "Entrada"){
 			console.log(frm.doc.docstatus)
 			cur_frm.refresh()
 			console.log('after save')
@@ -211,9 +212,11 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 	},
 
 	validate: function(frm){
-		if (parseInt(cur_frm.doc.kms_entrada) < parseInt(cur_frm.doc.kms_saida)){
-			frappe.show_alert("Kilometros de Entrada errada!!!",5)
-			validated = false
+		if (cur_frm.doc.entrada_ou_saida_viatura == "Entrada") {
+			if (parseInt(cur_frm.doc.kms_entrada) <= parseInt(cur_frm.doc.kms_saida)){
+				frappe.show_alert("Kilometros de Entrada errada!!!",5)
+				validated = false
+			}
 		}
 	},
 
@@ -385,7 +388,7 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','data_entrada_estacao',function(frm
 	console.log('DEVOLUCAO NO DIA .....')
 	if (cur_frm.doc.data_entrada_estacao && cur_frm.doc.data_saida_estacao) {
 		console.log(moment(cur_frm.doc.data_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
-		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.data_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (frappe.datetime.get_day_diff(cur_frm.doc.data_entrada_estacao,cur_frm.doc.data_saida_estacao) + 1) //(moment(cur_frm.doc.data_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
 
 		cur_frm.refresh_field('total_dias')
 	}
@@ -439,12 +442,22 @@ var tarifario_ = function(frm,cdt,cdn){
 			cur_frm.doc.seguro_tlw = tarifarios.seguro_tlw
 			cur_frm.doc.preco_dia_basico = tarifarios.preco_por_dia
 
+
+			/*
+
+			Tem muitas validacoes por fazer ...
+			1/3 dias e se fizer 100km esta tudo caso ultrapasse tem que calcular a diff de km por p_km 
+			Se data entrada - data saida =4 or ate 7 dias ou 8/15 ou +15 nao tem limites de KM
+
+
+			*/
+
 			//cur_frm.doc.valor_pdia = termos1.basico_dia
 			if (cur_frm.doc.entrada_ou_saida_viatura == 'Saida'){
-				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.data_estimada_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(cur_frm.doc.data_estimada_entrada_estacao,cur_frm.doc.data_saida_estacao) + 1) // (moment(cur_frm.doc.data_estimada_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
 
 			}else{
-				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(frappe.datetime.now_datetime()).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(frappe.datetime.now(),cur_frm.doc.data_saida_estacao) + 1) //(moment(frappe.datetime.now_datetime()).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
 
 			}
 
