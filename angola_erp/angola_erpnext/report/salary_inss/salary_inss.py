@@ -63,6 +63,8 @@ def execute(filters=None):
 				du_status = 0
 				st_status = 0
 				sdf_status = 0 
+				pat_status = 0
+				aj_1_status = 0
 				
 				
 
@@ -112,19 +114,19 @@ def execute(filters=None):
 				pp_status = 1
 				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
 
-			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'SA') and (pp_status ==0):
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'SA') and (sa_status ==0):
 			#SI = SB + HE - FTJSS - FI 
-				pp_status = 1
+				sa_status = 1
 				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
 
-			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'PAT') and (pp_status ==0):
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'PAT') and (pat_status ==0):
 			#SI = SB + HE - FTJSS - FI 
-				pp_status = 1
+				pat_status = 1
 				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
 
-			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'AJ_1') and (pp_status ==0):
+			elif (ss_earning_map1.get(ss.name, {}).get(e) == 'AJ_1') and (aj_1_status ==0):
 			#SI = SB + HE - FTJSS - FI 
-				pp_status = 1
+				aj_1_status = 1
 				encargo_inss = encargo_inss + flt(ss_earning_map.get(ss.name, {}).get(e))
 
 
