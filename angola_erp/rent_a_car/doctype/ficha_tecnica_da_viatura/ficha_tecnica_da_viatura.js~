@@ -53,6 +53,9 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 		cur_frm.toggle_enable('preco_dia_basico',false)
 		cur_frm.toggle_enable("data_estimada_entrada_estacao",false)
 		cur_frm.toggle_enable("grupo",false)
+		cur_frm.toggle_enable("kms_extra",false)
+		cur_frm.toggle_enable("total_kms_extra",false)
+
 		if (cur_frm.doc.docstatus == 0){
 
 			if (cur_frm.doc.entrada_ou_saida_viatura == 'Saida'){
@@ -112,10 +115,32 @@ frappe.ui.form.on('Ficha Tecnica da Viatura', {
 
 				}else{
 					frm.clear_custom_buttons()
+					//Botao para fazer FACTURA
+					if (cur_frm.doc.status_viatura == 'Devolvida') {
+						frm.add_custom_button(__('Fazer Factura'), function() {
+							//agora_entrada = true
+							//botao_checkin = false
+							//frappe.model.open_mapped_doc({method:"angola_erp.util.angola.checkin_ficha_tecnica",frm:cur_frm})
+							frappe.show_alert('Ainda por automatizar ... Mas sempre pode fazer indo as Facturas.,4)
+
+						});
+					}
+
 				}
 			}else{
 				console.log('limpa botoes')
 				frm.clear_custom_buttons()
+				//Botao para fazer FACTURA
+				if (cur_frm.doc.status_viatura == 'Devolvida') {
+					frm.add_custom_button(__('Fazer Factura'), function() {
+						//agora_entrada = true
+						//botao_checkin = false
+						//frappe.model.open_mapped_doc({method:"angola_erp.util.angola.checkin_ficha_tecnica",frm:cur_frm})
+						frappe.show_alert('Ainda por automatizar ... Mas sempre pode fazer indo as Facturas.,4)
+
+					});
+				}
+
 			}
 		}
 
@@ -404,6 +429,38 @@ frappe.ui.form.on('Ficha Tecnica da Viatura','combustivel_entrada',function(frm,
 
 });
 
+
+
+frappe.ui.form.on('Ficha Tecnica da Viatura','kms_entrada',function(frm,cdt,cdn){
+	//so pode ser numeros...
+	console.log('kms entrada')
+	if (isNaN(cur_frm.doc.kms_entrada) == true){
+ 		frappe.show_alert("Somente numeros",5)
+		cur_frm.doc.kms_entrada = ""
+	}
+	
+	if (flt(cur_frm.doc.kms_entrada) <= flt(cur_frm.doc.kms_saida)) {
+		frappe.show_alert('KMs de entrada Errados!!! ', 3)	
+		cur_frm.doc.kms_entrada = ""
+	}else if (frappe.datetime.get_day_diff(cur_frm.doc.data_estimada_entrada_estacao, cur_frm.doc.data_saida_estacao) + 1 <= 3) {  
+	//calculate diff of km... if tarifa entre os 3 dias.
+		//dentro dos 3 dias...
+		if (flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_saida) > 100) {
+			frappe.show_alert('Passou do 100Km.. ' + flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_saida), 3)
+			cur_frm.set_value('kms_extra', flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_saida))
+			cur_frm.set_value('total_kms_extra', flt(cur_frm.doc.por_km) * (flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_saida)))
+		}else {
+			cur_frm.set_value('kms_extra', 0)
+			cur_frm.set_value('total_kms_extra', 0)
+
+		}
+
+	}
+
+
+});
+
+
 var veiculos_ = function(frm,cdt,cdn){
 	frappe.model.with_doc(frm, cdt, function() { 
 		var carro = frappe.model.get_doc(frm,cdt)
@@ -449,7 +506,8 @@ var tarifario_ = function(frm,cdt,cdn){
 			1/3 dias e se fizer 100km esta tudo caso ultrapasse tem que calcular a diff de km por p_km 
 			Se data entrada - data saida =4 or ate 7 dias ou 8/15 ou +15 nao tem limites de KM
 
-
+			Se
+			
 			*/
 
 			//cur_frm.doc.valor_pdia = termos1.basico_dia
@@ -457,7 +515,7 @@ var tarifario_ = function(frm,cdt,cdn){
 				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(cur_frm.doc.data_estimada_entrada_estacao,cur_frm.doc.data_saida_estacao) + 1) // (moment(cur_frm.doc.data_estimada_entrada_estacao).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
 
 			}else{
-				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(frappe.datetime.now(),cur_frm.doc.data_saida_estacao) + 1) //(moment(frappe.datetime.now_datetime()).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
+				cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(frappe.datetime.now_datetime(),cur_frm.doc.data_saida_estacao) + 1) //(moment(frappe.datetime.now_datetime()).format('D') - moment(cur_frm.doc.data_saida_estacao).format('D'))
 
 			}
 

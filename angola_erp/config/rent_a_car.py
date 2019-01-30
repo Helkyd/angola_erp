@@ -17,6 +17,12 @@ def get_data():
 				   "description": "Ficha Tecnica da Viatura", 
 				   "name": "Ficha Tecnica da Viatura", 
 				  },
+				 {
+				   "description": _("Vehicle"), 
+				   "name": "Vehicle", 
+				   "type": "doctype"
+				  }, 
+
 
 			]
 		},

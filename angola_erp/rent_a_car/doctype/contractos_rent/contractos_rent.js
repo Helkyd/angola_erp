@@ -131,6 +131,7 @@ frappe.ui.form.on('Contractos Rent','kms_out',function(frm,cdt,cdn){
 
 });
 
+
 frappe.ui.form.on('Contractos Rent','carta_conducao_cliente',function(frm,cdt,cdn){
 
 	if (cliente_ != undefined){
@@ -192,8 +193,8 @@ var veiculos_ = function(frm,cdt,cdn){
 			cur_frm.doc.combustivel = carro.fuel_type
 			//check if Vehicle_lastmile and use 
 			if (car_lastMile) {
-				if (car_lastMile.responseText != "{}") {				
-					cur_frm.doc.kms_out = car_lastMile.responseJSON.message[0]
+				if (car_lastMile.responseText != "{}" && car_lastMile.responseText != undefined) {				
+					cur_frm.doc.kms_out = flt(car_lastMile.responseJSON.message[0])
 				}else{
 					cur_frm.doc.kms_out = carro.last_odometer
 

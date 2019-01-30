@@ -131,6 +131,27 @@ frappe.ui.form.on('Contractos Rent','kms_out',function(frm,cdt,cdn){
 
 });
 
+
+frappe.ui.form.on('Contractos Rent','kms_entrada',function(frm,cdt,cdn){
+	//so pode ser numeros...
+	console.log('kms entrada')
+	if (isNaN(cur_frm.doc.kms_entrada) == true){
+ 		frappe.show_alert("Somente numeros",5)
+		cur_frm.doc.kms_entrada = ""
+	}
+	//calculate diff of km... if tarifa entre os 3 dias.
+	if (frappe.datetime.get_day_diff(cur_frm.doc.data_estimada_entrada_estacao, cur_frm.doc.data_saida_estacao) + 1 <= 3) {  
+		//dentro dos 3 dias...
+		if (flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_out) > 100) {
+			frappe.show_alert('Passou do 100Km.. ' + flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_out), 3)
+			frappe.show_alert('Deve pagar por KM ' + flt(cur_frm.doc.p_km) * (flt(cur_frm.doc.kms_entrada) - flt(cur_frm.doc.kms_out))), 3)	
+		}
+
+	}
+
+
+});
+
 frappe.ui.form.on('Contractos Rent','carta_conducao_cliente',function(frm,cdt,cdn){
 
 	if (cliente_ != undefined){
@@ -167,7 +188,10 @@ frappe.ui.form.on('Contractos Rent','devolucao_prevista',function(frm,cdt,cdn){
 	console.log('DEVOLUCAO PREVISTA')
 	if (cur_frm.doc.devolucao_prevista && cur_frm.doc.data_de_saida) {
 		console.log(moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
-		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+		//cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+		cur_frm.doc.total_dias = cur_frm.doc.preco_dia_basico * (frappe.datetime.get_day_diff(cur_frm.doc.devolucao_prevista,cur_frm.doc.data_de_saida) + 1)
+
+
 
 		cur_frm.refresh_field('total_dias')
 	}
@@ -189,8 +213,8 @@ var veiculos_ = function(frm,cdt,cdn){
 			cur_frm.doc.combustivel = carro.fuel_type
 			//check if Vehicle_lastmile and use 
 			if (car_lastMile) {
-				if (car_lastMile.responseText != "{}") {				
-					cur_frm.doc.kms_out = car_lastMile.responseJSON.message[0]
+				if (car_lastMile.responseText != "{}" && car_lastMile.responseText != undefined) {				
+					cur_frm.doc.kms_out = flt(car_lastMile.responseJSON.message[0])
 				}else{
 					cur_frm.doc.kms_out = carro.last_odometer
 
@@ -244,7 +268,9 @@ var tarifario_ = function(frm,cdt,cdn){
 			cur_frm.doc.preco_dia_basico = tarifarios.preco_por_dia
 
 			//cur_frm.doc.valor_pdia = termos1.basico_dia
-			cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+			//cur_frm.doc.total_dias = tarifarios.preco_por_dia * (moment(cur_frm.doc.devolucao_prevista).format('D') - moment(cur_frm.doc.data_de_saida).format('D'))
+
+			cur_frm.doc.total_dias = tarifarios.preco_por_dia * (frappe.datetime.get_day_diff(cur_frm.doc.devolucao_prevista,cur_frm.doc.data_de_saida) + 1)
 
 		}
 		
