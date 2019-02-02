@@ -106,6 +106,14 @@ def get_data():
 			"label": _("Relatorio Vendas"),
 			"items": [
 				 {
+				   "description": "Imposto de Consumo", 
+				   "name": "Imposto de Consumo", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+
+				 {
 				   "description": "Imposto de Selo", 
 				   "name": "Imposto de Selo", 
 				   "doctype": "Sales Invoice",

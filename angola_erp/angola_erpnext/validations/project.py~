@@ -9,7 +9,7 @@ from frappe.utils import flt, getdate, get_url
 from frappe import _
 
 from frappe.model.document import Document
-from frappe.utils import formatdate, encode
+
 
 
 def validate(doc,method):
@@ -18,7 +18,7 @@ def validate(doc,method):
 
 def check_tasks(doc,method):
 	"""check tasks for opened """
-	print doc.name.encode('utf-8')
+	print doc.name
 	if doc.status == "Completed":
 		tarefaaberta = frappe.db.sql("""select count(status) from tabTask where (status='Open' or status='Working' or status='Pending Review') and project=%s """,doc.name)
 		print "Tarefas Projeto ", tarefaaberta
