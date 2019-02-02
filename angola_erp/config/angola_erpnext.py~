@@ -121,20 +121,20 @@ def get_data():
 				  }, 
 
 				 {
-				   "description": "Lotes data de Expiracao", 
-				   "name": "Lotes data de Expiracao", 
-				   "doctype": "Stock Ledger Entry",
-				   "type": "report",
-				   "is_query_report": True
-				  }, 
-
-				 {
 				   "description": "Registo de Vendas", 
 				   "name": "Registo de Vendas", 
 				   "doctype": "Sales Invoice",
 				   "type": "report",
 				   "is_query_report": True
 				  }, 
+				 {
+				   "description": "Registo de Vendas Somas", 
+				   "name": "Registo de Vendas Somas", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+
 				 {
 				   "description": "Registo de Vendas (Somas Diaria)", 
 				   "name": "Registo de Vendas (Somas Diaria)", 
@@ -143,13 +143,6 @@ def get_data():
 				   "is_query_report": True
 				  }, 
 
-				 {
-				   "description": "Registo de Vendas Somas", 
-				   "name": "Registo de Vendas Somas", 
-				   "doctype": "Sales Invoice",
-				   "type": "report",
-				   "is_query_report": True
-				  }, 
 
 
 			]
