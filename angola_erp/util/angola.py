@@ -20,6 +20,8 @@ from frappe.email.doctype.email_group.email_group import add_subscribers
 from frappe.contacts.doctype.address.address import get_company_address # for make_facturas_venda
 from frappe.model.utils import get_fetch_values
 
+#import json, os 
+#import csv, codecs, cStringIO
 
 @frappe.whitelist()
 def check_caixa_aberto():
@@ -629,7 +631,7 @@ def get_invoiced_qty_map(delivery_note):
 
 
 @frappe.whitelist()
-def make_factura_venda(source_name, target_doc=None):
+def make_factura_venda(source_name):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	
 	somaitems = []
@@ -669,34 +671,10 @@ def make_factura_venda(source_name, target_doc=None):
 	print('SOURCE DOC')
 	print(source_name)
 
-	doc = get_mapped_doc("Delivery Note", source_name, 	{
-		"Delivery Note": {
-			"doctype": "Sales Invoice",
-			"validation": {
-				"docstatus": ["=", 1]
-			}
-
-		},
-		"Delivery Note Item": {
-			"doctype": "Sales Invoice Item",
-			"field_map": {
-				"name": "dn_detail",
-				"parent": "delivery_note",
-				"so_detail": "so_detail",
-				"against_sales_order": "sales_order",
-				"serial_no": "serial_no",
-				"cost_center": "cost_center"
-			},			
-			"postprocess": update_item,
-			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
-
-		}
-	}, target_doc, set_missing_values)	
-
 	print('Factura ====')
 	print(doc)
 
-	return doc
+#	return doc
 		
 	source_parent =  frappe.model.frappe.get_all('Delivery Note Item',filters={'parent':source_name,'docstatus':1},fields=['name'])
 
@@ -721,7 +699,145 @@ def make_factura_venda(source_name, target_doc=None):
 	print(doc1)
 
 
+	return doc1
+
+	doc = get_mapped_doc("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Sales Invoice",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Delivery Note Item": {
+			"doctype": "Sales Invoice Item",
+			"field_map": {
+				"name": "dn_detail",
+				"parent": "delivery_note",
+				"so_detail": "so_detail",
+				"against_sales_order": "sales_order",
+				"serial_no": "serial_no",
+				"cost_center": "cost_center"
+			},
+			"postprocess": update_item,
+			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+		},
+
+		"Sales Taxes and Charges": {
+			"doctype": "Sales Taxes and Charges",
+			"add_if_empty": True
+		},
+		"Sales Team": {
+			"doctype": "Sales Team",
+			"field_map": {
+				"incentives": "incentives"
+			},
+			"add_if_empty": True
+		}
+	}, target_doc, set_missing_values)
+
+#		"Delivery Note Item": {
+#			"doctype": "Sales Invoice Item",
+#			"field_map": {
+#				"name": "dn_detail",
+#				"parent": "delivery_note",
+#				"so_detail": "so_detail",
+#				"against_sales_order": "sales_order",
+#				"serial_no": "serial_no",
+#				"cost_center": "cost_center"
+#			},
+#			"postprocess": update_item,
+#			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
+#		},
+
+
+	print ("make_sales_invoice")
+	print ("make_sales_invoice")
+	print ("make_sales_invoice")
+	print doc
+
+
+
+		
+
+
 	return doc
+
+
+#+++
+@frappe.whitelist()
+def make_factura_venda1(source_name):
+	#invoiced_qty_map = get_invoiced_qty_map(source_name)
+	
+	#somaitems = []
+
+	def set_missing_values(source, target):
+		target.is_pos = 0
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
+
+		if len(target.get("items")) == 0:
+			frappe.throw(_("All these items have already been invoiced"))
+
+		#MAYBE CORRE NO FIM target.run_method("calculate_taxes_and_totals")
+
+		# set company address
+		target.update(get_company_address(target.company))
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
+
+	def update_item(source_doc, target_doc, source_parent):
+		print(source_doc.item_code)
+		#print(source_doc.base_rate)
+		#print(target_doc.item_code)
+		idx = 0
+		adicionar = False
+
+		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
+		#target_doc.base_net_amount = source_doc.base_rate
+		if source_doc.serial_no and source_parent.per_billed > 0:
+			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
+				target_doc.qty, source_parent.name)
+
+	#Deve criar primeiro a Factura e depois ir buscar os Itens aos poucos...
+	print('TARGET DOC')
+	#print(target_doc)
+	print('SOURCE DOC')
+	print(source_name)
+
+	print('Factura ====')
+#	print(doc)
+
+#	return doc
+		
+#	source_parent =  frappe.model.frappe.get_all('Delivery Note Item',filters={'parent':source_name,'docstatus':1},fields=['name'])
+	source_parent =  frappe.model.frappe.get_all('Delivery Note Item',filters={'parent':source_name,'docstatus':1},fields=['*'])
+	print(source_parent)
+
+	return source_parent
+
+	for xx in source_parent:
+		print('DENTRO DO LOOP')
+		print(xx)
+		print(source_parent)
+		doc1
+		doc1 = get_mapped_doc('Delivery Note Item', xx.name, {
+			"Delivery Note Item": {
+				"doctype": "Sales Invoice Item",
+				"name": "dn_detail",
+				"parent": "delivery_note",
+				"so_detail": "so_detail",
+				"against_sales_order": "sales_order",
+				"serial_no": "serial_no",
+				"cost_center": "cost_center"
+			}
+		})
+		
+	print('ITEMS ====')
+	print(doc1)
+
+
+	return doc1
 
 	doc = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
@@ -791,4 +907,21 @@ def get_car_lastmile(matricula):
 	print('verifica lastmile')
 	print(frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False))
 	return frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False)
+
+@frappe.whitelist()
+def none(source_name, target_doc=None):
+	print('NOnE')
+	print(source_name)
+	print('target')
+	print(target_doc.encode('utf-8'))
+	return source_name
+
+@frappe.whitelist()
+def get_dn_for_si(source_name):
+	#source_name should be customer name
+
+	dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'docstatus':1},fields=['name','customer','posting_date'])
+
+	
+	return dn_for_si
 
