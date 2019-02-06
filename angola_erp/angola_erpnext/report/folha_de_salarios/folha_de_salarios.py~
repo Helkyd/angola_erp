@@ -63,8 +63,9 @@ def get_columns(salary_slips):
 	#	[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
 	#	[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
+
 	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component_abbr') + ":Currency:120") for d in salary_components[_("Deduction")]] + \
+		[_("Gross Pay") + ":Currency:120"] + [(frappe.db.get_value('Salary Component',{'name':d},'salary_component' if d !='Imposto Sobre o Rendimento do Trabalho' else 'salary_component_abbr') + (":Currency:120")) for d in salary_components[_("Deduction")]] + \
 		[_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]

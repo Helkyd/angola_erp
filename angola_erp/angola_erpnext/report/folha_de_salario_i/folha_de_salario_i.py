@@ -53,7 +53,7 @@ def execute(filters=None):
 				outros_descontos += ss_ded_map.get(ss.name, {}).get(d)
 
 		row += [outros_descontos]	
-		row += [ss.total_deduction, ss.net_pay]
+		row += [ss.total_deduction, round(ss.net_pay)]
 
 		data.append(row)
 
