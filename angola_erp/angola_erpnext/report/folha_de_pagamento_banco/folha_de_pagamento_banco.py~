@@ -79,7 +79,7 @@ def get_columns(salary_slips):
 
 	print salary_components
 	columns = columns + [(e + ":Currency:-1") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:-1") for d in salary_components[_("Deduction")]] + \
+		[_("Gross Pay") + ":Currency:-1"] + [(d + ":Currency:-1") for d in salary_components[_("Deduction")]] + \
 		[_("Total Deduction") + ":Currency:-1", _("Net Pay") + ":Currency:120"]
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
