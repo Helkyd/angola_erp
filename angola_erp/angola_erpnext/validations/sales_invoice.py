@@ -286,6 +286,12 @@ def before_submit(doc,method):
 		frappe.db.set_value("Fees",prop_.propina, "sales_invoice", doc.name)
 		#frappe.db.set_value("Fees",prop_.propina, "outstanding_amount", 0)
 		frappe.db.commit()
+
+	if doc.po_no:
+		if len(doc.po_no) > 140:
+			print("RETIRA As PO aqui ....")
+			doc.po_no = ""
+
 	
 def before_save(doc,method):
 	#check if PO_NO lenght more than 140 chars
