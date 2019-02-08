@@ -301,6 +301,13 @@ def before_save(doc,method):
 			doc.po_no = ""
 
 def on_submit(doc,method):
+	#check if PO_NO lenght more than 140 chars
+	if doc.po_no:
+		if len(doc.po_no) > 140:
+			print("RETIRA As PO aqui ....")
+			doc.po_no = ""
+
+
 	#Imposto de Selo
 	if doc.is_pos:
 		print "Pagamento do IS no POS"
