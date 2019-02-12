@@ -176,7 +176,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		add_party_gl_entries1(doc, gl_entries)
 		add_bank_gl_entries1(doc, gl_entries)
 
-	if doc.party_type != _("Supplier") and doc.party_type != _("Employee"):
+	if doc.party_type != _("Supplier") and doc.party_type != _("Employee") and doc.party_type != "Supplier":
 		print "II EMPLOYEE"
 		#Verify if isencao
 		if retencoes_is[0].isencao == 0:
