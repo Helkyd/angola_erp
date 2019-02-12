@@ -146,6 +146,8 @@ def on_submit(doc,method):
 
 
 def make_gl_entries1(doc, cancel=0, adv_adj=0):
+	print('MAKE GL ENTRIES 1...')
+
 	if doc.payment_type in ("Receive", "Pay") and not doc.get("party_account_field"):
 		doc.setup_party_account_field()
 
@@ -161,6 +163,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	for d in doc.get("references"):
 		if d.reference_doctype in ("Sales Invoice"):
 			tempIPC = frappe.get_doc(d.reference_doctype, d.reference_name)
+			print "Sales Invoice - TEMPIPC"
 			print tempIPC.name
 			print tempIPC.taxes_and_charges
 			if tempIPC.taxes_and_charges:
@@ -173,7 +176,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		add_party_gl_entries1(doc, gl_entries)
 		add_bank_gl_entries1(doc, gl_entries)
 
-	if doc.party_type != _("Supplier") and doc.party_type != _("Employee"):
+	if doc.party_type != _("Supplier") and doc.party_type != _("Employee") and doc.party_type != "Supplier":
 		print "II EMPLOYEE"
 		#Verify if isencao
 		if retencoes_is[0].isencao == 0:
@@ -201,6 +204,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	print "make_gl_entries"
 	print "make_gl_entries"
 	print "make_gl_entries"
+	print(gl_entries)
 	make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
 
@@ -408,6 +412,7 @@ def add_party_gl_entries2(doc, gl_entries):
 #			gl_entries.append(gle)
 
 def add_bank_gl_entries2(doc, gl_entries):
+	print "ADD BANK GL ENTRIES 2"
 	centro_custo = frappe.get_value("Company",doc.company,"cost_center")
 
 	#if doc.payment_type in ("Pay", "Internal Transfer"):
@@ -501,6 +506,7 @@ def add_party_gl_entries3(doc, gl_entries):
 #			gl_entries.append(gle)
 
 def add_bank_gl_entries3(doc, gl_entries):
+	print "ADD BANK GL ENTRIES 3...."
 	centro_custo = frappe.get_value("Company",doc.company,"cost_center")
 
 	#if doc.payment_type in ("Pay", "Internal Transfer"):

@@ -2,7 +2,7 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 12/01/2019
+#Date Changed: 10/02/2019
 
 from __future__ import unicode_literals
 
@@ -917,10 +917,14 @@ def none(source_name, target_doc=None):
 	return source_name
 
 @frappe.whitelist()
-def get_dn_for_si(source_name):
+def get_dn_for_si(source_name=None):
 	#source_name should be customer name
 
-	dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'docstatus':1},fields=['name','customer','posting_date'])
+	if source_name == None:
+		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
+
+	else:
+		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
 
 	
 	return dn_for_si
