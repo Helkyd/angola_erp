@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 #Helkyd
-#Modified 12-01-2019
+#Modified 13-02-2019
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
@@ -60,9 +60,10 @@ def on_submit(doc,method):
 	#Deve primeiro cancelar a GL entry feita para criar a Factura...
 	tem_Educacao = False;
 	tmp = frappe.get_single('Domain Settings')
+	print('Dominios ', tmp)
 	if tmp:
-		for dominios in frappe.cache().get_value('active_domains',tmp):
-			if dominios == "Education":
+		for dominios in tmp.active_domains: # frappe.cache().get_value('active_domains',tmp):
+			if dominios.domain == "Education":
 				tem_Educacao = True;
 
 	if tem_Educacao:
