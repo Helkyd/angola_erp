@@ -4,7 +4,7 @@
 var prj
 
 taxacambio= cur_frm.call({method:"angola_erp.util.cambios.cambios",args:{"fonte":"BNA"}})
-taxacambioLocal = cur_frm.call({method:"angola_erp.util.cambios.cambios_local",args:{"moeda":"EUR"}})
+taxacambioLocal = cur_frm.call({method:"angola_erp.util.cambios.cambios_local",args:{"moeda":"USD"}}) //cliente diz USD
 prj1= cur_frm.call({method:"get_projecto_status_completed",args:{}})
 
 frappe.ui.form.on('Ficha de Processo', {

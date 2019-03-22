@@ -272,6 +272,8 @@ frappe.ui.form.on("Ficha de Processo","funds_request_currency",function(frm,cdt,
 
 		}else{
 			//Tem que ir buscar o cambio based on the currency selected
+			cur_frm.doc.taxa_cambio_bna = 0
+			cur_frm.refresh_fields('taxa_cambio_bna');
 
 			frappe.call({
 				method: "angola_erp.util.cambios.cambios_local",
