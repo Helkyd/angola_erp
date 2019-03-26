@@ -4,6 +4,7 @@
 var prj
 
 taxacambio= cur_frm.call({method:"angola_erp.util.cambios.cambios",args:{"fonte":"BNA"}})
+taxacambioLocal = cur_frm.call({method:"angola_erp.util.cambios.cambios_local",args:{"moeda":"EUR"}})
 prj1= cur_frm.call({method:"get_projecto_status_completed",args:{}})
 
 frappe.ui.form.on('Ficha de Processo', {
@@ -32,21 +33,14 @@ frappe.ui.form.on('Ficha de Processo', {
 
 	},
 
-	validate: function(frm) {
-		if (isNaN(cur_frm.doc.process_number)){
-			
-			if (cur_frm.doc.process_number.length != (cur_frm.doc.serie_tipo.length + 4)){
-				frappe.show_alert('Numero de Processo tem que ter somente digitos')
-				frappe.validated = false
-			}
-
-		}
-	},
 	refresh: function(frm) {
 		
 		//Taxa de Cambio
 		if (taxacambio.responseJSON != undefined && cur_frm.doc.taxa_cambio_bna == 0){
-			cur_frm.doc.taxa_cambio_bna = taxacambio.responseJSON.message[1]
+			//pega o registo interno em vez do ONLINe vendo que o cliente pode ter alterado...
+			cur_frm.doc.taxa_cambio_bna = taxacambioLocal.responseJSON.message[0]["exchange_rate"]
+
+			//cur_frm.doc.taxa_cambio_bna = taxacambio.responseJSON.message[1]
 		}
 	
 		if (cur_frm.doc.status_process == 'Em Curso'){
@@ -196,6 +190,39 @@ var close_ficha_processo = function(){
 
 frappe.ui.form.on("Ficha de Processo","process_number",function(frm,cdt,cdn){
 	if (cur_frm.doc.taxa_cambio_bna == 0 || cur_frm.doc.taxa_cambio_bna == undefined ) {
+		if (taxacambioLocal.responseJSON == undefined){
+			if (taxacambio.responseJSON == undefined){
+				cur_frm.doc.taxa_cambio_bna = 0
+			}else{
+				if ( taxacambio.responseJSON.message == undefined){
+			
+					cur_frm.doc.taxa_cambio_bna =0
+				}else{
+					cur_frm.doc.taxa_cambio_bna = taxacambio.responseJSON.message[1]
+				}
+			}
+
+		}else{
+			if ( taxacambioLocal.responseJSON.message == undefined){
+			
+				if (taxacambio.responseJSON == undefined){
+					cur_frm.doc.taxa_cambio_bna = 0
+				}else{
+					if ( taxacambio.responseJSON.message == undefined){
+			
+						cur_frm.doc.taxa_cambio_bna =0
+					}else{
+						cur_frm.doc.taxa_cambio_bna = taxacambio.responseJSON.message[1]
+					}
+				}
+
+			}else{
+				cur_frm.doc.taxa_cambio_bna = taxacambioLocal.responseJSON.message[0]["exchange_rate"]
+			}
+		}
+
+
+/*
 		if (taxacambio.responseJSON == undefined){
 			cur_frm.doc.taxa_cambio_bna = 0
 		}else{
@@ -206,6 +233,7 @@ frappe.ui.form.on("Ficha de Processo","process_number",function(frm,cdt,cdn){
 				cur_frm.doc.taxa_cambio_bna = taxacambio.responseJSON.message[1]
 			}
 		}
+*/
 		cur_frm.refresh_fields('taxa_cambio_bna');
 	}
 
@@ -235,7 +263,7 @@ frappe.ui.form.on("Ficha de Processo","funds_request_currency",function(frm,cdt,
 			cur_frm.refresh_fields('taxa_cambio_bna');
 			//}
 
-		}else if (cur_frm.doc.funds_request_currency =="AKZ"){
+		}else if (cur_frm.doc.funds_request_currency =="AKZ" || cur_frm.doc.funds_request_currency =="AOA"){
 			//if (cur_frm.doc.taxa_cambio_bna == 0 || cur_frm.doc.taxa_cambio_bna == "Undefined" ) {
 			cur_frm.doc.taxa_cambio_bna = taxacambio.responseJSON.message[0]
 			cur_frm.refresh_fields('taxa_cambio_bna');
@@ -244,6 +272,42 @@ frappe.ui.form.on("Ficha de Processo","funds_request_currency",function(frm,cdt,
 
 		}else{
 			//Tem que ir buscar o cambio based on the currency selected
+			cur_frm.doc.taxa_cambio_bna = 0
+			cur_frm.refresh_fields('taxa_cambio_bna');
+
+			frappe.call({
+				method: "angola_erp.util.cambios.cambios_local",
+				args: {
+					"moeda": cur_frm.doc.funds_request_currency
+				},
+				callback: function(r){
+					if(r.message){
+						console.log(r.message[0]['exchange_rate'])
+						cur_frm.doc.taxa_cambio_bna = r.message[0]['exchange_rate']
+						cur_frm.refresh_fields('taxa_cambio_bna');
+					}
+				}
+			});
+
+
+/*
+			taxacambioLocal1 = cur_frm.call({method:"angola_erp.util.cambios.cambios_local",args:{"moeda":cur_frm.doc.funds_request_currency}})
+
+			if (taxacambioLocal1.responseJSON == undefined){
+				cur_frm.doc.taxa_cambio_bna = 0
+
+			}else{
+				if ( taxacambioLocal1.responseJSON.message == undefined){
+			
+					cur_frm.doc.taxa_cambio_bna = 0
+
+				}else{
+					cur_frm.doc.taxa_cambio_bna = taxacambioLocal1.responseJSON.message[0]["exchange_rate"]
+				}
+			}
+
+*/
+			console.log('Taxa cambio...aguarde')
 			frappe.show_alert("Taxa cambio...aguarde",1) 	
 		}
 	}

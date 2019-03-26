@@ -2,7 +2,7 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 10/02/2019
+#Date Changed: 12/03/2019
 
 from __future__ import unicode_literals
 
@@ -917,15 +917,71 @@ def none(source_name, target_doc=None):
 	return source_name
 
 @frappe.whitelist()
-def get_dn_for_si(source_name=None):
+def get_dn_for_si(source_name=None, datafiltro=None):
 	#source_name should be customer name
 
-	if source_name == None:
-		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
+#	if source_name == None:
+#		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
 
+#	else:
+		#removed doscstatus 1 due to returned invoices...
+		#dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
+
+	if source_name =="":
+		source_name = None
+
+	if datafiltro =="":
+		datafiltro = None
+
+	if datafiltro != None:
+
+		print('DATAFILTRO')
+		print(datafiltro)
+		print(datafiltro[2:datafiltro.find(',')-1])
+		print(datafiltro[datafiltro.find(',')+2:len(datafiltro)-2])
+
+		d1 = datafiltro[2:datafiltro.find(',')-1]
+		d2 = datafiltro[datafiltro.find(',')+2:len(datafiltro)-2]
+
+#			dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill','posting_date': (">=", d1),'posting_date': ("<=", d2)},fields=['name','customer','posting_date','is_return','return_against'])
+
+
+		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill','posting_date': ("between", [d1,d2])},fields=['name','customer','posting_date','is_return','return_against'])
+
+		print(dn_for_si)
 	else:
-		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
+		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill'},fields=['name','customer','posting_date','is_return','return_against'])
 
-	
+	#Filter returned invoices ... and remove from selection
+	#dn_for_si.sort(reverse=True)
+	ret1 = []
+	dn_for_si1 = []
+	for ret in dn_for_si:
+		if ret.return_against:
+			print(ret.return_against)
+			print(ret.name)  
+			ret1.append(ret.return_against)
+			ret1.append(ret.name)
+
+
+	for ret1a in dn_for_si:
+		#print('DN ',ret1a.name)
+		if ret1a.name in ret1:
+			print('PARA REMOVER')
+			print(ret1a)
+			print(ret1)
+			dn_for_si.remove(ret1a)
+
+	#Para ter a certeza que foi removido...
+	for ret1a in dn_for_si:
+		#print('DN ',ret1a.name)
+		if ret1a.name in ret1:
+			print('PARA REMOVER')
+			print(ret1a)
+			print(ret1)
+			dn_for_si.remove(ret1a)
+
+
 	return dn_for_si
+
 

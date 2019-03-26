@@ -552,3 +552,13 @@ def update_cambios_(fonte):
 
 #			return moedacompra, moedavenda
 
+
+@frappe.whitelist()
+def cambios_local(moeda):
+
+	print("CAMBIOS....")
+#	print(frappe.model.frappe.get_all('Currency Exchange',filters={'from_currency':moeda,'docstatus':0},fields=['from_currency','date','exchange_rate']))
+	cambiolocal = frappe.model.frappe.get_all('Currency Exchange',filters={'from_currency':moeda,'docstatus':0,'date':frappe.utils.nowdate()},fields=['from_currency','date','exchange_rate'])
+
+	print(cambiolocal)
+	return cambiolocal
