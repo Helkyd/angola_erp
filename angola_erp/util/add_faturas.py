@@ -15,7 +15,8 @@ from frappe.utils import cint, random_string
 from frappe.utils import cstr, flt, getdate
 from frappe.utils import encode
 from StringIO import StringIO
-from frappeclient import FrappeClient
+#from frappeclient import FrappeClient
+from frappe.frappeclient import FrappeClient
 from datetime import datetime
 import time
 import csv 
@@ -281,7 +282,7 @@ def check_jentry(empresa, usuario, senha, delimiter1 = None, ficheiro="journalen
 								print dados
 								print "++++ RESULTADO Ano Fiscal  +++++"
 								print " resultado ", x
-								if x.status_code == 200:
+								if x.status_code == 200 or x.status_code == 409 :
 									#200
 									print 'Anos Fiscal criado ', registoano
 									frappe.db.commit()
@@ -881,8 +882,14 @@ def add_jentry(empresa, usuario, senha, delimiter1 = None, ficheiro="journalentr
 								print 'CONTASJV Modificado'
 								print contasJV
 
+								#verifica o Ano da olddatagravacao com o registoano
+								olddatagravacao1 = olddatagravacao
+								print datagravacao[0:4]
+								if datagravacao[0:4] != registoano:
+									olddatagravacao1 = olddatagravacao1.replace(olddatagravacao1[0:4],registoano)
+
 								dados = {
-									"posting_date": olddatagravacao,
+									"posting_date": olddatagravacao1,
 									"doctype": "Journal Entry", 
 									"naming_series": "JV-", 
 									"voucher_type": "Journal Entry", 
@@ -1295,9 +1302,14 @@ def add_jentry(empresa, usuario, senha, delimiter1 = None, ficheiro="journalentr
 		print contasJV
 	
 		print "PRECISA SALVAR O ULTIMO REGISTO ======="
+		#verifica o Ano da olddatagravacao com o registoano
+		olddatagravacao1 = datagravacao
+		print datagravacao[0:4]
+		if datagravacao[0:4] != registoano:
+			olddatagravacao1 = olddatagravacao1.replace(olddatagravacao1[0:4],registoano)
 
 		dados = {
-			"posting_date": datagravacao,
+			"posting_date": olddatagravacao1,
 			"doctype": "Journal Entry", 
 			"naming_series": "JV-", 
 			"voucher_type": "Journal Entry", 
