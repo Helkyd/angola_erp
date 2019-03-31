@@ -985,3 +985,19 @@ def get_dn_for_si(source_name=None, datafiltro=None):
 	return dn_for_si
 
 
+
+@frappe.whitelist()
+def get_all_enderecos(doctipo,partyname):
+
+	print 'Todos Enderecos '
+	print doctipo
+	print partyname.encode('utf-8')
+	#dadoscliente = frappe.model.frappe.get_all('Dynamic Link',filters={'link_doctype':doctipo,'link_name':partyname,'parenttype':'Address'},fields={'*'})
+	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
+	if dadoscliente:
+		data1 = frappe.get_doc("Address", dadoscliente[0][0])
+		if data1:
+			return data1
+
+				
+
