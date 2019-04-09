@@ -1,0 +1,50 @@
+<div style="margin-bottom: 7px;" class="text-center">
+	{% frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __(report.report_name) %}</h2>
+<h5 class="text-center">{{ __("From") }} {%= filters.date_range[0] %} {{ __("to") }} {%= filters.date_range[1] %}</h5>
+<hr>
+<h5 class="text-left"><b>{{ __("Company") }}</b> {{ filters.company }} </h5>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			{% for(var i=1, l=report.columns.length; i<l; i++) { %}
+				<th class="text-right">{%= report.columns[i].label %}</th>
+			{% } %}
+		</tr>
+	</thead>
+    <tbody>
+		{% for(var j=0, k=data.length; j<k; j++) { %}
+            {%
+				var row = data[j];
+			%}
+			<tr>
+				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
+					{% var fieldname = report.columns[i].field; %}				
+					{% if (!isNaN(row[fieldname])) { %}
+						<td class="text-right">
+							{% if ((k-j) == 1) { %}
+								<b>
+							{% } %}
+							{% if (!is_null(row[fieldname])) { %}
+								{%= format_currency(row[fieldname]) %}
+							{% } %}	
+						</td>	
+					{% } else { %}
+						<td class="text-center">
+							{% if (!is_null(row[fieldname])) { %}
+								{% if ( "Total" == row[fieldname]) { %}								
+									<b>{%= row[fieldname] %}</b>			
+								{% } else { %}			
+									{%= row[fieldname] %}
+								{% } %}
+
+							{% } %}
+						</td>	
+					{% } %}					
+				{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">{{ __("Printed On") }} {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

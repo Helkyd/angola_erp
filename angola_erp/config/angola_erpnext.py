@@ -41,8 +41,8 @@ def get_data():
 				  }, 
 				{
 				   "type": "doctype", 
-				   "description": "Atualizacao Cambio", 
-				   "name": "Atualizacao Cambio", 
+				   "description": "Atualizacao Cambios", 
+				   "name": "Atualizacao Cambios", 
 				  },
 
 
@@ -82,6 +82,14 @@ def get_data():
 				   "type": "report",
 				   "is_query_report": True
 				  }, 
+				 {
+				   "description": "INSS by Salary Structure", 
+				   "name": "Salary INSS by Salary Structure", 
+				   "doctype": "Salary Slip",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+
 				 {
 				   "description": "IRT", 
 				   "name": "Salary IRT", 
