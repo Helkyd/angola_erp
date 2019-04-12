@@ -13,7 +13,7 @@ from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from num2words import num2words
 
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+#from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.accounts.utils import get_fiscal_year
 
 global diaspagamento, totaldiastrabalho, horasextra, trabalhouferiado 
@@ -36,13 +36,14 @@ def validate(doc,method):
 	print "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 
 	print doc.name , " + ", doc.employee, " + ", doc.start_date
+	print 'Dias de pagamento e Working Days'
 	print doc.payment_days, " + ", doc.total_working_days
 	print doc.company.encode('utf-8')
 
 #	if not doc.salary_slip_based_on_timesheet:
 
 	#Falta Injustificada
-	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+	j= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and processar_mes_seguinte = 0 and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
 	#Falta Justificada c/salario
 	ja= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
@@ -52,7 +53,7 @@ def validate(doc,method):
 	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
 	#Half day Injustificada
-	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
+	j3= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 0 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
 	#Still need to COUNT for Present during Holiday
 	fiscal_year = get_fiscal_year(doc.start_date, company=doc.company)[0]
@@ -65,6 +66,21 @@ def validate(doc,method):
 	med = m.month_end_date
 	print 'Mes start ', msd
 	print 'Mes END ', med
+
+	#Gets Faltas do previous month
+	print month
+	print int(month)-1
+	prev_m = get_month_details(fiscal_year, int(month)-1)
+	prev_msd = prev_m.month_start_date
+	prev_med = prev_m.month_end_date
+
+	print prev_msd
+	print prev_med
+	print mes_startdate.month
+
+	j4= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' or status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 1 and company = %s """,(doc.employee,int(month)-1,mes_startdate.year,doc.company), as_dict=True)
+	
+	print 'Faltas no mes anterior ', j4	
 
 	holiday_list = get_holiday_list_for_employee(doc.employee)
 	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
@@ -90,8 +106,8 @@ def validate(doc,method):
 			trabalhouferiado += 1
 
 	doc.total_working_days = doc.total_working_days + trabalhouferiado
-	doc.numero_de_faltas = flt(j[0]['count(status)']) + (flt(j3[0]['count(status)'])/2)
-	doc.payment_days = (doc.payment_days + trabalhouferiado) - j[0]['count(status)'] - j1[0]['count(status)']
+	doc.numero_de_faltas = flt(j[0]['count(status)']) + (flt(j3[0]['count(status)'])/2) + flt(j4[0]['count(status)'])
+	doc.payment_days = (doc.payment_days + trabalhouferiado) - j[0]['count(status)'] - j1[0]['count(status)'] - j4[0]['count(status)']
 	diaspagamento = doc.payment_days
 	totaldiastrabalho = doc.total_working_days
 	horasextra = j2[0]['horas']

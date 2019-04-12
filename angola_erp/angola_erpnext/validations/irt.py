@@ -59,7 +59,7 @@ def set_faltas(mes,ano,empresa):
 
 		#Faltas Injustificadas
 		j= frappe.db.sql(""" SELECT count(status)
-		from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+		from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and processar_mes_seguinte = 0 and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
 		#Faltas Justificadas C/Salario
 		ja= frappe.db.sql(""" SELECT count(status)
@@ -73,13 +73,24 @@ def set_faltas(mes,ano,empresa):
 
 		#Half day Injustificado
 		j4= frappe.db.sql(""" SELECT count(status)
-		from `tabAttendance` where employee = %s and status = 'Half Day' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
+		from `tabAttendance` where employee = %s and status = 'Half Day' and processar_mes_seguinte = 0 and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 """,(tra.name,mes,ano), as_dict=False)
 
 		print 'VERIFICA ATTENDANCE e LEAVE'
 		print tra.name
 
 		#print j3
 		
+
+		#Gets Faltas do previous month
+		print 'MES ANTERIOR COM FALTAS'
+		print 'MES ANTERIOR COM FALTAS'
+		print 'MES ANTERIOR COM FALTAS'
+		print mes
+		print int(mes)-1
+
+		j5 = frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' or status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 1  """,(tra.name,int(mes)-1,ano), as_dict=False)
+
+		print 'RESULTA MES ', j5
 
 		j1 = frappe.get_doc("Employee",tra.name)		
 
@@ -144,6 +155,25 @@ def set_faltas(mes,ano,empresa):
 			#save on Employee record
 			#j1 = frappe.get_doc("Employee",tra.name)
 			if j[0][0]  < 0 :
+				j1.numer_faltas = 0
+			#j1.save()
+
+
+		if j5[0][0] > 0:
+			#save on Employee record
+			#j1 = frappe.get_doc("Employee",tra.name)
+
+			print " FALTAS DO MES ANTERIOR"					
+			#print j4[0][0]
+			print j[0][0] + (flt(j4[0][0])/2) + flt(j5[0][0])
+			print 'aaaa'
+
+			j1.numer_faltas = flt(j[0][0])	+ (flt(j4[0][0])/2) + flt(j5[0][0])
+			#j1.save()
+		else:
+			#save on Employee record
+			#j1 = frappe.get_doc("Employee",tra.name)
+			if j5[0][0]  < 0 :
 				j1.numer_faltas = 0
 			#j1.save()
 
