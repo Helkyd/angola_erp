@@ -106,8 +106,8 @@ def validate(doc,method):
 			trabalhouferiado += 1
 
 	doc.total_working_days = doc.total_working_days + trabalhouferiado
-	doc.numero_de_faltas = flt(j[0]['count(status)']) + (flt(j3[0]['count(status)'])/2)
-	doc.payment_days = (doc.payment_days + trabalhouferiado) - j[0]['count(status)'] - j1[0]['count(status)']
+	doc.numero_de_faltas = flt(j[0]['count(status)']) + (flt(j3[0]['count(status)'])/2) + flt(j4[0]['count(status)'])
+	doc.payment_days = (doc.payment_days + trabalhouferiado) - j[0]['count(status)'] - j1[0]['count(status)'] - j4[0]['count(status)']
 	diaspagamento = doc.payment_days
 	totaldiastrabalho = doc.total_working_days
 	horasextra = j2[0]['horas']

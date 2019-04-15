@@ -78,7 +78,7 @@ def validate(doc,method):
 	print prev_med
 	print mes_startdate.month
 
-	j4= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' or status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 1 and company = %s """,(doc.employee,int(month)-1,mes_startdate.year,doc.company), as_dict=True)
+	j4= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and (status = 'Half Day' or status = 'Absent') and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 1 and company = %s """,(doc.employee,int(month)-1,mes_startdate.year,doc.company), as_dict=True)
 	
 	print 'Faltas no mes anterior ', j4	
 
