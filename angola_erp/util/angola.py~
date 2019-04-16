@@ -2,9 +2,15 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 12/03/2019
+#Date Changed: 16/04/2019
 
 from __future__ import unicode_literals
+
+#from __future__ import unicode_literals
+import sys
+reload (sys)
+sys.setdefaultencoding('utf8')
+
 
 from frappe.model.document import Document
 import frappe.model
@@ -25,6 +31,11 @@ from frappe.model.utils import get_fetch_values
 
 import csv 
 import json
+
+import xml.etree.ElementTree as ET
+from datetime import datetime, date, timedelta
+
+
 
 
 @frappe.whitelist()
@@ -1009,6 +1020,18 @@ def get_all_enderecos(doctipo,partyname):
 			if data1:
 				return data1
 
+
+@frappe.whitelist()
+def get_all_enderecos_a(doctipo,partyname):
+
+	print 'Todos Enderecos Address ONLY!!!'
+	print doctipo
+	print partyname.encode('utf-8')
+	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
+	if dadoscliente:
+		data1 = frappe.get_doc("Address", dadoscliente[0][0])
+		if data1:
+			return data1
 				
 
 @frappe.whitelist()
@@ -1027,7 +1050,7 @@ def get_xml(args):
 
 
 def convert_xml():
-	import xml.etree.ElementTree as ET
+	
 
 	print 'creating Header'
 
@@ -1684,6 +1707,717 @@ def convert_xml():
 	print 'file created'
 
 @frappe.whitelist()
+def gerar_saft_ao():
+	#read from source ...
+	empresa = frappe.get_doc('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
+	emp_enderecos = get_all_enderecos("Company",empresa.name)
+	print 'ENdereco Empresa'
+	print emp_enderecos
+
+	AnoFiscal = frappe.db.sql(""" select year, year_start_date, year_end_date, disabled from `tabFiscal Year` where year = %s """,(datetime.today().year
+),as_dict=True)
+
+	print 'AnoFiscal'
+	print AnoFiscal 
+	print datetime.today().year
+
+	#create Header
+
+	data = ET.Element('AuditFile')
+	print 'creating Header'
+	head = ET.SubElement(data,'Header')
+
+	auditfileversion = ET.SubElement(head,'AuditFileVersion')
+	auditfileversion.text = '1.0'
+
+	companyid = ET.SubElement(head,'CompanyID')	
+	companyid.text = empresa.name
+
+	taxregistrationnumber = ET.SubElement(head,'TaxRegistrationNumber')
+	taxregistrationnumber.text = empresa.tax_id
+
+	taxaccountingbasis = ET.SubElement(head,'TaxAccountingBasis')
+	taxaccountingbasis.text = "I"	#I contab. integrada c/Factur, C - Contab, F - Fact, Q - bens, services, Fact.
+
+	companyname = ET.SubElement(head,'CompanyName')
+	companyname.text = empresa.name
+
+	businessname = ET.SubElement(companyname,'BusinessName')
+	businessname.text = empresa.name
+
+	companyaddress = ET.SubElement(companyname,'CompanyAddress')
+	buildingnumber = ET.SubElement(companyname,'BuildingNumber')
+
+	streetname = ET.SubElement(companyname,'StreetName')
+	streetname.text = emp_enderecos.address_line1
+
+	addressdetail = ET.SubElement(companyname,'AddressDetail')
+	addressdetail.text = emp_enderecos.address_line1
+
+	city = ET.SubElement(companyname,'City')
+	city.text = emp_enderecos.city
+	
+	postalcode = ET.SubElement(companyname,'PostalCode')
+	postalcode.text = emp_enderecos.pincode
+
+	region = ET.SubElement(companyname,'Region')
+	region.text = emp_enderecos.state
+
+	country = ET.SubElement(companyname,'Country')
+	country.text = "AO"	#default
+
+	fiscalyear = ET.SubElement(companyname,'FiscalYear')
+	fiscalyear.text = AnoFiscal[0].year
+
+	print 'Ano Inicio'
+	print AnoFiscal[0].year_start_date
+
+	startdate = ET.SubElement(companyname,'SartDate')
+	startdate.text = AnoFiscal[0].year_start_date.strftime("%Y-%m-%d %H:%M:%S")
+
+	enddate = ET.SubElement(companyname,'EndDate')
+	enddate.text = AnoFiscal[0].year_end_date.strftime("%Y-%m-%d %H:%M:%S")
+
+	currencycode = ET.SubElement(companyname,'CurrencyCode')
+	currencycode.text = "AOA"	#default
+
+	datecreated = ET.SubElement(companyname,'DateCreated')
+	datecreated.text = frappe.utils.nowdate()	#XML created
+
+	taxentity = ET.SubElement(companyname,'TaxEntity')
+	taxentity.text = "Global"	#default
+
+	productcompanytaxid = ET.SubElement(head,'ProductCompanyTaxID')
+	productcompanytaxid.text = "5417537802"	#TeorLogico
+
+	
+	softwarevalidationnumber = ET.SubElement(head,'SoftwareValidationNumber')
+	softwarevalidationnumber.text = 0	#TeorLogico for now
+
+	productid = ET.SubElement(head,'ProductID')
+	productid.text = "AngolaERP / TeorLogico"	#TeorLogico
+
+	productversion = ET.SubElement(head,'ProductVersion')
+	productid.text = str(get_versao_erp())
+
+	print get_versao_erp()
+
+	headercomment = ET.SubElement(head,'HeaderComment')
+
+	telephone = ET.SubElement(companyname,'Telephone')
+	telephone.text = emp_enderecos.phone
+
+	fax = ET.SubElement(companyname,'Fax')
+	productid.text = emp_enderecos.fax
+
+	email = ET.SubElement(companyname,'Email')
+	productid.text = emp_enderecos.email_id
+
+	website = ET.SubElement(companyname,'Website')
+	productid.text = empresa.website
+
+
+	# END OF HEADER
+
+	#MASTER Files
+	masterfiles = ET.SubElement(data,'MasterFiles')
+	#Customers
+	customers = ET.SubElement(masterfiles,'Customers')
+
+	#masterfiles = ET.Element('MasterFiles')
+
+	#create Customer
+	clientes = frappe.db.sql(""" select * from `tabCustomer` where docstatus = 0 """,as_dict=True)
+
+	adicionacliente = True
+
+	#Faz loop
+	for cliente in clientes:
+		contascliente = frappe.db.sql(""" select * from `tabParty Account` where parenttype = 'Customer' and parentfield = 'accounts' and parent = %s and company = %s """,(cliente.name, empresa.name), as_dict=True)
+		print 'account cliente'
+		print cliente.name
+		print contascliente
+
+		if not contascliente:
+			#test to see if exists ... but on diff company
+
+			contascliente = frappe.db.sql(""" select * from `tabParty Account` where parenttype = 'Customer' and parentfield = 'accounts' and parent = %s """,(cliente.name), as_dict=True)
+			print 'outra empresa'
+			print contascliente
+			if contascliente:
+				#Outra empresa..
+				adicionacliente = False
+			else:
+				adicionacliente = True
+		
+		
+		if adicionacliente == True:
+			print 'Add cliente'
+			print 'Add cliente'
+			print 'Add cliente'
+			#Customers
+			#customers = ET.SubElement(masterfiles,'Customers')
+			customer = ET.SubElement(customers,'Customer')
+			customerid = ET.SubElement(customer,'CustomerID')
+			customerid.text = cliente.name
+
+			accountid = ET.SubElement(customer,'AccountID')
+
+
+
+			if not contascliente:
+					contascliente = frappe.db.sql(""" select * from `tabAccount` where name like '31121000%%' and company = %s """,(empresa.name), as_dict=True)
+					print contascliente
+					accountid.text = contascliente[0].account_name
+#				else:
+#					accountid.text = "Desconhecido"				
+			else:
+
+				accountid.text = contascliente[0].account
+
+
+			customertaxid = ET.SubElement(customer,'CustomerTaxID')
+			customertaxid.text = cliente.tax_id
+
+			companyname = ET.SubElement(customer,'CompanyName')
+			companyname.text = cliente.customer_name
+
+			contact = ET.SubElement(customer,'Contact')
+
+			#address
+			address = ET.SubElement(customer,'Address')
+
+			billingaddress = ET.SubElement(address,'BillingAddress')
+			cliente_endereco = get_all_enderecos_a("Customer",cliente.name)
+			if cliente_endereco:
+				print cliente_endereco.address_line1
+				billingaddress.text = cliente_endereco.address_line1
+
+			streetname = ET.SubElement(address,'StreetName')
+			if cliente_endereco:
+				streetname.text = cliente_endereco.address_line1
+
+			addressdetail = ET.SubElement(address,'AddressDetail')
+			if cliente_endereco:				
+				addressdetail.text = cliente_endereco.address_line1
+
+			else:
+				addressdetail.text = "Desconhecido"	#default
+
+			city = ET.SubElement(address,'City')
+			if cliente_endereco:
+				city.text = cliente_endereco.city
+
+			postalcode = ET.SubElement(address,'PostalCode')
+			if cliente_endereco:
+				postalcode.text = cliente_endereco.pincode
+
+			region = ET.SubElement(address,'Region')
+
+			country = ET.SubElement(address,'Country')
+			if cliente_endereco:
+				country.text = cliente_endereco.country
+
+			#address 1
+			shiptoaddress = ET.SubElement(address,'ShipToAddress')
+
+			buildingnumber = ET.SubElement(shiptoaddress,'BuildingNumber')
+			streetname = ET.SubElement(shiptoaddress,'StreetName')
+			addressdetail = ET.SubElement(shiptoaddress,'AddressDetail')
+			city = ET.SubElement(shiptoaddress,'City')
+			postalcode = ET.SubElement(shiptoaddress,'PostalCode')
+			region = ET.SubElement(shiptoaddress,'Region')
+			country = ET.SubElement(shiptoaddress,'Country')
+
+
+			telephone = ET.SubElement(customer,'Telephone')
+			if cliente_endereco:
+				telephone.text = cliente_endereco.phone
+
+			fax = ET.SubElement(customer,'Fax')
+			if cliente_endereco:
+				fax.text = cliente_endereco.fax
+
+			email = ET.SubElement(customer,'Email')
+			if cliente_endereco:
+				email.text = cliente_endereco.email_id
+
+			website = ET.SubElement(customer,'Website')
+
+			selfbillingindicator = ET.SubElement(customer,'SelfBillingIndicator')
+			selfbillingindicator.text = 0	#default
+
+		#END OF Customers
+
+	#create Suppliers
+
+
+	#Suppliers
+	suppliers = ET.SubElement(masterfiles,'Suppliers')
+	fornecedores = frappe.db.sql(""" select * from `tabSupplier` where docstatus = 0 """,as_dict=True)
+
+	adicionafornecedor = True
+
+	for fornecedor in fornecedores:
+		contasfornecedor = frappe.db.sql(""" select * from `tabParty Account` where parenttype = 'Supplier' and parentfield = 'accounts' and parent = %s and company = %s """,(fornecedor.name, empresa.name), as_dict=True)
+		print 'account fornecedor'
+		print fornecedor.name
+		print contasfornecedor
+
+		if not contasfornecedor:
+			#test to see if exists ... but on diff company
+
+			contasfornecedor = frappe.db.sql(""" select * from `tabParty Account` where parenttype = 'Supplier' and parentfield = 'accounts' and parent = %s """,(fornecedor.name), as_dict=True)
+			print 'outra empresa'
+			print contasfornecedor
+			if contasfornecedor:
+				#Outra empresa..
+				adicionafornecedor = False
+			else:
+				adicionafornecedor = True
+		
+		
+		if adicionafornecedor == True:
+			print 'Add Fornecedor'
+			print 'Add Fornecedor'
+			print 'Add Fornecedor'
+
+
+
+			supplier = ET.SubElement(suppliers,'Supplier')
+			supplierid = ET.SubElement(supplier,'SuplierID')
+			supplierid.text = fornecedor.name
+
+		
+			accountid = ET.SubElement(supplier,'AccountID')
+
+			if not contasfornecedor:
+					contasfornecedor = frappe.db.sql(""" select * from `tabAccount` where name like '31121000%%' and company = %s """,(empresa.name), as_dict=True)
+					print contasfornecedor
+					accountid.text = contasfornecedor[0].account_name
+#				else:
+#					accountid.text = "Desconhecido"				
+			else:
+
+				accountid.text = contasfornecedor[0].account
+
+
+			supliertaxid = ET.SubElement(supplier,'SuplierTaxID')
+			supliertaxid.text = fornecedor.tax_id
+
+			companyname = ET.SubElement(supplier,'CompanyName')
+			companyname.text = fornecedor.supplier_name
+
+			#address
+			address = ET.SubElement(supplier,'Address')
+			billingaddress = ET.SubElement(address,'BillingAddress')
+
+			fornecedor_endereco = get_all_enderecos_a("Supplier",fornecedor.name)
+			if fornecedor_endereco:
+				print fornecedor_endereco.address_line1
+				billingaddress.text = fornecedor_endereco.address_line1
+
+			streetname = ET.SubElement(address,'StreetName')
+			if fornecedor_endereco:
+				streetname.text = fornecedor_endereco.address_line1
+
+
+			addressdetail = ET.SubElement(address,'AddressDetail')
+			if fornecedor_endereco:
+				addressdetail.text = fornecedor_endereco.address_line1
+
+			city = ET.SubElement(address,'City')
+			if fornecedor_endereco:
+				city.text = fornecedor_endereco.city
+
+
+			postalcode = ET.SubElement(address,'PostalCode')
+			if fornecedor_endereco:
+				postalcode.text = fornecedor_endereco.pincode
+
+			region = ET.SubElement(address,'Region')
+			if fornecedor_endereco:
+				region.text = fornecedor_endereco.region
+
+			country = ET.SubElement(address,'Country')
+			if fornecedor_endereco:
+				countr.text = fornecedor_endereco.country
+
+			#address 1
+			shipfromaddress = ET.SubElement(address,'ShipFromAddress')
+			buildingnumber = ET.SubElement(shipfromaddress,'BuildingNumber')
+
+			address1 = ET.SubElement(shipfromaddress,'Address1')
+			streetname = ET.SubElement(shipfromaddress,'StreetName')
+			addressdetail = ET.SubElement(shipfromaddress,'AddressDetail')
+			city = ET.SubElement(shipfromaddress,'City')
+			postalcode = ET.SubElement(shipfromaddress,'PostalCode')
+			region = ET.SubElement(shipfromaddress,'Region')
+			country = ET.SubElement(shipfromaddress,'Country')
+
+			telephone = ET.SubElement(supplier,'Telephone')
+			if fornecedor_endereco:
+				telephone.text = fornecedor_endereco.phone
+
+			fax = ET.SubElement(supplier,'Fax')
+			if fornecedor_endereco:
+				fax.text = fornecedor_endereco.fax
+
+			email = ET.SubElement(supplier,'Email')
+			if fornecedor_endereco:
+				email.text = fornecedor_endereco.email_id
+
+			website = ET.SubElement(supplier,'Website')
+			website.text = fornecedor.website
+
+			selfbillingindicator = ET.SubElement(supplier,'SelfBillingIndicator')
+			selfbillingindicator.text = 0 #default
+
+	#END OF Suppliers
+
+
+	#create Products / Services
+	#Products
+
+
+	products = ET.SubElement(masterfiles,'Products')
+
+	produtos = frappe.db.sql(""" select * from `tabItem` where docstatus = 0 """,as_dict=True)
+
+	for produto in produtos:
+	
+		product = ET.SubElement(products,'Product')
+		producttype = ET.SubElement(product,'ProductType')
+		if produto.is_stock_item:
+			producttype.text = "P" #Produto
+		else:
+			producttype.text = "S" #Servico
+
+		
+		productcode = ET.SubElement(product,'ProductCode')
+		productcode.text = produto.item_code
+
+		productgroup = ET.SubElement(product,'ProductGroup')
+		productgroup.text = produto.item_group
+
+		productdescription = ET.SubElement(product,'ProductDescription')
+		productdescription.text = produto.item_name
+
+		productnumbercode = ET.SubElement(product,'ProductNumberCode')
+		productnumbercode.text = produto.barcode
+
+		customsdetails = ET.SubElement(product,'CustomsDetails')
+		unnumber = ET.SubElement(product,'UNNumber')
+
+	#END OF Products
+
+
+	#create Retencoes...
+	#TaxTable
+
+	
+	taxtable = ET.SubElement(masterfiles,'TaxTable')
+	retencoes = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 """,as_dict=True)
+
+	for retencao in retencoes:
+
+		taxtableentry = ET.SubElement(taxtable,'TaxTableEntry')
+		taxtype = ET.SubElement(taxtableentry,'TaxType')
+		if "IPC" in retencao.name:
+			taxtype.text = "NS"
+		elif "SELO" in retencao.name:
+			taxtype.text = "IS"
+		elif "IVA" in retencao.name:
+			taxtype.text = "IVA"
+		else:
+			taxtype.text = "NS"
+
+		taxcountryregion = ET.SubElement(taxtableentry,'TaxCountryRegion')
+
+
+		taxcode = ET.SubElement(taxtableentry,'TaxCode')
+		if "IPC" in retencao.name:
+			taxcode.text = "NS"
+		elif "SELO" in retencao.name:
+			taxcode.text = "ISE"
+		elif "IVA" in retencao.name:
+			taxcode.text = "ISE"
+		else:
+			taxcode.text = "NS"
+
+		description = ET.SubElement(taxtableentry,'Description')
+		description.text = retencao.descricao
+
+		taxexpirationdate = ET.SubElement(taxtableentry,'TaxExpirationDate')
+		taxexpirationdate.text = retencao.data_limite
+
+		taxpercentage = ET.SubElement(taxtableentry,'TaxPercentage')
+		taxpercentage.text = str(retencao.percentagem)+"0"
+
+		taxamount = ET.SubElement(taxtableentry,'TaxAmount')
+		taxamount.text = 0
+
+	#END OF TaxTable
+
+	#create Sales Invoices
+
+
+	#SalesInvoices
+	salesinvoices = ET.SubElement(data,'SalesInvoices')
+	#still need to filter per user request by MONTH or dates filter...
+	#Default CURRENT MONTH
+	print 'mes inicial ', get_first_day(datetime.today())
+	print 'mes fim ', get_last_day(datetime.today())
+
+	primeirodiames = get_first_day(datetime.today())
+	ultimodiames = get_last_day(datetime.today())
+
+	facturas = frappe.db.sql(""" select count(name) from `tabSales Invoice` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	print facturas
+	print int(facturas[0]['count(name)'])
+
+
+	numberofentries = ET.SubElement(salesinvoices,'NumberOfEntries')
+	numberofentries.text = str(int(facturas[0]['count(name)']))
+
+	##### POR FAZER
+	totaldebit = ET.SubElement(salesinvoices,'TotalDebit')
+
+	totalcredit = ET.SubElement(salesinvoices,'TotalCredit')
+
+	####### POR FAZER
+
+
+	#invoice
+	facturas = frappe.db.sql(""" select * from `tabSales Invoice` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for factura in facturas:
+		print factura.name
+		print factura.creation
+		print factura.modified
+
+		invoice = ET.SubElement(salesinvoices,'Invoice')
+
+		invoiceno = ET.SubElement(invoice,'InvoiceNo')
+		invoiceno.text = str(factura.name)
+
+		#documentstatus
+		documentstatus = ET.SubElement(invoice,'DocumentStatus')
+		invoicestatus = ET.SubElement(documentstatus,'InvoiceStatus')
+		if factura.status =="Paid" and factura.docstatus == 1:
+			invoicestatus.text = "F"	#Facturado
+		elif factura.status =="Cancelled" and factura.docstatus == 2:
+			invoicestatus.text = "A"	#Anulado
+
+		else:
+			invoicestatus.text = "N"	#Normal
+
+
+		invoicestatusdate = ET.SubElement(documentstatus,'InvoiceStatusDate')
+		invoicestatusdate.text = factura.modified.strftime("%Y-%m-%d %H:%M:%S")	#ultima change
+
+		reason = ET.SubElement(documentstatus,'Reason')
+		sourceid = ET.SubElement(documentstatus,'SourceID')
+		sourceid.text = factura.modified_by	#User
+
+		sourcebilling = ET.SubElement(documentstatus,'SourceBilling')
+		sourcebilling.text = "P"	#Default
+
+		salesinvoicehash = ET.SubElement(invoice,'Hash')
+		salesinvoicehash.text = 0	#por rever...
+
+		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
+		salesinvoicehashcontrol.text = 0	#por rever
+
+		period = ET.SubElement(invoice,'Period')
+		period.text = str(factura.modified.month)	#last modified month
+
+		invoicedate = ET.SubElement(invoice,'InvoiceDate')
+		invoicedate.text = factura.posting_date.strftime("%Y-%m-%d %H:%M:%S")	#posting date
+
+		invoicetype = ET.SubElement(invoice,'InvoiceType')
+		invoicedate.text = "FT"	#default sales invoice
+
+		#specialRegimes
+		specialregimes = ET.SubElement(invoice,'SpecialRegimes')
+		selfbillingindicator = ET.SubElement(specialregimes,'SelfBillingIndicator')
+		selfbillingindicator.text = 0	#default 
+
+		cashvatschemeindicator = ET.SubElement(specialregimes,'CashVATSchemeIndicator')
+		cashvatschemeindicator.text = 0	#default 
+
+		thirdpartiesbillingindicator = ET.SubElement(specialregimes,'ThirdPartiesBillingIndicator')
+		thirdpartiesbillingindicator.text = 0	#default 
+
+		sourceid = ET.SubElement(invoice,'SourceID')
+		sourceid.text = factura.owner	#created by
+
+		eaccode = ET.SubElement(invoice,'EACCode')
+
+		systementrydate = ET.SubElement(invoice,'SystemEntryDate')
+		systementrydate.text = factura.creation.strftime("%Y-%m-%d %H:%M:%S")	#creation date
+
+		transactionid = ET.SubElement(invoice,'TransactionID')
+		entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+		if entradasgl:
+			transactionid.text = entradasgl[0].name	#entrada GL;single invoice can generate more than 2GL
+
+		customerid = ET.SubElement(invoice,'CustomerID')
+		customerid.text = factura.customer	#cliente
+
+		#shipto
+		shipto = ET.SubElement(invoice,'ShipTo')
+		deliveryid = ET.SubElement(shipto,'DeliveryID')
+		deliverydate = ET.SubElement(shipto,'DeliveryDate')
+		warehouseid = ET.SubElement(shipto,'WarehouseID')
+		locationid = ET.SubElement(shipto,'LocationID')
+		#address
+		address = ET.SubElement(shipto,'Address')	
+		buildingnumber = ET.SubElement(address,'BuildingNumber')
+		streetname = ET.SubElement(address,'StreetName')
+		addressdetail = ET.SubElement(address,'AddressDetail')
+		city = ET.SubElement(address,'City')
+		postalcode = ET.SubElement(address,'PostalCode')
+		region = ET.SubElement(address,'Region')
+		country = ET.SubElement(address,'Country')
+		#shipfrom
+		shipfrom = ET.SubElement(invoice,'ShipFrom')
+		deliveryid = ET.SubElement(shipfrom,'DeliveryID')
+		deliverydate = ET.SubElement(shipfrom,'DeliveryDate')
+		warehouseid = ET.SubElement(shipfrom,'WarehouseID')
+		locationid = ET.SubElement(shipfrom,'LocationID')
+		#address
+		address = ET.SubElement(shipfrom,'Address')
+		buildingnumber = ET.SubElement(address,'BuildingNumber')
+		streetname = ET.SubElement(address,'StreetName')
+		addressdetail = ET.SubElement(address,'AddressDetail')
+		city = ET.SubElement(address,'City')
+		postalcode = ET.SubElement(address,'PostalCode')
+		region = ET.SubElement(address,'Region')
+		country = ET.SubElement(address,'Country')
+
+		movementendtime = ET.SubElement(invoice,'MovementEndTime')
+		movementstarttime = ET.SubElement(invoice,'MovementStartTime')
+
+		#line
+		line = ET.SubElement(invoice,'Line')
+		facturaitems = frappe.db.sql(""" select * from `tabSales Invoice Item` where parent = %s """,(factura.name), as_dict=True)
+		
+		for facturaitem in facturaitems:
+
+			linenumber = ET.SubElement(line,'LineNumber')
+			linenumber.text = str(facturaitem.idx)
+
+
+			#orderreferences
+			orderreferences = ET.SubElement(line,'OrderReferences')
+			originatingon = ET.SubElement(orderreferences,'OriginatingON')
+			orderdate = ET.SubElement(orderreferences,'OrderDate')
+
+			productcode = ET.SubElement(line,'ProductCode')
+			productcode.text = facturaitem.item_code
+
+			productdescription = ET.SubElement(line,'ProductDescription')
+			productdescription.text = facturaitem.item_name
+
+			quantity = ET.SubElement(line,'Quantity')
+			quantity.text = str(facturaitem.qty)
+
+
+			unifofmeasure = ET.SubElement(line,'UnifOfMeasure')
+			unifofmeasure.text = facturaitem.uom
+
+			unitprice = ET.SubElement(line,'UnitPrice')
+			unitprice.text = str(facturaitem.rate)+"0"
+
+			taxbase = ET.SubElement(line,'TaxBase')
+			taxbase.text = str(facturaitem.net_rate)+"0"
+
+			taxpointdate = ET.SubElement(line,'TaxPointDate')
+			taxpointdate.text = facturaitem.delivery_note	#DN
+
+			#references
+			references = ET.SubElement(line,'References')
+			reference = ET.SubElement(references,'Reference')
+			reason = ET.SubElement(references,'Reason')
+
+			description = ET.SubElement(line,'Description')
+			description.text = facturaitem.item_description
+
+			#productserialnumber
+			productserialnumber = ET.SubElement(line,'ProductSerialNumber')
+			serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
+			serialnumber.text = facturaitem.serial_no
+
+			debitamount = ET.SubElement(line,'DebitAmount')
+			debitamount.text = str(facturaitem.amount)+"0"
+
+			creditamount = ET.SubElement(line,'CreditAmount')
+
+		#tax
+		tax = ET.SubElement(line,'Tax')
+		taxtype = ET.SubElement(tax,'TaxType')
+		taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+		taxcode = ET.SubElement(tax,'TaxCode')
+		taxpercentage = ET.SubElement(tax,'TaxPercentage')
+		taxamount = ET.SubElement(tax,'TaxAmount')
+		taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
+		taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
+		settlementamount = ET.SubElement(tax,'SettlementAmount')
+		#customsinformation
+		customsinformation = ET.SubElement(line,'CustomsInformation')
+		arcno = ET.SubElement(customsinformation,'ARCNo')
+		iecamount = ET.SubElement(customsinformation,'IECAmount')
+		#documenttotals
+		documenttotals = ET.SubElement(line,'DocumentTotals')
+		taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+		nettotal = ET.SubElement(documenttotals,'NetTotal')
+		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+		#currency
+		currency = ET.SubElement(line,'Currency')
+		currencycode = ET.SubElement(currency,'CurrencyCode')
+		currencyamount = ET.SubElement(currency,'CurrencyAmount')
+		exchangerate = ET.SubElement(currency,'ExchangeRate')
+		#settlement
+		settlement = ET.SubElement(line,'Settlement')
+		settlementdiscount = ET.SubElement(settlement,'SettlementDiscount')
+		settlementamount = ET.SubElement(settlement,'SettlementAmount')
+		settlementdate = ET.SubElement(settlement,'SettlementDate')
+		paymentterms = ET.SubElement(settlement,'PaymentTerms')
+		#payment
+		payment = ET.SubElement(line,'Payment')
+		paymentmechanism = ET.SubElement(payment,'PaymentMechanism')
+		paymentamount = ET.SubElement(payment,'PaymentAmount')
+		paymentdate = ET.SubElement(payment,'PaymentDate')
+		#witholdingtax
+		withholdingtax = ET.SubElement(line,'WithholdingTax')
+		withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
+		withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
+		withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
+
+
+	#END OF SAlesInvoice
+
+
+	#create WorkingDocuments...
+
+	#create Payments
+
+
+
+	#record the data...	
+	mydata = ET.tostring(data, encoding='utf8')
+
+	myfile = open("/tmp/clientes.xml","w")
+
+	myfile.write(mydata)
+
+	print 'file created'
+
+	#END OF SAFT_AO
+
+@frappe.whitelist()
 def convert_csv_xml(ficheiro="csv_xml.csv", delimiter1 = None, site="http://127.0.0.1:8000"):
 
 	#delimiter default , but added ;
@@ -1743,7 +2477,7 @@ def test_xs():
 	ROLE = ET.QName(NS_OPF, "role")
 	opf = ElementMaker(namespace=NS_OPF, nsmap={"opf": NS_OPF, "dc": NS_DC})
 	dc = ElementMaker(namespace=NS_DC)
-	validator = ET.RelaxNG(ET.parse("/tmp/opf-schema.xml"))
+#	validator = ET.RelaxNG(ET.parse("/tmp/opf-schema.xml"))
 
 	tree = (
 	    opf.package(
@@ -1769,6 +2503,17 @@ def test_xs():
 		),
 	    )
 	)
-	validator.assertValid(tree)
+#	validator.assertValid(tree)
 
 	print(ET.tostring(tree, pretty_print=True).decode('utf-8'))
+
+
+
+def get_first_day(dt, d_years=0, d_months=0):
+    # d_years, d_months are "deltas" to apply to dt
+    y, m = dt.year + d_years, dt.month + d_months
+    a, m = divmod(m-1, 12)
+    return date(y+a, m+1, 1)
+
+def get_last_day(dt):
+    return get_first_day(dt, 0, 1) + timedelta(-1)
