@@ -1357,7 +1357,7 @@ def convert_xml():
 	#currency
 	currency = ET.SubElement(line,'Currency')
 	currencycode = ET.SubElement(currency,'CurrencyCode')
-	currencyamount = ET.SubElement(currency,'CurrenctAmount')
+	currencyamount = ET.SubElement(currency,'CurrencyAmount')
 	exchangerate = ET.SubElement(currency,'ExchangeRate')
 	#settlement
 	settlement = ET.SubElement(line,'Settlement')
@@ -1384,9 +1384,278 @@ def convert_xml():
 
 	#MovementOfGoods
 	movementofgoods = ET.Element('MovementOfGoods')
+	numberofmovementlines = ET.SubElement(movementofgoods,'NumberOfMovimentLines')
+	totalquantityissued = ET.SubElement(movementofgoods,'TotalQuantityIssued')
+	stockmovement = ET.SubElement(movementofgoods,'StockMovement')
+	documentnumber = ET.SubElement(movementofgoods,'DocumentNumber')
+	documentstatus = ET.SubElement(movementofgoods,'DocumentStatus')
+	movementstatus = ET.SubElement(movementofgoods,'MovementStatus')
+	movementstatusdate = ET.SubElement(movementofgoods,'MovementStatusDate')
+	reason = ET.SubElement(movementofgoods,'Reason')
+	sourceid = ET.SubElement(movementofgoods,'SourceID')
+	sourcebilling = ET.SubElement(movementofgoods,'SourceBilling')
+	movementofgoodshash = ET.SubElement(movementofgoods,'Hash')
+	movementofgoodshashcontrol = ET.SubElement(movementofgoods,'HashControl')
+	period = ET.SubElement(movementofgoods,'Period')
+	movementdate = ET.SubElement(movementofgoods,'MovementDate')
+	movementtype = ET.SubElement(movementofgoods,'MovementType')
+	systementrydate = ET.SubElement(movementofgoods,'SystemEntryDate')
+	transactionid = ET.SubElement(movementofgoods,'TransactionID')
+	customerid = ET.SubElement(movementofgoods,'CustomerID')
+	supplierid = ET.SubElement(movementofgoods,'SupplierID')
+	sourceid = ET.SubElement(movementofgoods,'SourceID')
+	eaccode = ET.SubElement(movementofgoods,'EACCode')
+	movementcomments = ET.SubElement(movementofgoods,'MovementComments')
+	shipto = ET.SubElement(movementofgoods,'ShipTo')
+	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
+	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
+	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
+	locationid = ET.SubElement(movementofgoods,'LocationId')
+	address = ET.SubElement(movementofgoods,'Address')
+	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
+	streetname = ET.SubElement(movementofgoods,'StreetName')
+	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
+	city = ET.SubElement(movementofgoods,'City')
+	postalcode = ET.SubElement(movementofgoods,'PostalCode')
+	region = ET.SubElement(movementofgoods,'Region')
+	country = ET.SubElement(movementofgoods,'Country')
+	shipfrom = ET.SubElement(movementofgoods,'ShipFrom')
+	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
+	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
+	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
+	locationid = ET.SubElement(movementofgoods,'LocationID')
+	address = ET.SubElement(movementofgoods,'Address')
+	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
+	streetname = ET.SubElement(movementofgoods,'StreetName')
+	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
+	city = ET.SubElement(movementofgoods,'City')
+	postalcode = ET.SubElement(movementofgoods,'PostalCode')
+	region = ET.SubElement(movementofgoods,'Region')
+	country = ET.SubElement(movementofgoods,'Country')
+	movementendtime = ET.SubElement(movementofgoods,'MovementEndTime')
+	movementstarttime = ET.SubElement(movementofgoods,'MovementStartTime')
+	codigoidentificacaodocumento = ET.SubElement(movementofgoods,'CodigoIdentificacaoDocumento')
+	line = ET.SubElement(movementofgoods,'Line')
+	linenumber = ET.SubElement(movementofgoods,'LineNumber')
+	orderreferences = ET.SubElement(movementofgoods,'OrderReferences')
+	originatingon = ET.SubElement(movementofgoods,'OriginatingON')
+	orderdate = ET.SubElement(movementofgoods,'OrderDate')
+	productcode = ET.SubElement(movementofgoods,'ProductCode')
+	productdescription = ET.SubElement(movementofgoods,'ProductDescription')
+	quantity = ET.SubElement(movementofgoods,'Quantity')
+	unitofmeasure = ET.SubElement(movementofgoods,'UnifOfMeasure')
+	unitprice = ET.SubElement(movementofgoods,'UnitPrice')
+	description = ET.SubElement(movementofgoods,'Description')
+	productserialnumber = ET.SubElement(movementofgoods,'ProductSerialNumber')
+	serialnumber = ET.SubElement(movementofgoods,'SerialNumber')
+	debitamount = ET.SubElement(movementofgoods,'DebitAmount')
+	creditamount = ET.SubElement(movementofgoods,'creditAmount')
+	tax = ET.SubElement(movementofgoods,'Tax')
+	taxtype = ET.SubElement(movementofgoods,'TaxType')
+	taxcountryregion = ET.SubElement(movementofgoods,'TaxCountryRegion')
+	taxcode = ET.SubElement(movementofgoods,'TaxCode')
+	taxpercentage = ET.SubElement(movementofgoods,'TaxPercentage')
+	taxexemptionreason = ET.SubElement(movementofgoods,'TaxExemptionReason')
+	taxexemptioncode = ET.SubElement(movementofgoods,'TaxExemptionCode')
+	settlementamount = ET.SubElement(movementofgoods,'SettlementAmount')
+
+	#customsinformation
+	customsinformation = ET.SubElement(movementofgoods,'CustomsInformation')
+	arcno = ET.SubElement(customsinformation,'ARCNo')
+	iecamount = ET.SubElement(customsinformation,'IECAmount')
+	#documenttotals
+	documenttotals = ET.SubElement(movementofgoods,'DocumentTotals')
+	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+	nettotal = ET.SubElement(documenttotals,'NetTotal')
+	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+	#currency
+	currency = ET.SubElement(movementofgoods,'Currency')
+	currencycode = ET.SubElement(currency,'CurrencyCode')
+	currencyamount = ET.SubElement(currency,'CurrencyAmount')
+	exchangerate = ET.SubElement(currency,'ExchangeRate')
 
 
+	#END OF MovementOfGoods
 
+	#Still need to add DATA MovementOfGoods
+
+
+	#WorkingDocuments
+	workingdocuments = ET.Element('WorkingDocuments')
+	numberofentries = ET.SubElement(workingdocuments,'NumberOfEntries')
+	totaldebit = ET.SubElement(workingdocuments,'TotalDebit')
+	totalcredit = ET.SubElement(workingdocuments,'TotalCredit')
+	workdocument = ET.SubElement(workingdocuments,'WorkDocument')
+	documentnumber = ET.SubElement(workingdocuments,'DocumentNumber')
+	codigounicodocumento = ET.SubElement(workingdocuments,'CodigoUnicoDocumento')
+	documentstatus = ET.SubElement(workingdocuments,'DocumentStatus')
+	workstatus = ET.SubElement(workingdocuments,'WorkStatus')
+	workstatusdate = ET.SubElement(workingdocuments,'WorkStatusDate')
+	reason = ET.SubElement(workingdocuments,'Reason')
+	sourceid = ET.SubElement(workingdocuments,'SourceID')
+	sourcebilling = ET.SubElement(workingdocuments,'SourceBilling')
+	workingdocumentshash = ET.SubElement(workingdocuments,'Hash')
+	workingdocumentshashcontrol = ET.SubElement(workingdocuments,'HashControl')
+	period = ET.SubElement(workingdocuments,'Period')
+	workdate = ET.SubElement(workingdocuments,'WorkDate')
+	worktype = ET.SubElement(workingdocuments,'WorkType')
+	sourceid = ET.SubElement(workingdocuments,'SourceID')
+	eaccode = ET.SubElement(workingdocuments,'EACCode')
+	systementrydate = ET.SubElement(workingdocuments,'SystemEntryDate')
+	transactionid = ET.SubElement(workingdocuments,'TransactionID')
+
+	customerid = ET.SubElement(workingdocuments,'CustomerID')
+	#line
+	line = ET.SubElement(workingdocuments,'Line')
+	linenumber = ET.SubElement(line,'LineNumber')
+	orderreferences = ET.SubElement(line,'OrderReferences')
+	originatingon = ET.SubElement(orderreferences,'OriginatingON')
+	orderdate = ET.SubElement(orderreferences,'OrderDate')
+
+	productcode = ET.SubElement(line,'ProductCode')
+	productdescription = ET.SubElement(line,'ProductDescription')
+	quantity = ET.SubElement(line,'Quantity')
+	unitofmeasure = ET.SubElement(line,'UnifOfMeasure')
+	unitprice = ET.SubElement(line,'UnitPrice')
+	taxbase = ET.SubElement(line,'TaxBase')
+	taxpointdate = ET.SubElement(line,'TaxPointDate')
+	#references
+	references = ET.SubElement(line,'References')
+	reference = ET.SubElement(references,'Reference')
+	reason = ET.SubElement(references,'Reason')
+	description = ET.SubElement(references,'Description')
+	#productserialnumber
+	productserialnumber = ET.SubElement(line,'ProductSerialNumber')
+	serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
+	debitamount = ET.SubElement(line,'DebitAmount')
+	creditamount = ET.SubElement(line,'CreditAmount')
+	#tax
+	tax = ET.SubElement(line,'Tax')
+	taxtype = ET.SubElement(tax,'TaxType')
+	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+	taxcode = ET.SubElement(tax,'TaxCode')
+	taxpercentage = ET.SubElement(tax,'TaxPercentage')
+	taxamount = ET.SubElement(tax,'TaxAmount')
+	taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
+	taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
+
+	settlementamount = ET.SubElement(tax,'SettlementAmount')
+	#customsinformation
+	customsinformation = ET.SubElement(line,'CustomsInformation')
+	arcno = ET.SubElement(customsinformation,'ARCNo')
+	iecamount = ET.SubElement(customsinformation,'IECAmount')
+	#documenttotals
+	documenttotals = ET.SubElement(workingdocuments,'DocumentTotals')
+	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+	nettotal = ET.SubElement(documenttotals,'NetTotal')
+	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+	#currency
+	currency = ET.SubElement(documenttotals,'Currency')
+	currencycode = ET.SubElement(currency,'CurrencyCode')
+	currencyamount = ET.SubElement(currency,'CurrencyAmount')
+	exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+
+	#END OF WorkingDocuments
+
+	#Still need to add DATA WorkingDocuments
+
+
+	#Payments
+	payments = ET.Element('Payments')
+	numberofentries = ET.SubElement(payments,'NumberOfEntries')
+	totaldebit = ET.SubElement(payments,'TotalDebit')
+	totalcredit = ET.SubElement(payments,'TotalCredit')
+	#payment
+	payment = ET.SubElement(payments,'Payment')
+	paymentrefno = ET.SubElement(payment,'PaymentRefNo')
+	period = ET.SubElement(payment,'Period')
+	transactionid = ET.SubElement(payment,'TransactionID')
+	transactiondate = ET.SubElement(payment,'TransactionDate')
+	paymenttype = ET.SubElement(payment,'PaymentType')
+	description = ET.SubElement(payment,'Description')
+	systemid = ET.SubElement(payment,'SystemID')
+	documentstatus = ET.SubElement(payment,'DocumentStatus')
+	paymentstatus = ET.SubElement(documentstatus,'PaymentStatus')	
+	paymentstatusdate = ET.SubElement(documentstatus,'PaymentStatusDate')
+	reason = ET.SubElement(documentstatus,'Reason')
+	sourceid = ET.SubElement(documentstatus,'SourceID')
+	sourcepayment = ET.SubElement(documentstatus,'SourcePayment')
+	paymentmethod = ET.SubElement(payment,'PaymentMethod')
+	paymentmechanism = ET.SubElement(paymentmethod,'PaymentMechanism')
+	paymentamount = ET.SubElement(paymentmethod,'PaymentAmount')
+	paymentdate = ET.SubElement(paymentmethod,'PaymentDate')
+	sourceid = ET.SubElement(payment,'SourceID')
+	systementrydate = ET.SubElement(payment,'SystemEntryDate')
+	customerid = ET.SubElement(payment,'CustomerID')
+
+	#line
+	line = ET.SubElement(payment,'Line')
+	linenumber = ET.SubElement(line,'LineNumber')
+	sourcedocumentid = ET.SubElement(line,'SourceDocumentID')
+	originatingon = ET.SubElement(sourcedocumentid,'OriginatingON')
+	invoicedate = ET.SubElement(sourcedocumentid,'InvoiceDate')
+	description = ET.SubElement(sourcedocumentid,'Description')
+
+	settlementamount = ET.SubElement(line,'SettlementAmount')
+	debitamount = ET.SubElement(line,'DebitAmount')
+	creditamount = ET.SubElement(line,'CreditAmount')
+	#tax
+	tax = ET.SubElement(line,'Tax')
+	taxtype = ET.SubElement(tax,'TaxType')
+	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+	taxcode = ET.SubElement(tax,'TaxCode')
+	taxpercentage = ET.SubElement(tax,'TaxPercentage')
+	taxamount = ET.SubElement(tax,'TaxAmount')
+	taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+	taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+	#documenttotals
+	documenttotals = ET.SubElement(payment,'DocumentTotals')
+	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+	nettotal = ET.SubElement(documenttotals,'NetTotal')
+	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+	#settlement
+	settlement = ET.SubElement(documenttotals,'Settlement')
+	settlementamount = ET.SubElement(settlement,'SettlementAmount')
+	#currency
+	currency = ET.SubElement(documenttotals,'Currency')
+	currencycode = ET.SubElement(currency,'CurrencyCode')
+	currencyamount = ET.SubElement(currency,'CurrencyAmount')
+	exchangerate = ET.SubElement(currency,'ExchangeRate')
+	#witholdingtax
+	withholdingtax = ET.SubElement(payment,'WithholdingTax')
+	withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
+	withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
+	withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
+
+
+	#END OF Payments
+
+	#Still need to add DATA Payments
+
+
+	#Invoices
+	invoices = ET.Element('Invoices')
+	numberofentries = ET.SubElement(invoices,'NumberOfEntries')
+	invoicedate = ET.SubElement(invoices,'InvoiceDate')
+	period = ET.SubElement(invoices,'Period')
+	invoicetype = ET.SubElement(invoices,'InvoiceType')
+	sourceid = ET.SubElement(invoices,'SourceID')
+	supplierid = ET.SubElement(invoices,'SupplierID')
+	invoiceno = ET.SubElement(invoices,'InvoiceNo')
+	documenttotals = ET.SubElement(invoices,'DocumentTotals')
+	inputtax = ET.SubElement(invoices,'InputTax')
+	taxbase = ET.SubElement(invoices,'TaxBase')
+	grosstotal = ET.SubElement(invoices,'GrossTotal')
+	deductibletax = ET.SubElement(invoices,'DeductibleTax')
+	deductiblepercentage = ET.SubElement(invoices,'DeductiblePercentage')
+	currencycode = ET.SubElement(invoices,'CurrencyCode')
+	currencyamount = ET.SubElement(invoices,'CurrencyAmount')
+	operationtype = ET.SubElement(invoices,'OperationType')
+
+	#END OF Invoices
+
+	#Still need to add DATA Invoices
 
 
 	print 'Convert XML'
@@ -1462,3 +1731,44 @@ def convert_csv_xml(ficheiro="csv_xml.csv", delimiter1 = None, site="http://127.
 
 
 
+@frappe.whitelist()
+def test_xs():
+	from lxml import etree as ET
+	from lxml.builder import ElementMaker
+
+	NS_DC = "http://purl.org/dc/elements/1.1/"
+	NS_OPF = "http://www.idpf.org/2007/opf"
+	SCHEME = ET.QName(NS_OPF, 'scheme')
+	FILE_AS = ET.QName(NS_OPF, "file-as")
+	ROLE = ET.QName(NS_OPF, "role")
+	opf = ElementMaker(namespace=NS_OPF, nsmap={"opf": NS_OPF, "dc": NS_DC})
+	dc = ElementMaker(namespace=NS_DC)
+#	validator = ET.RelaxNG(ET.parse("/tmp/opf-schema.xml"))
+
+	tree = (
+	    opf.package(
+		{"unique-identifier": "uuid_id", "version": "2.0"},
+		opf.metadata(
+		    dc.identifier(
+		        {SCHEME: "uuid", "id": "uuid_id"},
+		        "d06a2234-67b4-40db-8f4a-136e52057101"),
+		    dc.creator({FILE_AS: "Homes, A. M.", ROLE: "aut"}, "A. M. Homes"),
+		    dc.title("My Book"),
+		    dc.language("en"),
+		),
+		opf.manifest(
+		    opf.item({"id": "foo", "href": "foo.pdf", "media-type": "foo"})
+		),
+		opf.spine(
+		    {"toc": "uuid_id"},
+		    opf.itemref({"idref": "uuid_id"}),
+		),
+		opf.guide(
+		    opf.reference(
+		        {"href": "cover.jpg", "title": "Cover", "type": "cover"})
+		),
+	    )
+	)
+#	validator.assertValid(tree)
+
+	print(ET.tostring(tree, pretty_print=True).decode('utf-8'))
