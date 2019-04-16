@@ -23,6 +23,10 @@ from frappe.model.utils import get_fetch_values
 #import json, os 
 #import csv, codecs, cStringIO
 
+import csv 
+import json
+
+
 @frappe.whitelist()
 def check_caixa_aberto():
 
@@ -989,15 +993,470 @@ def get_dn_for_si(source_name=None, datafiltro=None):
 @frappe.whitelist()
 def get_all_enderecos(doctipo,partyname):
 
-	print 'Todos Enderecos '
+	print 'Todos Enderecos Address or Contact'
 	print doctipo
 	print partyname.encode('utf-8')
 	#dadoscliente = frappe.model.frappe.get_all('Dynamic Link',filters={'link_doctype':doctipo,'link_name':partyname,'parenttype':'Address'},fields={'*'})
-	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
+	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Contact' """,(doctipo,partyname),as_dict=False)
 	if dadoscliente:
-		data1 = frappe.get_doc("Address", dadoscliente[0][0])
+		data1 = frappe.get_doc("Contact", dadoscliente[0][0])
 		if data1:
 			return data1
+	else:
+		dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
+		if dadoscliente:
+			data1 = frappe.get_doc("Address", dadoscliente[0][0])
+			if data1:
+				return data1
 
 				
+
+@frappe.whitelist()
+def get_xml(args):
+	from werkzeug.wrappers import Response
+	response = Response()
+	response.mimetype = 'text/xml'
+	response.charset = 'utf-8'
+	response.data = '<xml></xml>'
+
+	print 'AAAAA'
+
+	print response	
+
+	return response
+
+
+def convert_xml():
+	import xml.etree.ElementTree as ET
+
+	print 'creating Header'
+
+	head = ET.Element('Header')
+	auditfileversion = ET.SubElement(head,'AuditFile Version')
+	companyid = ET.SubElement(head,'Company ID')	
+	taxregistrationnumber = ET.SubElement(head,'Tax Registration Number')
+	taxaccountingbasis = ET.SubElement(head,'Tax Accounting Basis')
+
+	companyname = ET.SubElement(head,'Company Name')
+	businessname = ET.SubElement(companyname,'Business Name')
+	companyaddress = ET.SubElement(companyname,'Company Address')
+	buildingnumber = ET.SubElement(companyname,'Building Number')
+	streetname = ET.SubElement(companyname,'Street Name')
+	addressdetail = ET.SubElement(companyname,'Address Detail')
+	city = ET.SubElement(companyname,'City')
+	postalcode = ET.SubElement(companyname,'Postal Code')
+	region = ET.SubElement(companyname,'Region')
+	country = ET.SubElement(companyname,'Country')
+	fiscalyear = ET.SubElement(companyname,'Fiscal Year')
+	startdate = ET.SubElement(companyname,'Sart Date')
+	enddate = ET.SubElement(companyname,'End Date')
+	currencycode = ET.SubElement(companyname,'Currency Code')
+	datecreated = ET.SubElement(companyname,'Date Created')
+	taxentity = ET.SubElement(companyname,'Tax Entity')
+	productcompanytaxid = ET.SubElement(head,'Product Company Tax ID')
+	softwarevalidationnumber = ET.SubElement(head,'Software Validation Number')
+	productid = ET.SubElement(head,'Product ID')
+	productversion = ET.SubElement(head,'Product Version')
+	headercomment = ET.SubElement(head,'Header Comment')
+	telephone = ET.SubElement(companyname,'Telephone')
+	fax = ET.SubElement(companyname,'Fax')
+	email = ET.SubElement(companyname,'Email')
+	website = ET.SubElement(companyname,'Website')
+
+	# END OF HEADER
+	#Set os textos dos campos acima ..... using TEXT
+	
+	#Still need to add DATA FOR HEADER
+
+	#MasterFiles
+	#GeneralLedgerAccounts
+	masterfiles = ET.Element('MasterFiles')
+
+	generalledgeraccounts = ET.SubElement(masterfiles,'GeneralLedgerAccounts')
+	account = ET.SubElement(generalledgeraccounts,'Account')
+	accountid = ET.SubElement(account,'AccountID')
+	accountdescription = ET.SubElement(account,'AccountDescription')		
+	openingcreditbalance = ET.SubElement(account,'Opening Debit Balance')
+	openingdebitbalance = ET.SubElement(account,'Opening Credit Balance')
+	closingdebitbalance = ET.SubElement(account,'Closing Debit Balance')
+	closingdebitbalance = ET.SubElement(account,'Closing Credit Balance')
+	groupingcategory = ET.SubElement(account,'GroupingCategory')
+	groupingcode = ET.SubElement(account,'GroupingCode')
+
+	#END OF GeneralLedgerAccounts
+
+	#Still need to add DATA GeneralLedgerAccounts
+
+	#Customers
+	customers = ET.SubElement(masterfiles,'Customers')
+	customer = ET.SubElement(customers,'Customer')
+	customerid = ET.SubElement(customer,'CustomerID')
+	accountid = ET.SubElement(customer,'AccountID')
+	cutomertaxid = ET.SubElement(customer,'Customer Tax ID')
+	companyname = ET.SubElement(customer,'Company Name')
+	contact = ET.SubElement(customer,'Contact')
+	#address
+	address = ET.SubElement(customer,'Address')
+	billingaddress = ET.SubElement(address,'Billing Address')
+	streetname = ET.SubElement(address,'Street Name')
+	addressdetail = ET.SubElement(address,'Address Detail')
+	city = ET.SubElement(address,'City')
+	postalcode = ET.SubElement(address,'PostalCode')
+	region = ET.SubElement(address,'Region')
+	country = ET.SubElement(address,'Country')
+	shiptoaddress = ET.SubElement(address,'ShipToAddress')
+	buildingnumber = ET.SubElement(address,'BuildingNumber')
+	#address 1
+	address1 = ET.SubElement(customer,'Address1')
+	streetname = ET.SubElement(address1,'Street Name')
+	addressdetail = ET.SubElement(address1,'Address Detail')
+	city = ET.SubElement(address1,'City')
+	postalcode = ET.SubElement(address1,'PostalCode')
+	region = ET.SubElement(address1,'Region')
+	country = ET.SubElement(address1,'Country')
+	telephone = ET.SubElement(customer,'Telephone')
+	fax = ET.SubElement(customer,'Fax')
+	email = ET.SubElement(customer,'Email')
+	website = ET.SubElement(customer,'Website')
+	selfbillingindicator = ET.SubElement(customer,'SelfBillingIndicator')
+
+
+	#END OF Customers
+
+	#Still need to add DATA Customers
+
+	#Suppliers
+	suppliers = ET.SubElement(masterfiles,'Suppliers')
+	supplier = ET.SubElement(suppliers,'Supplier')
+	supplierid = ET.SubElement(supplier,'SuplierID')
+	accountid = ET.SubElement(supplier,'AccountID')
+	supliertaxid = ET.SubElement(supplier,'SuplierTaxID')
+	companyname = ET.SubElement(supplier,'CompanyName')
+	#address
+	address = ET.SubElement(supplier,'Address')
+	billingaddress = ET.SubElement(address,'Billing Address')
+	streetname = ET.SubElement(address,'Street Name')
+	addressdetail = ET.SubElement(address,'Address Detail')
+	city = ET.SubElement(address,'City')
+	postalcode = ET.SubElement(address,'PostalCode')
+	region = ET.SubElement(address,'Region')
+	country = ET.SubElement(address,'Country')
+	shipfromaddress = ET.SubElement(address,'ShipFromAddress')
+	buildingnumber = ET.SubElement(address,'BuildingNumber')
+	#address 1
+	address1 = ET.SubElement(supplier,'Address1')
+	streetname = ET.SubElement(address1,'Street Name')
+	addressdetail = ET.SubElement(address1,'Address Detail')
+	city = ET.SubElement(address1,'City')
+	postalcode = ET.SubElement(address1,'PostalCode')
+	region = ET.SubElement(address1,'Region')
+	country = ET.SubElement(address1,'Country')
+	telephone = ET.SubElement(supplier,'Telephone')
+	fax = ET.SubElement(supplier,'Fax')
+	email = ET.SubElement(supplier,'Email')
+	website = ET.SubElement(supplier,'Website')
+	selfbillingindicator = ET.SubElement(supplier,'SelfBillingIndicator')
+
+	#END OF Suppliers
+
+	#Still need to add DATA Suppliers
+
+
+	#Products
+
+	products = ET.SubElement(masterfiles,'Products')
+	product = ET.SubElement(products,'Product')
+	producttype = ET.SubElement(product,'Product Type')
+	productcode = ET.SubElement(product,'Product Code')
+	productgroup = ET.SubElement(product,'Product Group')
+	productdescription = ET.SubElement(product,'Product Description')
+	productnumbercode = ET.SubElement(product,'Product Number Code')
+	customsdetails = ET.SubElement(product,'Customs Details')
+	unnumber = ET.SubElement(product,'UNNumber')
+
+	#END OF Products
+
+	#Still need to add DATA Products
+
+
+	#TaxTable
+
+	taxtable = ET.SubElement(masterfiles,'TaxTable')
+	taxtableentry = ET.SubElement(taxtable,'TaxTableEntry')
+	taxtype = ET.SubElement(taxtableentry,'Tax Type')
+	taxcountryregion = ET.SubElement(taxtableentry,'Tax Country Region')
+	taxcode = ET.SubElement(taxtableentry,'Tax Code')
+	description = ET.SubElement(taxtableentry,'Description')
+	taxexpirationdate = ET.SubElement(taxtableentry,'Tax Expiration Date')
+	taxpercentage = ET.SubElement(taxtableentry,'Tax Percentage')
+	taxamount = ET.SubElement(taxtableentry,'Tax Amount')
+
+	#END OF TaxTable
+
+	#Still need to add DATA TaxTable
+
+
+
+	###### FECHA O MASTER FILES
+
+	#GeneralLEdgerEntries
+	generalledgerentries = ET.Element('GeneralLedgerEntries')
+	numberofentries = ET.SubElement(generalledgerentries,'NumberOfEntries')
+	totaldebit = ET.SubElement(generalledgerentries,'TotalDebit')
+	totalcredit = ET.SubElement(generalledgerentries,'TotalCredit')
+	journal = ET.SubElement(generalledgerentries,'Journal')
+	journalid = ET.SubElement(journal,'JournalID')
+	description = ET.SubElement(journal,'Description')
+	#transaction
+	transaction = ET.SubElement(journal,'Transaction')
+	transactionid = ET.SubElement(transaction,'TransactionID')
+	period = ET.SubElement(transaction,'Period')
+	transactiondate = ET.SubElement(transaction,'TransactionDate')
+	sourceid = ET.SubElement(transaction,'SourceID')
+	description = ET.SubElement(transaction,'Description')
+	docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
+	transactiontype = ET.SubElement(transaction,'TransactionType')
+	glpostingdate = ET.SubElement(transaction,'GLPostingDate')
+	customerid = ET.SubElement(transaction,'CustomerID')
+	supplierid = ET.SubElement(transaction,'SupplierID')
+	#lines
+	lines = ET.SubElement(generalledgerentries,'Lines')
+	debitline = ET.SubElement(lines,'Debit Line')
+	recordid = ET.SubElement(lines,'Record ID')
+	accountid = ET.SubElement(lines,'Account ID')
+	sourcedocumentid = ET.SubElement(lines,'Source Document ID')
+	systementrydate = ET.SubElement(lines,'System Entry Date')
+	description = ET.SubElement(lines,'Description')
+	debitamount = ET.SubElement(lines,'Debit Amount')
+	#lines 1
+	lines1 = ET.SubElement(generalledgerentries,'Lines1')
+	creditline = ET.SubElement(lines1,'Credit Line')
+	recordid = ET.SubElement(lines1,'RecordID')
+	accountid = ET.SubElement(lines1,'Account ID')
+	sourcedocumentid = ET.SubElement(lines1,'Source Document ID')
+	systementrydate = ET.SubElement(lines1,'System Entry Date')
+	description = ET.SubElement(lines1,'description')
+	creditamount = ET.SubElement(lines1,'CreditAmount')
+
+
+
+	#END OF GeneralLEdgerEntries
+
+	#Still need to add DATA GeneralLEdgerEntries
+
+
+
+	#SalesInvoices
+	salesinvoices = ET.Element('SalesInvoices')
+	numberofentries = ET.SubElement(salesinvoices,'NumberOfEntries')
+	totaldebit = ET.SubElement(salesinvoices,'TotalDebit')
+	totalcredit = ET.SubElement(salesinvoices,'TotalCredit')
+	#invoice
+	invoice = ET.SubElement(salesinvoices,'Invoice')
+	invoiceno = ET.SubElement(invoice,'InvoiceNo')
+	#documentstatus
+	documentstatus = ET.SubElement(invoice,'DocumentStatus')
+	invoicestatus = ET.SubElement(documentstatus,'InvoiceStatus')
+	invoicestatusdate = ET.SubElement(documentstatus,'InvoiceStatusDate')
+	reason = ET.SubElement(documentstatus,'Reason')
+	sourceid = ET.SubElement(documentstatus,'SourceID')
+	sourcebilling = ET.SubElement(documentstatus,'SourceBilling')
+
+	salesinvoicehash = ET.SubElement(invoice,'Hash')
+	salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
+	period = ET.SubElement(invoice,'Period')
+	invoicedate = ET.SubElement(invoice,'InvoiceDate')
+	invoicetype = ET.SubElement(invoice,'InvoiceType')
+	#specialRegimes
+	specialregimes = ET.SubElement(invoice,'SpecialRegimes')
+	selfbillingindicator = ET.SubElement(specialregimes,'SelfBillingIndicator')
+	cashvatschemeindicator = ET.SubElement(specialregimes,'CashVATSchemeIndicator')
+	thirdpartiesbillingindicator = ET.SubElement(specialregimes,'ThirdPartiesBillingIndicator')
+
+	sourceid = ET.SubElement(invoice,'SourceID')
+	eaccode = ET.SubElement(invoice,'EACCode')
+	systementrydate = ET.SubElement(invoice,'SystemEntryDate')
+	transactionid = ET.SubElement(invoice,'TransactionID')
+	customerid = ET.SubElement(invoice,'CustomerID')
+	#shipto
+	shipto = ET.SubElement(invoice,'ShipTo')
+	deliveryid = ET.SubElement(shipto,'DeliveryID')
+	deliverydate = ET.SubElement(shipto,'DeliveryDate')
+	warehouseid = ET.SubElement(shipto,'WarehouseID')
+	locationid = ET.SubElement(shipto,'LocationID')
+	#address
+	address = ET.SubElement(shipto,'Address')	
+	buildingnumber = ET.SubElement(address,'BuildingNumber')
+	streetname = ET.SubElement(address,'StreetName')
+	addressdetail = ET.SubElement(address,'AddressDetail')
+	city = ET.SubElement(address,'City')
+	postalcode = ET.SubElement(address,'PostalCode')
+	region = ET.SubElement(address,'Region')
+	country = ET.SubElement(address,'Country')
+	#shipfrom
+	shipfrom = ET.SubElement(invoice,'ShipFrom')
+	deliveryid = ET.SubElement(shipfrom,'DeliveryID')
+	deliverydate = ET.SubElement(shipfrom,'DeliveryDate')
+	warehouseid = ET.SubElement(shipfrom,'WarehouseID')
+	locationid = ET.SubElement(shipfrom,'LocationID')
+	#address
+	address = ET.SubElement(shipfrom,'Address')
+	buildingnumber = ET.SubElement(address,'BuildingNumber')
+	streetname = ET.SubElement(address,'StreetName')
+	addressdetail = ET.SubElement(address,'AddressDetail')
+	city = ET.SubElement(address,'City')
+	postalcode = ET.SubElement(address,'PostalCode')
+	region = ET.SubElement(address,'Region')
+	country = ET.SubElement(address,'Country')
+
+	movementendtime = ET.SubElement(invoice,'MovementEndTime')
+	movementstarttime = ET.SubElement(invoice,'MovementStartTime')
+	#line
+	line = ET.SubElement(invoice,'Line')
+	linenumber = ET.SubElement(line,'LineNumber')
+	#orderreferences
+	orderreferences = ET.SubElement(line,'OrderReferences')
+	originatingon = ET.SubElement(orderreferences,'OriginatingON')
+	orderdate = ET.SubElement(orderreferences,'OrderDate')
+	productdate = ET.SubElement(line,'ProductDate')
+	productdescription = ET.SubElement(line,'ProductDescription')
+	quantity = ET.SubElement(line,'Quantity')
+	unifofmeasure = ET.SubElement(line,'UnifOfMeasure')
+	unitprice = ET.SubElement(line,'UnitPrice')
+	taxbase = ET.SubElement(line,'TaxBase')
+	taxpointdate = ET.SubElement(line,'TaxPointDate')
+	#references
+	references = ET.SubElement(line,'References')
+	reference = ET.SubElement(references,'Reference')
+	reason = ET.SubElement(references,'Reason')
+	description = ET.SubElement(references,'Description')
+	#productserialnumber
+	productserialnumber = ET.SubElement(line,'ProductSerialNumber')
+	serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
+	debitamount = ET.SubElement(line,'DebitAmount')
+	creditamount = ET.SubElement(line,'CreditAmount')
+	#tax
+	tax = ET.SubElement(line,'Tax')
+	taxtype = ET.SubElement(tax,'TaxType')
+	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+	taxcode = ET.SubElement(tax,'TaxCode')
+	taxpercentage = ET.SubElement(tax,'TaxPercentage')
+	taxamount = ET.SubElement(tax,'TaxAmount')
+	taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
+	taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
+	settlementamount = ET.SubElement(tax,'SettlementAmount')
+	#customsinformation
+	customsinformation = ET.SubElement(line,'CustomsInformation')
+	arcno = ET.SubElement(customsinformation,'ARCNo')
+	iecamount = ET.SubElement(customsinformation,'IECAmount')
+	#documenttotals
+	documenttotals = ET.SubElement(line,'DocumentTotals')
+	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+	nettotal = ET.SubElement(documenttotals,'NetTotal')
+	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+	#currency
+	currency = ET.SubElement(line,'Currency')
+	currencycode = ET.SubElement(currency,'CurrencyCode')
+	currencyamount = ET.SubElement(currency,'CurrenctAmount')
+	exchangerate = ET.SubElement(currency,'ExchangeRate')
+	#settlement
+	settlement = ET.SubElement(line,'Settlement')
+	settlementdiscount = ET.SubElement(settlement,'SettlementDiscount')
+	settlementamount = ET.SubElement(settlement,'SettlementAmount')
+	settlementdate = ET.SubElement(settlement,'SettlementDate')
+	paymentterms = ET.SubElement(settlement,'PaymentTerms')
+	#payment
+	payment = ET.SubElement(line,'Payment')
+	paymentmechanism = ET.SubElement(payment,'PaymentMechanism')
+	paymentamount = ET.SubElement(payment,'PaymentAmount')
+	paymentdate = ET.SubElement(payment,'PaymentDate')
+	#witholdingtax
+	withholdingtax = ET.SubElement(line,'WithholdingTax')
+	withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
+	withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
+	withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
+
+
+	#END OF SAlesInvoice
+
+	#Still need to add DATA SAlesInvoice
+
+
+	#MovementOfGoods
+	movementofgoods = ET.Element('MovementOfGoods')
+
+
+
+	print 'Convert XML'
+
+	data = ET.Element('root')
+	row = ET.SubElement(data,'row')
+	#Campos do file CSV....
+	cust = ET.SubElement(row,'customer_name')
+	custtype = ET.SubElement(row,'customer_type')
+
+	custgroup = ET.SubElement(row,'customer_group')
+
+	cust.text= 'Virgilio Luis'
+
+	custtype.text = 'Individual'
+
+	custgroup.text = 'Funcionarios'
+
+	#record the data...	
+	mydata = ET.tostring(data, encoding='utf8')
+
+	myfile = open("/tmp/clientes.xml","w")
+
+	myfile.write(mydata)
+
+	print 'file created'
+
+@frappe.whitelist()
+def convert_csv_xml(ficheiro="csv_xml.csv", delimiter1 = None, site="http://127.0.0.1:8000"):
+
+	#delimiter default , but added ;
+	if delimiter1 == None:
+		delimiter1 = str(u',').encode('utf-8') 
+	if delimiter1 == ';':
+		delimiter1 = str(u';').encode('utf-8') 	
+	
+	if not "tmp" in ficheiro:
+		ficheiro = "/tmp/" + ficheiro	
+
+	linhainicial = False
+	colunas = []
+
+	with open (ficheiro) as csvfile:
+			readCSV = csv.reader(csvfile, delimiter = delimiter1)	
+
+			for row in readCSV:
+				if "DocType:" in row[0]:
+					print row[1]	#Doctype name
+
+				if "Column Name:" in row[0]:
+					print len(row)	#Fields count
+					for cols in row:	#Fields name print.
+						print cols
+						colunas.append(cols)
+					#print row[1]	# 1st Fields...
+
+
+				if linhainicial == True:	
+					#Data starts here ....
+#					print "Data starts here ...."
+					for idx, cols in enumerate(row):
+						#print idx
+						#print cols
+						print colunas[idx]
+						print cols
+
+				if "Start entering data below this line" in row[0]:
+					print row
+					linhainicial = True
+
+			#testing ....
+			convert_xml()
+
+
 
