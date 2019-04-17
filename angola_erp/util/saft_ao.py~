@@ -3,13 +3,14 @@
 # For license information, please see license.txt
 
 #Date Changed: 16/04/2019
+#Version: 1.0.0
 
 from __future__ import unicode_literals
 
 #from __future__ import unicode_literals
 import sys
 reload (sys)
-sys.setdefaultencoding("utf-8")
+sys.setdefaultencoding('utf-8')
 
 
 from frappe.model.document import Document
@@ -36,1004 +37,7 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom 
 from datetime import datetime, date, timedelta
 
-
-
-
-@frappe.whitelist()
-def check_caixa_aberto():
-
-	if (frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Aberto' """, as_dict=False)) != ():
-		print "AAAAAAAA"
-		return frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Aberto' """, as_dict=False)
-	elif (frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Em Curso' """, as_dict=False)) != ():
-		return frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Em Curso' """, as_dict=False)
-		print "BBBBBBBBB"
-		print frappe.db.sql("""select name from `tabCaixa de Registo` WHERE status_caixa ='Aberto' """, as_dict=False)	
-
-@frappe.whitelist()
-def caixa_movimentos_in(start,caixa,fecho):
-
-		total_tpa = 0
-		total_ccorrente = 0
-		total_caixa = 0
-		recalcula = False
-		for d in  frappe.db.sql("""select hora_atendimento, name,total_servicos,pagamento_por, status_atendimento, bar_tender, company from `tabAtendimento Bar` where status_atendimento ='Fechado' and hora_atendimento >= %(start)s and hora_atendimento <= %(end)s """, {"start": start,"end": frappe.utils.now()	}, as_dict=True):
-			
-			print "MOVIMENTOS BAR RESTAURANTE +++++++++++++++++++++++++++++++"
-			ddd = make_autoname('MOV-' + '.#####')
-			if len(frappe.db.sql("SELECT name,descricao_movimento from tabMovimentos_Caixa WHERE descricao_movimento=%(mov)s""",{"mov":d.name}, as_dict=True))==0:
-				frappe.db.sql("INSERT into tabMovimentos_Caixa (name, docstatus, parent, parenttype, parentfield, tipo_pagamento, descricao_movimento, valor_pago, hora_atendimento, creation, modified, usuario_movimentos, company) values (%s,0,%s,'Caixa de Registo','movimentos_caixa',%s,%s,%s,%s,%s,%s,%s,%s) ",(ddd, caixa, d.pagamento_por ,d.name, d.total_servicos, d.hora_atendimento, frappe.utils.now(), frappe.utils.now(),d.bar_tender,d.company))
-				total_caixa = d.total_servicos+total_caixa
-				if (d.pagamento_por == "TPA"):
-					total_tpa = d.total_servicos+total_tpa
-				
-				if (d.pagamento_por == "Conta-Corrente"):
-					total_ccorrente = d.total_servicos+total_ccorrente
-			else:
-				#Recalcula o Caixa ....
-				recalcula = True
-				total_caixa = d.total_servicos+total_caixa
-				if (d.pagamento_por == "TPA"):
-					total_tpa = d.total_servicos+total_tpa
-				
-				if (d.pagamento_por == "Conta-Corrente"):
-					total_ccorrente = d.total_servicos+total_ccorrente
-
-		print "Abre Caixa"
-		print total_caixa
-		reser = frappe.get_doc("Caixa de Registo",caixa)
-		if (total_caixa > 1) and (reser.amount_caixa == 0):
-			if (recalcula == False):
-				reser.amount_caixa = total_caixa+reser.amount_caixa
-				reser.amount_tpa = total_tpa+reser.amount_tpa
-				reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
-			else:
-				reser.amount_caixa = total_caixa
-				reser.amount_tpa = total_tpa
-				reser.amount_conta_corrente = total_ccorrente
-
-			reser.status_caixa='Em Curso'
-			reser.save()
-		elif (total_caixa > 1) and (reser.amount_caixa >= 0):
-			if (recalcula == False):
-				reser.amount_caixa = total_caixa+reser.amount_caixa
-				reser.amount_tpa = total_tpa+reser.amount_tpa
-				reser.amount_conta_corrente = total_ccorrente+reser.amount_conta_corrente
-			else:
-				reser.amount_caixa = total_caixa
-				reser.amount_tpa = total_tpa
-				reser.amount_conta_corrente = total_ccorrente
-
-			reser.save()
-
-		print fecho
-		print reser.status_caixa
-		if (fecho==2):
-			reser.status_caixa='Fechado'
-			reser.save()
-
-		
-
-		return total_caixa
-
-
-
-@frappe.whitelist()
-def get_taxa_ipc():
-	#IPC to temp account 37710000
-
-	#locate account 37710000 instead of 34210000
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3771%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
-
-	print " LISTA TAXE IPC conta 3771"
-	print j	
-
-	return j
-
-@frappe.whitelist()
-def get_taxa_ipc_1():
-	#Original
-
-	#locate account 34210000
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3421%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
-
-	print " LISTA TAXE IPC conta 3421"
-	print j	
-
-	return j
-
-
-@frappe.whitelist()
-def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
-	#locate account 34130000 or plano contif 2.80.20.20.30 - Ret Fonte a Pagar - Imposto Industrial
-	print (empresa).encode('utf-8')
-	if (empresa):
-		if (fornclien == 'Supplier'):
-			j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3413%%'  """,(empresa),as_dict=True)
-			print " LISTA CONTAB TAXA RETENCAO conta 3413"
-		else:
-			j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '3414%%'  """,(empresa),as_dict=True)
-			print " LISTA CONTAB TAXA RETENCAO conta 3414"
-		print j	
-
-		# ****************** Still missing aqui qual a conta para o cliente e para fornecedor
-		if (j==[]):
-			#Plano CONTIF
-			j= frappe.db.sql(""" select name, account_name from `tabAccount` where company = %s and account_name like '2.80.20.20.30%%' """,(empresa),as_dict=True)
-
-			print " LISTA CONTAB TAXA RETENCAO conta 2.80.20.20.20"
-			print j	
-
-	return j if (j) else None
-
-@frappe.whitelist()
-def get_compras_taxa_retencao():
-	#locate account 34130000 or plano contif 2.80.20.20.30 - Ret Fonte a Pagar - Imposto Industrial
-
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabPurchase Taxes and Charges` where account_head like '3413%' and parenttype ='Purchase Taxes and Charges Template' """,as_dict=True)
-
-	print " LISTA COMPRA TAXA RETENCAO conta 3413"
-	print j	
-	if (j==[]):
-		#Plano CONTIF
-		j= frappe.db.sql(""" select name, description, account_head, parent  from `tabPurchase Taxes and Charges` where account_head like '2.80.20.20.30%' and parenttype ='Purchase Taxes and Charges Template' """,as_dict=True)
-
-		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
-		print j	
-
-	return j
-
-@frappe.whitelist()
-def get_vendas_taxa_retencao():
-	#locate account 34140000 por liquidar pelo Cliente
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3414%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
-
-	print " LISTA TAXA RETENCAO conta 3414"
-	print j	
-	if (j==[]):
-		#Plano CONTIF
-		j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '2.80.20.20.30%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
-
-		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
-		print j	
-
-	return j
-
-@frappe.whitelist()
-def get_taxa_retencao():
-	# POR REMOVER MAIS TARDE  **********************
-	#locate account 34130000
-
-	#Account 3413 ou 3414
-	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3413%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
-
-	print " LISTA TAXA RETENCAO conta 3413"
-	print j	
-	if (j==[]):
-		#Plano CONTIF
-		j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '2.80.20.20.30%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
-
-		print " LISTA COMPRA TAXA RETENCAO conta 2.80.20.20.20"
-		print j	
-
-	return j
-
-@frappe.whitelist()
-def get_lista_retencoes():
-	j= frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` """,as_dict=True)
-
-	print " LISTA RETENCOES"
-	print j	
-	return j
-
-
-
-@frappe.whitelist()
-def get_lista_taxas_vendas():
-	j= frappe.db.sql(""" select name, description  from `tabSales Taxes and Charges` """,as_dict=True)
-
-	print " LISTA TAXES e CHARGES"
-	print j	
-	return j
-
-
-@frappe.whitelist()
-def get_supplier_retencao(fornecedor,fornclien = 'Supplier'):
-	"""
-		Looks for Supplier otherwise for Customer
-	"""
-	if (fornclien == 'Supplier'):
-		j= frappe.db.sql(""" select name,que_retencao,retencao_na_fonte from `tabSupplier` where retencao_na_fonte=1 and name = %s """,fornecedor,as_dict=True)
-	else:
-		j= frappe.db.sql(""" select name,que_retencao,retencao_na_fonte from `tabCustomer` where retencao_na_fonte=1 and name = %s """,fornecedor,as_dict=True)
-
-
-	print (fornclien," com RETENCAO")
-	print j	
-	return j
-
-
-
-
-
-# 
-# convert number to words 
-# 
-def in_words_pt(integer, in_million=True): 
-	""" 
-	Returns string in words for the given integer. 
-	""" 
-	n=int(integer) 
- 	known = {0: 'zero', 1: 'um', 2: 'dois', 3: 'três', 4: 'quarto', 5: 'cinco', 6: 'seis', 7: 'sete', 8: 'oito', 9: 'novo', 10: 'dez', 11: 'onze', 12: 'doze', 13: 'treze', 14: 'catorze', 15: 'quinze', 16: 'dezaseis', 17: 'dezasete', 18: 'dezoito',
-19: 'dezanove', 20: 'vinte', 30: 'trinta', 40: 'quarenta', 50: 'cinquenta', 60: 'sessenta', 70: 'setenta', 80: 'oitenta', 90: 'noventa'} 
-
-
-	def psn(n, known, xpsn): 
-		import sys; 
-		if n in known: return known[n] 
-		bestguess, remainder = str(n), 0 
-
- 
-		if n<=20: 
-			webnotes.errprint(sys.stderr) 
-			webnotes.errprint(n) 
-			webnotes.errprint("Como isto aconteceu?") 
-			assert 0 
-		elif n < 100: 
-			bestguess= xpsn((n//10)*10, known, xpsn) + '-' + xpsn(n%10, known, xpsn) 
-			return bestguess 
-		elif n < 1000: 
-			bestguess= xpsn(n//100, known, xpsn) + ' ' + 'cem' 
-			remainder = n%100 
-		else: 
-			if in_million: 
-				if n < 1000000: 
-					bestguess= xpsn(n//1000, known, xpsn) + ' ' + 'mil' 
-					remainder = n%1000 
-				elif n < 1000000000: 
-					bestguess= xpsn(n//1000000, known, xpsn) + ' ' + 'milhões' 
-					remainder = n%1000000 
-				else: 
-					bestguess= xpsn(n//1000000000, known, xpsn) + ' ' + 'bilhões' 
-					remainder = n%1000000000 
-			else: 
-				if n < 100000: 
-					bestguess= xpsn(n//1000, known, xpsn) + ' ' + 'mil' 
-					remainder = n%1000 
-				elif n < 10000000: 
-					bestguess= xpsn(n//100000, known, xpsn) + ' ' + 'cem mil' 
-					remainder = n%100000 
-				else: 
-					bestguess= xpsn(n//10000000, known, xpsn) + ' ' + 'dez milhões' 
-					remainder = n%10000000 
-		if remainder: 
-			if remainder >= 100: 
-				comma = ',' 
-			else: 
-				comma = '' 
-			return bestguess + comma + ' ' + xpsn(remainder, known, xpsn) 
-		else: 
-			return bestguess 
-
-
-	return psn(n, known, psn) 
-
-@frappe.whitelist()
-def get_sample_data():
-
-	return frappe.db.sql("""select * from `tabJournal Entry` """, as_dict=False)
-
-@frappe.whitelist()
-def get_escola_ginasio():
-
-	#print frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
-	print frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
-	return frappe.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
-	#return frappe.db.get_value("Modulo Ginasio",None,"mod_escola_ginasio")
-
-
-@frappe.whitelist()
-def get_escola_config():
-
-
-	print frappe.get_value("School Settings",None,"current_academic_year")
-	print frappe.get_value("School Settings",None,"current_academic_term")
-	return frappe.get_value("School Settings",None,"current_academic_year"), frappe.get_value("School Settings",None,"current_academic_term")
-
-@frappe.whitelist()
-def get_cursos(programa):
-	return frappe.db.sql('''select course, course_name from `tabProgram Course` where parent = %s''', (programa), as_dict=1)
-
-
-@frappe.whitelist()
-def set_fee_pago(propina,fatura):
-
-	pago = frappe.get_doc('Fees',propina)
-	print 'propina paga'
-	print pago.outstanding_amount
-	
-	factura = frappe.get_doc('Sales Invoice',fatura) #self.format_as_links(ss.name)[0]
-
-	if pago.outstanding_amount:
-		#PAID
-		if pago.grand_total:
-			frappe.db.set_value("Fees", propina, "paid_amount", pago.grand_total)
-		else:
-			frappe.db.set_value("Fees", propina, "paid_amount", pago.total_amount)
-		frappe.db.set_value("Fees", propina, "outstanding_amount", 0)
-		frappe.db.set_value("Fees", propina, "sales_invoice", fatura)
-#		pago.paid_amount = pago.total_amount
-#		pago.outstanding_amount = 0
-#		pago.save()
-
-
-
-
-@frappe.whitelist()
-def get_programa_enroll(aluno):
-
-	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno},fields=['name','student_name','program'])
-
-	print ('segundo ')
-
-	print frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=False)
-
-	return frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=True)
-
-
-
-@frappe.whitelist()
-def estudante_enroll(source_name):
-	"""Creates a Student Record and returns a Program Enrollment.
-
-	:param source_name: Student Applicant.
-	"""
-	frappe.publish_realtime('enroll_student_progress', {"progress": [1, 4]}, user=frappe.session.user)
-	student = get_mapped_doc("Student Applicant", source_name,
-		{"Student Applicant": {
-			"doctype": "Student",
-			"field_map": {
-				"name": "student_applicant"
-			}
-		}}, ignore_permissions=True)
-
-	student.save()
-
-	frappe.db.set_value('Student',student.name,'_user_tags',student.title[0])
-	frappe.db.commit()
-
-
-	#Cria Customer	
-	cliente = get_mapped_doc("Student Applicant", source_name,
-		{"Student Applicant": {
-			"doctype": "Customer",
-			"field_map": {
-				"name": "student_applicant"
-			}
-		}}, ignore_permissions=True)
-
-	cliente.customer_name = student.title
-	cliente.customer_group = 'Individual'
-	cliente.territory = 'Angola'
-	cliente.language = 'pt'
-	print "ALUNO GENDER"
-	print _(student.gender)
-
-	cliente.save()
-
-	frappe.db.set_value('Customer',cliente.name,'_user_tags',student.title[0])
-	frappe.db.commit()
-	
-
-	contacto = frappe.new_doc("Contact")
-	contacto.name = student.title
-	contacto.first_name = student.first_name	
-	contacto.middle_name = student.middle_name	
-	contacto.last_name = student.last_name	
-	contacto.gender = student.gender
-	contacto.email_id = student.student_email_id
-	contacto.mobile_no = student.student_mobile_number
-	#contacto.parent
-
-	contacto.status = 'Passive'
-	contacto.save()
-
-
-	contacto_link = frappe.new_doc('Dynamic Link')
-	contacto_link.parent = contacto.name
-	contacto_link.parentfield ='links'
-	contacto_link.parenttype ='Contact'
-	contacto_link.link_title = student.title
-	contacto_link.link_doctype ='Customer'
-	contacto_link.link_name = student.title
-
-	contacto_link.save()
-
-
-	program_enrollment = frappe.new_doc("Program Enrollment")
-	program_enrollment.student = student.name
-	program_enrollment.student_name = student.title
-	program_enrollment.program = frappe.db.get_value("Student Applicant", source_name, "program")
-	frappe.publish_realtime('enroll_student_progress', {"progress": [4, 4]}, user=frappe.session.user)	
-	return program_enrollment
-
-
-@frappe.whitelist()
-def update_email_group(doctype, name):
-	if not frappe.db.exists("Email Group", name):
-		email_group = frappe.new_doc("Email Group")
-		email_group.title = name
-		email_group.save()
-	email_list = []
-	students = []
-	if doctype == "Student Group":
-		students = get_student_group_students(name)
-	for stud in students:
-		email = frappe.db.get_value("Student", stud.student, "student_email_id")
-		print email
-		if email:
-			email_list.append(email)	
-	add_subscribers(name, email_list)
-
-@frappe.whitelist()
-def get_student_group_students(student_group, include_inactive=0):
-	"""Returns List of student, student_name in Student Group.
-
-	:param student_group: Student Group.
-	"""
-	if include_inactive:
-		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
-			filters={"parent": student_group}, order_by= "group_roll_number")
-	else:
-		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
-			filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
-	return students
-
-@frappe.whitelist()
-def css_per_user(username=frappe.session.user):
-	""" Should load the CSS created on app theme  per user
-	
-	:param username: currently logged or logging.
-	"""
-
-	print 'css per user ', username
-
-	#should look for user folder with CSS and load if not use starndard CSS
-	#assets/css/username/.css
-	
-	#assets/angola_erp/css/erpnext/bootstrap.css
-	
-	"""	body {
-		  font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
-		  font-size: 10px;
-		  line-height: 1.42857143;
-		  color: #36414c;
-		  background-color: #ff5858;
-		}
-	"""		
-	#script = open ("./assets/angola_erp/js/carregarCSS.js","r")
-	#script_content = script.read()
-
-	#script.close()
-
-	#js.exec(script_content)
-	
-
-@frappe.whitelist()
-def get_versao_erp():
-	""" Due to School renamed to Education ....
-	
-	"""
-
-	print frappe.get_attr("erpnext"+".__version__")
-
-	return frappe.get_attr("erpnext"+".__version__")
-
-@frappe.whitelist()
-def cancel_gl_entry_fee(fee_number):
-	"""Cancel the GL Entry made by FEE... ONLY if user makes SALES INVOICE LATER FOR ALL GROUP OF Fees...
-
-	:param fee_number.
-	"""
-
-	print "Cancela GL ENTRY NO FEE"
-	print "Cancela GL ENTRY NO FEE"
-	frappe.db.sql('''UPDATE `tabGL Entry` set docstatus = 2 where voucher_no = %s''', (fee_number), as_dict=1)
-
-	print "APAGA GL ENTRY NO FEE"
-	print "APAGA GL ENTRY NO FEE"
-	frappe.db.sql('''DELETE from `tabGL Entry` where voucher_no = %s''', (fee_number), as_dict=1)
-
-
-@frappe.whitelist()
-def get_dominios_activos():
-	"""Returns Active domains .... 
-
-	:param .
-	"""
-
-	print "DOMINIOS ACTIVOS"
-	print "DOMINIOS ACTIVOS"
-	print "DOMINIOS ACTIVOS"
-	print "DOMINIOS ACTIVOS"
-
-	tmp = frappe.get_single('Domain Settings').active_domains
-
-	#frappe.get_single('Domain Settings')
-
-	if tmp:
-		return tmp #frappe.cache().get_value('active_domains',tmp)
-	else:
-		return None
-
-
-@frappe.whitelist()
-def get_cliente_address(cliente):
-
-	clientes = frappe.get_doc("Customer",cliente)
-	if clientes:
-		link1 = frappe.get_all('Dynamic Link',filters={'link_doctype':'Customer','link_name':cliente,'parenttype':'Address'}, fields=['parent'])
-		if link1:
-			endereco = frappe.get_doc('Address',link1[0].parent)
-			return endereco
-
-
-@frappe.whitelist()
-def get_contracto_numero(matricula):
-
-	link1 =  frappe.model.frappe.get_all('Contractos Rent',filters={'matricula':matricula,'docstatus':1,'status_contracto':'Activo'},fields=['contracto_numero','local_de_saida','local_previsto_entrada','data_de_saida','devolucao_prevista'])
-	if link1:
-		return link1
-
-@frappe.whitelist()
-def get_all_contracto_numero():
-
-	link1 =  frappe.model.frappe.get_all('Contractos Rent',filters={'matricula':['like', '%'],'docstatus':1},fields=['matricula','contracto_numero','local_de_saida','local_previsto_entrada','data_de_saida','devolucao_prevista','kms_out','combustivel','deposito_out'])
-	if link1:
-		return link1
-				
-
-
-@frappe.whitelist()
-def checkin_ficha_tecnica(source_name, target_doc = None):
-
-	#Copy a Ficha Tecnica para o mesmo....
-	fichatecnica = get_mapped_doc("Ficha Tecnica da Viatura", source_name,
-		{"Ficha Tecnica da Viatura": {
-			"doctype": "Ficha Tecnica da Viatura",
-			"field_map": {
-				"name": "name",
-
-			}
-		}}, target_doc,ignore_permissions=True)
-
-	return fichatecnica
-
-
-@frappe.whitelist()
-def actualiza_ficha_tecnica(source_name):
-
-	ficha = frappe.db.sql("""select name, matricula_veiculo, entrada_ou_saida_viatura from `tabFicha Tecnica da Viatura` WHERE entrada_ou_saida_viatura = "Saida" and matricula_veiculo = %s """, (source_name), as_dict=False)
-
-	if ficha:
-		print(ficha[0][0])
-		ficha1 = frappe.get_doc("Ficha Tecnica da Viatura",ficha[0][0])
-	
-		print('aquiaaaaaaa')
-
-		ficha1.status_viatura = "Devolvida"
-		ficha1.save()		
-
-
-@frappe.whitelist()
-def get_termos(source_name):
-	termos = frappe.db.sql("""select name, terms from `tabTerms and Conditions` WHERE name = %s """, (source_name), as_dict=False)
-	print(termos)
- 	if termos:
-		return termos
-
-
-def get_invoiced_qty_map(delivery_note):
-	"""returns a map: {dn_detail: invoiced_qty}"""
-	invoiced_qty_map = {}
-
-	for dn_detail, qty in frappe.db.sql("""select dn_detail, qty from `tabSales Invoice Item`
-		where delivery_note=%s and docstatus=1""", delivery_note):
-			if not invoiced_qty_map.get(dn_detail):
-				invoiced_qty_map[dn_detail] = 0
-			invoiced_qty_map[dn_detail] += qty
-
-	return invoiced_qty_map
-
-
-@frappe.whitelist()
-def make_factura_venda(source_name):
-	invoiced_qty_map = get_invoiced_qty_map(source_name)
-	
-	somaitems = []
-
-	def set_missing_values(source, target):
-		target.is_pos = 0
-		target.ignore_pricing_rule = 1
-		target.run_method("set_missing_values")
-		target.run_method("set_po_nos")
-
-		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been invoiced"))
-
-		#MAYBE CORRE NO FIM target.run_method("calculate_taxes_and_totals")
-
-		# set company address
-		target.update(get_company_address(target.company))
-		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
-
-	def update_item(source_doc, target_doc, source_parent):
-		print(source_doc.item_code)
-		#print(source_doc.base_rate)
-		#print(target_doc.item_code)
-		idx = 0
-		adicionar = False
-
-		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
-		#target_doc.base_net_amount = source_doc.base_rate
-		if source_doc.serial_no and source_parent.per_billed > 0:
-			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
-				target_doc.qty, source_parent.name)
-
-	#Deve criar primeiro a Factura e depois ir buscar os Itens aos poucos...
-	print('TARGET DOC')
-	#print(target_doc)
-	print('SOURCE DOC')
-	print(source_name)
-
-	print('Factura ====')
-	print(doc)
-
-#	return doc
-		
-	source_parent =  frappe.model.frappe.get_all('Delivery Note Item',filters={'parent':source_name,'docstatus':1},fields=['name'])
-
-	for xx in source_parent:
-		print('DENTRO DO LOOP')
-		print(xx)
-		print(source_parent)
-
-		doc1 = get_mapped_doc('Delivery Note Item', xx.name, {
-			"Delivery Note Item": {
-				"doctype": "Sales Invoice Item",
-				"name": "dn_detail",
-				"parent": "delivery_note",
-				"so_detail": "so_detail",
-				"against_sales_order": "sales_order",
-				"serial_no": "serial_no",
-				"cost_center": "cost_center"
-			}
-		})
-		
-	print('ITEMS ====')
-	print(doc1)
-
-
-	return doc1
-
-	doc = get_mapped_doc("Delivery Note", source_name, 	{
-		"Delivery Note": {
-			"doctype": "Sales Invoice",
-			"validation": {
-				"docstatus": ["=", 1]
-			}
-		},
-		"Delivery Note Item": {
-			"doctype": "Sales Invoice Item",
-			"field_map": {
-				"name": "dn_detail",
-				"parent": "delivery_note",
-				"so_detail": "so_detail",
-				"against_sales_order": "sales_order",
-				"serial_no": "serial_no",
-				"cost_center": "cost_center"
-			},
-			"postprocess": update_item,
-			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
-		},
-
-		"Sales Taxes and Charges": {
-			"doctype": "Sales Taxes and Charges",
-			"add_if_empty": True
-		},
-		"Sales Team": {
-			"doctype": "Sales Team",
-			"field_map": {
-				"incentives": "incentives"
-			},
-			"add_if_empty": True
-		}
-	}, target_doc, set_missing_values)
-
-#		"Delivery Note Item": {
-#			"doctype": "Sales Invoice Item",
-#			"field_map": {
-#				"name": "dn_detail",
-#				"parent": "delivery_note",
-#				"so_detail": "so_detail",
-#				"against_sales_order": "sales_order",
-#				"serial_no": "serial_no",
-#				"cost_center": "cost_center"
-#			},
-#			"postprocess": update_item,
-#			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
-#		},
-
-
-	print ("make_sales_invoice")
-	print ("make_sales_invoice")
-	print ("make_sales_invoice")
-	print doc
-
-
-
-		
-
-
-	return doc
-
-
-#+++
-@frappe.whitelist()
-def make_factura_venda1(source_name):
-	#invoiced_qty_map = get_invoiced_qty_map(source_name)
-	
-	#somaitems = []
-
-	def set_missing_values(source, target):
-		target.is_pos = 0
-		target.ignore_pricing_rule = 1
-		target.run_method("set_missing_values")
-		target.run_method("set_po_nos")
-
-		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been invoiced"))
-
-		#MAYBE CORRE NO FIM target.run_method("calculate_taxes_and_totals")
-
-		# set company address
-		target.update(get_company_address(target.company))
-		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))	
-
-	def update_item(source_doc, target_doc, source_parent):
-		print(source_doc.item_code)
-		#print(source_doc.base_rate)
-		#print(target_doc.item_code)
-		idx = 0
-		adicionar = False
-
-		target_doc.qty = source_doc.qty - invoiced_qty_map.get(source_doc.name, 0)
-		#target_doc.base_net_amount = source_doc.base_rate
-		if source_doc.serial_no and source_parent.per_billed > 0:
-			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
-				target_doc.qty, source_parent.name)
-
-	#Deve criar primeiro a Factura e depois ir buscar os Itens aos poucos...
-	print('TARGET DOC')
-	#print(target_doc)
-	print('SOURCE DOC')
-	print(source_name)
-
-	print('Factura ====')
-#	print(doc)
-
-#	return doc
-		
-#	source_parent =  frappe.model.frappe.get_all('Delivery Note Item',filters={'parent':source_name,'docstatus':1},fields=['name'])
-	source_parent =  frappe.model.frappe.get_all('Delivery Note Item',filters={'parent':source_name,'docstatus':1},fields=['*'])
-	print(source_parent)
-
-	return source_parent
-
-	for xx in source_parent:
-		print('DENTRO DO LOOP')
-		print(xx)
-		print(source_parent)
-		doc1
-		doc1 = get_mapped_doc('Delivery Note Item', xx.name, {
-			"Delivery Note Item": {
-				"doctype": "Sales Invoice Item",
-				"name": "dn_detail",
-				"parent": "delivery_note",
-				"so_detail": "so_detail",
-				"against_sales_order": "sales_order",
-				"serial_no": "serial_no",
-				"cost_center": "cost_center"
-			}
-		})
-		
-	print('ITEMS ====')
-	print(doc1)
-
-
-	return doc1
-
-	doc = get_mapped_doc("Delivery Note", source_name, 	{
-		"Delivery Note": {
-			"doctype": "Sales Invoice",
-			"validation": {
-				"docstatus": ["=", 1]
-			}
-		},
-		"Delivery Note Item": {
-			"doctype": "Sales Invoice Item",
-			"field_map": {
-				"name": "dn_detail",
-				"parent": "delivery_note",
-				"so_detail": "so_detail",
-				"against_sales_order": "sales_order",
-				"serial_no": "serial_no",
-				"cost_center": "cost_center"
-			},
-			"postprocess": update_item,
-			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
-		},
-
-		"Sales Taxes and Charges": {
-			"doctype": "Sales Taxes and Charges",
-			"add_if_empty": True
-		},
-		"Sales Team": {
-			"doctype": "Sales Team",
-			"field_map": {
-				"incentives": "incentives"
-			},
-			"add_if_empty": True
-		}
-	}, target_doc, set_missing_values)
-
-#		"Delivery Note Item": {
-#			"doctype": "Sales Invoice Item",
-#			"field_map": {
-#				"name": "dn_detail",
-#				"parent": "delivery_note",
-#				"so_detail": "so_detail",
-#				"against_sales_order": "sales_order",
-#				"serial_no": "serial_no",
-#				"cost_center": "cost_center"
-#			},
-#			"postprocess": update_item,
-#			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
-#		},
-
-
-	print ("make_sales_invoice")
-	print ("make_sales_invoice")
-	print ("make_sales_invoice")
-	print doc
-
-
-
-		
-
-
-	return doc
-
-
-@frappe.whitelist()
-def get_car_lastmile(matricula):
-	### Returns last KM of the car registered...
-	print('verifica lastmile')
-	print(frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False))
-	return frappe.db.sql(""" select ultimo_km from `tabVehicle_lastmile` where matricula like %s order by data_registo DESC limit 1 """,(matricula),as_dict=False)
-
-@frappe.whitelist()
-def none(source_name, target_doc=None):
-	print('NOnE')
-	print(source_name)
-	print('target')
-	print(target_doc.encode('utf-8'))
-	return source_name
-
-@frappe.whitelist()
-def get_dn_for_si(source_name=None, datafiltro=None):
-	#source_name should be customer name
-
-#	if source_name == None:
-#		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
-
-#	else:
-		#removed doscstatus 1 due to returned invoices...
-		#dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'docstatus':1,'status':'To Bill'},fields=['name','customer','posting_date'])
-
-	if source_name =="":
-		source_name = None
-
-	if datafiltro =="":
-		datafiltro = None
-
-	if datafiltro != None:
-
-		print('DATAFILTRO')
-		print(datafiltro)
-		print(datafiltro[2:datafiltro.find(',')-1])
-		print(datafiltro[datafiltro.find(',')+2:len(datafiltro)-2])
-
-		d1 = datafiltro[2:datafiltro.find(',')-1]
-		d2 = datafiltro[datafiltro.find(',')+2:len(datafiltro)-2]
-
-#			dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill','posting_date': (">=", d1),'posting_date': ("<=", d2)},fields=['name','customer','posting_date','is_return','return_against'])
-
-
-		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill','posting_date': ("between", [d1,d2])},fields=['name','customer','posting_date','is_return','return_against'])
-
-		print(dn_for_si)
-	else:
-		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill'},fields=['name','customer','posting_date','is_return','return_against'])
-
-	#Filter returned invoices ... and remove from selection
-	#dn_for_si.sort(reverse=True)
-	ret1 = []
-	dn_for_si1 = []
-	for ret in dn_for_si:
-		if ret.return_against:
-			print(ret.return_against)
-			print(ret.name)  
-			ret1.append(ret.return_against)
-			ret1.append(ret.name)
-
-
-	for ret1a in dn_for_si:
-		#print('DN ',ret1a.name)
-		if ret1a.name in ret1:
-			print('PARA REMOVER')
-			print(ret1a)
-			print(ret1)
-			dn_for_si.remove(ret1a)
-
-	#Para ter a certeza que foi removido...
-	for ret1a in dn_for_si:
-		#print('DN ',ret1a.name)
-		if ret1a.name in ret1:
-			print('PARA REMOVER')
-			print(ret1a)
-			print(ret1)
-			dn_for_si.remove(ret1a)
-
-
-	return dn_for_si
-
-
-
-@frappe.whitelist()
-def get_all_enderecos(doctipo,partyname):
-
-	print 'Todos Enderecos Address or Contact'
-	print doctipo
-	print partyname.encode('utf-8')
-	#dadoscliente = frappe.model.frappe.get_all('Dynamic Link',filters={'link_doctype':doctipo,'link_name':partyname,'parenttype':'Address'},fields={'*'})
-	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Contact' """,(doctipo,partyname),as_dict=False)
-	if dadoscliente:
-		data1 = frappe.get_doc("Contact", dadoscliente[0][0])
-		if data1:
-			return data1
-	else:
-		dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
-		if dadoscliente:
-			data1 = frappe.get_doc("Address", dadoscliente[0][0])
-			if data1:
-				return data1
-
-
-@frappe.whitelist()
-def get_all_enderecos_a(doctipo,partyname):
-
-	print 'Todos Enderecos Address ONLY!!!'
-	print doctipo
-	print partyname.encode('utf-8')
-	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
-	if dadoscliente:
-		data1 = frappe.get_doc("Address", dadoscliente[0][0])
-		if data1:
-			return data1
-				
+import angola
 
 @frappe.whitelist()
 def get_xml(args):
@@ -1710,8 +714,8 @@ def convert_xml():
 @frappe.whitelist()
 def gerar_saft_ao():
 	#read from source ...
-	empresa = frappe.get_doc('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
-	emp_enderecos = get_all_enderecos("Company",empresa.name)
+	empresa = frappe.get_doc('Company','Fazenda-Aurora') #('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
+	emp_enderecos = angola.get_all_enderecos("Company",empresa.name)
 	print 'ENdereco Empresa'
 	print emp_enderecos
 
@@ -1799,9 +803,8 @@ def gerar_saft_ao():
 	productid.text = "AngolaERP / TeorLogico"	#TeorLogico
 
 	productversion = ET.SubElement(head,'ProductVersion')
-	productid.text = str(get_versao_erp())
+	productid.text = str(angola.get_versao_erp())
 
-	print get_versao_erp()
 
 	headercomment = ET.SubElement(head,'HeaderComment')
 
@@ -1913,7 +916,7 @@ def gerar_saft_ao():
 			address = ET.SubElement(customer,'Address')
 
 			billingaddress = ET.SubElement(address,'BillingAddress')
-			cliente_endereco = get_all_enderecos_a("Customer",cliente.name)
+			cliente_endereco = angola.get_all_enderecos_a("Customer",cliente.name)
 			if cliente_endereco:
 				print cliente_endereco.address_line1
 				billingaddress.text = cliente_endereco.address_line1
@@ -2037,7 +1040,7 @@ def gerar_saft_ao():
 			address = ET.SubElement(supplier,'Address')
 			billingaddress = ET.SubElement(address,'BillingAddress')
 
-			fornecedor_endereco = get_all_enderecos_a("Supplier",fornecedor.name)
+			fornecedor_endereco = angola.get_all_enderecos_a("Supplier",fornecedor.name)
 			if fornecedor_endereco:
 				print fornecedor_endereco.address_line1
 				billingaddress.text = fornecedor_endereco.address_line1
@@ -2062,11 +1065,11 @@ def gerar_saft_ao():
 
 			region = ET.SubElement(address,'Region')
 			if fornecedor_endereco:
-				region.text = fornecedor_endereco.region
+				region.text = fornecedor_endereco.county
 
 			country = ET.SubElement(address,'Country')
 			if fornecedor_endereco:
-				countr.text = fornecedor_endereco.country
+				country.text = fornecedor_endereco.country
 
 			#address 1
 			shipfromaddress = ET.SubElement(address,'ShipFromAddress')
@@ -2191,11 +1194,11 @@ def gerar_saft_ao():
 	salesinvoices = ET.SubElement(data,'SalesInvoices')
 	#still need to filter per user request by MONTH or dates filter...
 	#Default CURRENT MONTH
-	print 'mes inicial ', get_first_day(datetime.today())
-	print 'mes fim ', get_last_day(datetime.today())
+	print 'mes inicial ', angola.get_first_day(datetime.today())
+	print 'mes fim ', angola.get_last_day(datetime.today())
 
-	primeirodiames = get_first_day(datetime.today())
-	ultimodiames = get_last_day(datetime.today())
+	primeirodiames = angola.get_first_day(datetime.today())
+	ultimodiames = angola.get_last_day(datetime.today())
 
 	facturas = frappe.db.sql(""" select count(name) from `tabSales Invoice` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
@@ -2332,7 +1335,7 @@ def gerar_saft_ao():
 
 		#line
 		line = ET.SubElement(invoice,'Line')
-		facturaitems = frappe.db.sql(""" select * from `tabSales Invoice Item` where parent = %s """,(factura.name), as_dict=True)
+		facturaitems = frappe.db.sql(""" select * from `tabSales Invoice Item` where parent = %s order by idx """,(factura.name), as_dict=True)
 		
 		for facturaitem in facturaitems:
 
@@ -2561,97 +1564,199 @@ def gerar_saft_ao():
 	#MovementOfGoods
 	movementofgoods = ET.SubElement(data,'MovementOfGoods')
 
-
-	movementofgoods = ET.Element('MovementOfGoods')
 	numberofmovementlines = ET.SubElement(movementofgoods,'NumberOfMovimentLines')
-	totalquantityissued = ET.SubElement(movementofgoods,'TotalQuantityIssued')
-	stockmovement = ET.SubElement(movementofgoods,'StockMovement')
-	documentnumber = ET.SubElement(movementofgoods,'DocumentNumber')
-	documentstatus = ET.SubElement(movementofgoods,'DocumentStatus')
-	movementstatus = ET.SubElement(movementofgoods,'MovementStatus')
-	movementstatusdate = ET.SubElement(movementofgoods,'MovementStatusDate')
-	reason = ET.SubElement(movementofgoods,'Reason')
-	sourceid = ET.SubElement(movementofgoods,'SourceID')
-	sourcebilling = ET.SubElement(movementofgoods,'SourceBilling')
-	movementofgoodshash = ET.SubElement(movementofgoods,'Hash')
-	movementofgoodshashcontrol = ET.SubElement(movementofgoods,'HashControl')
-	period = ET.SubElement(movementofgoods,'Period')
-	movementdate = ET.SubElement(movementofgoods,'MovementDate')
-	movementtype = ET.SubElement(movementofgoods,'MovementType')
-	systementrydate = ET.SubElement(movementofgoods,'SystemEntryDate')
-	transactionid = ET.SubElement(movementofgoods,'TransactionID')
-	customerid = ET.SubElement(movementofgoods,'CustomerID')
-	supplierid = ET.SubElement(movementofgoods,'SupplierID')
-	sourceid = ET.SubElement(movementofgoods,'SourceID')
-	eaccode = ET.SubElement(movementofgoods,'EACCode')
-	movementcomments = ET.SubElement(movementofgoods,'MovementComments')
-	shipto = ET.SubElement(movementofgoods,'ShipTo')
-	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
-	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
-	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
-	locationid = ET.SubElement(movementofgoods,'LocationId')
-	address = ET.SubElement(movementofgoods,'Address')
-	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
-	streetname = ET.SubElement(movementofgoods,'StreetName')
-	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
-	city = ET.SubElement(movementofgoods,'City')
-	postalcode = ET.SubElement(movementofgoods,'PostalCode')
-	region = ET.SubElement(movementofgoods,'Region')
-	country = ET.SubElement(movementofgoods,'Country')
-	shipfrom = ET.SubElement(movementofgoods,'ShipFrom')
-	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
-	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
-	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
-	locationid = ET.SubElement(movementofgoods,'LocationID')
-	address = ET.SubElement(movementofgoods,'Address')
-	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
-	streetname = ET.SubElement(movementofgoods,'StreetName')
-	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
-	city = ET.SubElement(movementofgoods,'City')
-	postalcode = ET.SubElement(movementofgoods,'PostalCode')
-	region = ET.SubElement(movementofgoods,'Region')
-	country = ET.SubElement(movementofgoods,'Country')
-	movementendtime = ET.SubElement(movementofgoods,'MovementEndTime')
-	movementstarttime = ET.SubElement(movementofgoods,'MovementStartTime')
-	codigoidentificacaodocumento = ET.SubElement(movementofgoods,'CodigoIdentificacaoDocumento')
-	line = ET.SubElement(movementofgoods,'Line')
-	linenumber = ET.SubElement(movementofgoods,'LineNumber')
-	orderreferences = ET.SubElement(movementofgoods,'OrderReferences')
-	originatingon = ET.SubElement(movementofgoods,'OriginatingON')
-	orderdate = ET.SubElement(movementofgoods,'OrderDate')
-	productcode = ET.SubElement(movementofgoods,'ProductCode')
-	productdescription = ET.SubElement(movementofgoods,'ProductDescription')
-	quantity = ET.SubElement(movementofgoods,'Quantity')
-	unitofmeasure = ET.SubElement(movementofgoods,'UnifOfMeasure')
-	unitprice = ET.SubElement(movementofgoods,'UnitPrice')
-	description = ET.SubElement(movementofgoods,'Description')
-	productserialnumber = ET.SubElement(movementofgoods,'ProductSerialNumber')
-	serialnumber = ET.SubElement(movementofgoods,'SerialNumber')
-	debitamount = ET.SubElement(movementofgoods,'DebitAmount')
-	creditamount = ET.SubElement(movementofgoods,'creditAmount')
-	tax = ET.SubElement(movementofgoods,'Tax')
-	taxtype = ET.SubElement(movementofgoods,'TaxType')
-	taxcountryregion = ET.SubElement(movementofgoods,'TaxCountryRegion')
-	taxcode = ET.SubElement(movementofgoods,'TaxCode')
-	taxpercentage = ET.SubElement(movementofgoods,'TaxPercentage')
-	taxexemptionreason = ET.SubElement(movementofgoods,'TaxExemptionReason')
-	taxexemptioncode = ET.SubElement(movementofgoods,'TaxExemptionCode')
-	settlementamount = ET.SubElement(movementofgoods,'SettlementAmount')
+	#get delivery notes / items and count during the period.
 
-	#customsinformation
-	customsinformation = ET.SubElement(movementofgoods,'CustomsInformation')
-	arcno = ET.SubElement(customsinformation,'ARCNo')
-	iecamount = ET.SubElement(customsinformation,'IECAmount')
-	#documenttotals
-	documenttotals = ET.SubElement(movementofgoods,'DocumentTotals')
-	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-	nettotal = ET.SubElement(documenttotals,'NetTotal')
-	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-	#currency
-	currency = ET.SubElement(movementofgoods,'Currency')
-	currencycode = ET.SubElement(currency,'CurrencyCode')
-	currencyamount = ET.SubElement(currency,'CurrencyAmount')
-	exchangerate = ET.SubElement(currency,'ExchangeRate')
+	#guiasremessa = frappe.db.sql(""" select * from `tabDelivery Note` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	primeirodiames = '2019-03-01'
+	ultimodiames = '2019-03-01'
+
+	guiasremessa = frappe.db.sql(""" select count(dn.name), sum(dni.qty) from `tabDelivery Note Item` dni join `tabDelivery Note` dn on dni.parent = dn.name where dn.company = %s and dn.posting_date >= %s and dn.posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+
+	print guiasremessa
+
+	if guiasremessa:
+		print 'num linhas ',guiasremessa[0]['count(dn.name)']
+
+		numberofmovementlines.text = str(guiasremessa[0]['count(dn.name)'])
+
+	#	guiasremessaitems = frappe.db.sql(""" select * from `tabDelivery Note Item` where parent = %s """,(guiasremessa.name), as_dict=True)
+
+		totalquantityissued = ET.SubElement(movementofgoods,'TotalQuantityIssued')
+
+		print 'Qtys ',guiasremessa[0]['sum(dni.qty)']
+		totalquantityissued.text = str(guiasremessa[0]['sum(dni.qty)'])
+
+		
+
+		guiasremessa = frappe.db.sql(""" select * from `tabDelivery Note` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+		for guiaremessa in guiasremessa:
+			stockmovement = ET.SubElement(movementofgoods,'StockMovement')
+			documentnumber = ET.SubElement(stockmovement,'DocumentNumber')
+			documentnumber.text = str(guiaremessa.name)
+
+			documentnumberunique = ET.SubElement(stockmovement,'DocumentNumberUnique')
+			documentnumberunique.text = 0	#default
+
+			documentstatus = ET.SubElement(stockmovement,'DocumentStatus')
+			movementstatus = ET.SubElement(documentstatus,'MovementStatus')
+			if guiaremessa.status == 'Completed' and guiaremessa.docstatus == 1:
+				#pago
+				movementstatus.text = "F"
+			elif guiaremessa.status == 'To bill' and (guiaremessa.docstatus == 1 or guiaremessa.docstatus == 2):
+				#por pagar
+				movementstatus.text = "N"
+			elif guiaremessa.status == 'Cancelled' and guiaremessa.docstatus == 2:
+				#cancelled
+				movementstatus.text = "A"
+			elif guiaremessa.status == 'Draft' and guiaremessa.docstatus == 0:
+				#Draft
+				movementstatus.text = "N"
+
+			movementstatusdate = ET.SubElement(documentstatus,'MovementStatusDate')
+			movementstatusdate.text = guiaremessa.modified.strftime("%Y-%m-%d %H:%M:%S")
+
+			reason = ET.SubElement(documentstatus,'Reason')
+			sourceid = ET.SubElement(documentstatus,'SourceID')
+			sourceid.text = guiaremessa.modified_by
+
+			sourcebilling = ET.SubElement(documentstatus,'SourceBilling')
+			sourcebilling.text = "P"	#default feito pela APP
+
+
+			movementofgoodshash = ET.SubElement(stockmovement,'Hash')
+			movementofgoodshash.text = 0	#default nossa app nao precisa.
+
+			movementofgoodshashcontrol = ET.SubElement(stockmovement,'HashControl')
+			movementofgoodshashcontrol.text = 0	#default nossa app nao precisa.
+
+
+			period = ET.SubElement(stockmovement,'Period')
+			period.text = str(guiaremessa.modified.month)	#last modified month
+
+			movementdate = ET.SubElement(stockmovement,'MovementDate')
+			movementdate.text = guiaremessa.modified.strftime("%Y-%m-%d %H:%M:%S")
+
+			movementtype = ET.SubElement(stockmovement,'MovementType')
+			movementtype.text = "GR"	#default Delivery Note
+
+			systementrydate = ET.SubElement(stockmovement,'SystemEntryDate')
+			systementrydate.text = guiaremessa.creation.strftime("%Y-%m-%d %H:%M:%S")
+
+			transactionid = ET.SubElement(stockmovement,'TransactionID')
+			#Get GL; TO CHECK as OURS GENS two or more GLs
+
+
+			customerid = ET.SubElement(stockmovement,'CustomerID')
+			customerid.text = guiaremessa.customer
+
+			supplierid = ET.SubElement(stockmovement,'SupplierID')
+			#For now EMPTY
+
+			sourceid = ET.SubElement(stockmovement,'SourceID')
+			sourceid.text = guiaremessa.owner
+
+			eaccode = ET.SubElement(stockmovement,'EACCode')
+
+			movementcomments = ET.SubElement(stockmovement,'MovementComments')
+			shipto = ET.SubElement(stockmovement,'ShipTo')
+			deliveryid = ET.SubElement(stockmovement,'DeliveryID')
+			deliverydate = ET.SubElement(stockmovement,'DeliveryDate')
+			warehouseid = ET.SubElement(stockmovement,'WarehouseID')
+			locationid = ET.SubElement(stockmovement,'LocationId')
+			address = ET.SubElement(stockmovement,'Address')
+			buildingnumber = ET.SubElement(stockmovement,'BuildingNumber')
+			streetname = ET.SubElement(stockmovement,'StreetName')
+			addressdetail = ET.SubElement(stockmovement,'AddressDetail')
+			city = ET.SubElement(stockmovement,'City')
+			postalcode = ET.SubElement(stockmovement,'PostalCode')
+			region = ET.SubElement(stockmovement,'Region')
+			country = ET.SubElement(stockmovement,'Country')
+			shipfrom = ET.SubElement(stockmovement,'ShipFrom')
+			deliveryid = ET.SubElement(stockmovement,'DeliveryID')
+			deliverydate = ET.SubElement(stockmovement,'DeliveryDate')
+			warehouseid = ET.SubElement(stockmovement,'WarehouseID')
+			locationid = ET.SubElement(stockmovement,'LocationID')
+			address = ET.SubElement(stockmovement,'Address')
+			buildingnumber = ET.SubElement(stockmovement,'BuildingNumber')
+			streetname = ET.SubElement(stockmovement,'StreetName')
+			addressdetail = ET.SubElement(stockmovement,'AddressDetail')
+			city = ET.SubElement(stockmovement,'City')
+			postalcode = ET.SubElement(stockmovement,'PostalCode')
+			region = ET.SubElement(stockmovement,'Region')
+			country = ET.SubElement(stockmovement,'Country')
+			movementendtime = ET.SubElement(stockmovement,'MovementEndTime')
+			movementstarttime = ET.SubElement(stockmovement,'MovementStartTime')
+			codigoidentificacaodocumento = ET.SubElement(stockmovement,'CodigoIdentificacaoDocumento')
+
+			#Itens
+
+			guiasremessaitems = frappe.db.sql(""" select * from `tabDelivery Note Item` where parent = %s order by idx """,(guiaremessa.name), as_dict=True)
+			for guiaremessaitem in guiasremessaitems:
+				line = ET.SubElement(stockmovement,'Line')
+
+				linenumber = ET.SubElement(line,'LineNumber')
+				linenumber.text = str(guiaremessaitem.idx)
+
+				orderreferences = ET.SubElement(line,'OrderReferences')
+				originatingon = ET.SubElement(orderreferences,'OriginatingON')
+				orderdate = ET.SubElement(orderreferences,'OrderDate')
+
+				productcode = ET.SubElement(line,'ProductCode')
+				productcode.text = guiaremessaitem.item_code
+
+				productdescription = ET.SubElement(line,'ProductDescription')
+				productdescription.text = guiaremessaitem.item_name
+
+				quantity = ET.SubElement(line,'Quantity')
+				quantity.text = str(guiaremessaitem.qty)
+
+				unitofmeasure = ET.SubElement(line,'UnifOfMeasure')
+				unitofmeasure.text = guiaremessaitem.uom
+
+				unitprice = ET.SubElement(line,'UnitPrice')
+				unitprice.text = str(guiaremessaitem.rate)+"0"
+
+				description = ET.SubElement(line,'Description')
+				description.text = guiaremessaitem.description
+
+				productserialnumber = ET.SubElement(line,'ProductSerialNumber')
+				serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
+				serialnumber.text = guiaremessaitem.serial_no
+
+				debitamount = ET.SubElement(line,'DebitAmount')
+				debitamount.text = 0
+
+				creditamount = ET.SubElement(line,'creditAmount')
+				creditamount.text = 0
+
+				tax = ET.SubElement(line,'Tax')
+				taxtype = ET.SubElement(line,'TaxType')
+				taxcountryregion = ET.SubElement(line,'TaxCountryRegion')
+				taxcode = ET.SubElement(line,'TaxCode')
+				taxpercentage = ET.SubElement(line,'TaxPercentage')
+				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+				taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+				settlementamount = ET.SubElement(line,'SettlementAmount')
+
+				#customsinformation
+				customsinformation = ET.SubElement(line,'CustomsInformation')
+				arcno = ET.SubElement(customsinformation,'ARCNo')
+				iecamount = ET.SubElement(customsinformation,'IECAmount')
+
+			#documenttotals
+			documenttotals = ET.SubElement(stockmovement,'DocumentTotals')
+			taxpayable = ET.SubElement(stockmovement,'TaxPayable')
+			nettotal = ET.SubElement(stockmovement,'NetTotal')
+			grosstotal = ET.SubElement(stockmovement,'GrossTotal')
+			#currency
+			currency = ET.SubElement(stockmovement,'Currency')
+			currencycode = ET.SubElement(currency,'CurrencyCode')
+			currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			exchangerate = ET.SubElement(currency,'ExchangeRate')
 
 
 	#END OF MovementOfGoods
@@ -2660,18 +1765,245 @@ def gerar_saft_ao():
 
 	#create WorkingDocuments...
 
+	#WorkingDocuments
+
+	workingdocuments = ET.SubElement(data,'WorkingDocuments')
+
+	numberofentries = ET.SubElement(workingdocuments,'NumberOfEntries')
+	totaldebit = ET.SubElement(workingdocuments,'TotalDebit')
+	totalcredit = ET.SubElement(workingdocuments,'TotalCredit')
+
+	workdocument = ET.SubElement(workingdocuments,'WorkDocument')
+	documentnumber = ET.SubElement(workdocument,'DocumentNumber')
+	codigounicodocumento = ET.SubElement(workdocument,'CodigoUnicoDocumento')
+	documentstatus = ET.SubElement(workdocument,'DocumentStatus')
+	workstatus = ET.SubElement(workdocument,'WorkStatus')
+	workstatusdate = ET.SubElement(workdocument,'WorkStatusDate')
+	reason = ET.SubElement(workdocument,'Reason')
+	sourceid = ET.SubElement(workdocument,'SourceID')
+	sourcebilling = ET.SubElement(workdocument,'SourceBilling')
+	workingdocumentshash = ET.SubElement(workdocument,'Hash')
+	workingdocumentshashcontrol = ET.SubElement(workdocument,'HashControl')
+	period = ET.SubElement(workdocument,'Period')
+	workdate = ET.SubElement(workdocument,'WorkDate')
+	worktype = ET.SubElement(workdocument,'WorkType')
+	sourceid = ET.SubElement(workdocument,'SourceID')
+	eaccode = ET.SubElement(workdocument,'EACCode')
+	systementrydate = ET.SubElement(workdocument,'SystemEntryDate')
+	transactionid = ET.SubElement(workdocument,'TransactionID')
+
+	customerid = ET.SubElement(workdocument,'CustomerID')
+	#line
+	line = ET.SubElement(workdocument,'Line')
+	linenumber = ET.SubElement(line,'LineNumber')
+	orderreferences = ET.SubElement(line,'OrderReferences')
+	originatingon = ET.SubElement(orderreferences,'OriginatingON')
+	orderdate = ET.SubElement(orderreferences,'OrderDate')
+
+	productcode = ET.SubElement(line,'ProductCode')
+	productdescription = ET.SubElement(line,'ProductDescription')
+	quantity = ET.SubElement(line,'Quantity')
+	unitofmeasure = ET.SubElement(line,'UnifOfMeasure')
+	unitprice = ET.SubElement(line,'UnitPrice')
+	taxbase = ET.SubElement(line,'TaxBase')
+	taxpointdate = ET.SubElement(line,'TaxPointDate')
+	#references
+	references = ET.SubElement(line,'References')
+	reference = ET.SubElement(references,'Reference')
+	reason = ET.SubElement(references,'Reason')
+	description = ET.SubElement(references,'Description')
+	#productserialnumber
+	productserialnumber = ET.SubElement(line,'ProductSerialNumber')
+	serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
+	debitamount = ET.SubElement(line,'DebitAmount')
+	creditamount = ET.SubElement(line,'CreditAmount')
+	#tax
+	tax = ET.SubElement(line,'Tax')
+	taxtype = ET.SubElement(tax,'TaxType')
+	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+	taxcode = ET.SubElement(tax,'TaxCode')
+	taxpercentage = ET.SubElement(tax,'TaxPercentage')
+	taxamount = ET.SubElement(tax,'TaxAmount')
+	taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
+	taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
+
+	settlementamount = ET.SubElement(tax,'SettlementAmount')
+	#customsinformation
+	customsinformation = ET.SubElement(line,'CustomsInformation')
+	arcno = ET.SubElement(customsinformation,'ARCNo')
+	iecamount = ET.SubElement(customsinformation,'IECAmount')
+	#documenttotals
+	documenttotals = ET.SubElement(workingdocuments,'DocumentTotals')
+	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+	nettotal = ET.SubElement(documenttotals,'NetTotal')
+	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+	#currency
+	currency = ET.SubElement(documenttotals,'Currency')
+	currencycode = ET.SubElement(currency,'CurrencyCode')
+	currencyamount = ET.SubElement(currency,'CurrencyAmount')
+	exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+
+	#END OF WorkingDocuments
+
+
 	#create Payments
+
+	#Payments
+	payments = ET.SubElement(data,'Payments')
+
+	primeirodiames = '2019-03-01'
+	ultimodiames = '2019-03-01'
+
+	pagamentos = frappe.db.sql(""" select count(name), sum(paid_amount) from `tabPayment Entry` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	if pagamentos:
+
+		numberofentries = ET.SubElement(payments,'NumberOfEntries')
+		numberofentries.text = str(pagamentos[0]['count(name)'])
+
+		totaldebit = ET.SubElement(payments,'TotalDebit')
+		totaldebit.text = str(pagamentos[0]['sum(paid_amount)'])+"0"
+
+		totalcredit = ET.SubElement(payments,'TotalCredit')
+
+		pagamentos = frappe.db.sql(""" select * from `tabPayment Entry` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+		#payment
+
+		for recibo in pagamentos:
+			payment = ET.SubElement(payments,'Payment')
+			paymentrefno = ET.SubElement(payment,'PaymentRefNo')
+			paymentrefno.text = recibo.name
+
+			period = ET.SubElement(payment,'Period')
+			period.text = str(recibo.modified.month)	#last modified month
+
+			transactionid = ET.SubElement(payment,'TransactionID')
+			#GLs created .... 
+
+			transactiondate = ET.SubElement(payment,'TransactionDate')
+			transactiondate.text = recibo.posting_date.strftime("%Y-%m-%d %H:%M:%S")
+
+			paymenttype = ET.SubElement(payment,'PaymentType')
+			paymenttype.text = "RC"	#default SAFT
+
+			description = ET.SubElement(payment,'Description')
+			description.text = recibo.remarks
+
+			systemid = ET.SubElement(payment,'SystemID')
+			systemid.text = recibo.name
+
+			documentstatus = ET.SubElement(payment,'DocumentStatus')
+			paymentstatus = ET.SubElement(documentstatus,'PaymentStatus')	
+			if recibo.docstatus == 1:
+				#pago
+				paymentstatus.text = "N"
+			elif recibo.docstatus == 2:
+				#Canceled
+				paymentstatus.text = "A"
+
+			paymentstatusdate = ET.SubElement(documentstatus,'PaymentStatusDate')
+			paymentstatusdate.text = recibo.modified.strftime("%Y-%m-%d %H:%M:%S")
+
+			reason = ET.SubElement(documentstatus,'Reason')
+
+			sourceid = ET.SubElement(documentstatus,'SourceID')
+			sourceid.text = recibo.owner
+
+			sourcepayment = ET.SubElement(documentstatus,'SourcePayment')
+			sourcepayment.text = "P"	#default nossa APP
+
+			paymentmethod = ET.SubElement(payment,'PaymentMethod')
+			paymentmechanism = ET.SubElement(paymentmethod,'PaymentMechanism')
+			if "Transferência Bancária" in recibo.mode_of_payment:
+				paymentmechanism.text = "TB"
+			elif "Cash" in recibo.mode_of_payment:					
+				paymentmechanism.text = "NU"
+
+			elif "TPA" in recibo.mode_of_payment:					
+				paymentmechanism.text = "CD"
+
+			paymentamount = ET.SubElement(paymentmethod,'PaymentAmount')
+			paymentamount.text = str(recibo.paid_amount)+"0"
+
+			paymentdate = ET.SubElement(paymentmethod,'PaymentDate')
+			paymentdate.text = recibo.modified.strftime("%Y-%m-%d %H:%M:%S")
+
+			sourceid = ET.SubElement(payment,'SourceID')
+			sourceid.text = recibo.owner
+
+			systementrydate = ET.SubElement(payment,'SystemEntryDate')
+			systementrydate.text = recibo.posting_date.strftime("%Y-%m-%d %H:%M:%S")
+
+			customerid = ET.SubElement(payment,'CustomerID')
+			customerid.text = recibo.party
+
+
+			#line
+			recibosreferencias = frappe.db.sql(""" select * from `tabPayment Entry Reference` where parenttype = 'payment entry' and parent = %s order by idx """,(recibo.name), as_dict=True)
+
+			for reciboreferencia in recibosreferencias:
+				line = ET.SubElement(payment,'Line')
+				linenumber = ET.SubElement(line,'LineNumber')
+				customerid.text = str(reciboreferencia.idx)
+
+				sourcedocumentid = ET.SubElement(line,'SourceDocumentID')
+				originatingon = ET.SubElement(sourcedocumentid,'OriginatingON')
+				originatingon.text = reciboreferencia.reference_name
+
+				invoicedate = ET.SubElement(sourcedocumentid,'InvoiceDate')
+				invoicedate.text = reciboreferencia.criation.strftime("%Y-%m-%d %H:%M:%S")	#still need to know if should be postingdate from SL
+
+				description = ET.SubElement(sourcedocumentid,'Description')
+
+				settlementamount = ET.SubElement(line,'SettlementAmount')
+				debitamount = ET.SubElement(line,'DebitAmount')
+				debitamount.text = str(reciboreferencia.allocated_amount)+"0"
+
+				creditamount = ET.SubElement(line,'CreditAmount')
+
+				#tax
+				tax = ET.SubElement(line,'Tax')
+				taxtype = ET.SubElement(tax,'TaxType')
+				taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+				taxcode = ET.SubElement(tax,'TaxCode')
+				taxpercentage = ET.SubElement(tax,'TaxPercentage')
+				taxamount = ET.SubElement(tax,'TaxAmount')
+				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+				taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+
+			#documenttotals
+			documenttotals = ET.SubElement(payment,'DocumentTotals')
+	
+			taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+			nettotal = ET.SubElement(documenttotals,'NetTotal')
+			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+			#settlement
+			settlement = ET.SubElement(documenttotals,'Settlement')
+			settlementamount = ET.SubElement(settlement,'SettlementAmount')
+			#currency
+			currency = ET.SubElement(documenttotals,'Currency')
+			currencycode = ET.SubElement(currency,'CurrencyCode')
+			currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			#witholdingtax
+			withholdingtax = ET.SubElement(payment,'WithholdingTax')
+			withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
+			withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
+			withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
+
+
+	#END OF Payments
+
+
+
 
 	from lxml import etree
 	from lxml.html import parse
 
 	#record the data...	
-	mydata = ET.tostring(data, encoding="utf-8")
-#	mydata = ET.tostring(data, pretty_print=True, encoding='utf-8')
-#	mydata1 = xml.dom.minidom.parseString(mydata)
-
-	
-#	mydata = mydata1.toprettyxml()
+	mydata = ET.tostring(data, encoding='utf-8')
 
 	myfile = open("/tmp/clientes.xml","w")
 
@@ -2799,11 +2131,3 @@ def validar_xml_xsd(xml_path, xsd_path):
 
 
 
-def get_first_day(dt, d_years=0, d_months=0):
-    # d_years, d_months are "deltas" to apply to dt
-    y, m = dt.year + d_years, dt.month + d_months
-    a, m = divmod(m-1, 12)
-    return date(y+a, m+1, 1)
-
-def get_last_day(dt):
-    return get_first_day(dt, 0, 1) + timedelta(-1)

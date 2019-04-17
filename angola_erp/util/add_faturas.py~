@@ -892,7 +892,7 @@ def add_jentry(empresa, usuario, senha, delimiter1 = None, ficheiro="journalentr
 
 							if natureza == "D" and LINKcentroscusto == False:
 								#print 'NATUREZA D'
-								if conta.startswith('311210'):
+								if conta.startswith('31121'):
 									contas1 = {
 											"is_advance": "No", 
 											"cost_center": centrocusto[0]['cost_center'],
@@ -919,7 +919,7 @@ def add_jentry(empresa, usuario, senha, delimiter1 = None, ficheiro="journalentr
 								#print contas1
 							elif natureza == "C" and LINKcentroscusto == False:
 								print 'NATUREZA C'
-								if conta.startswith('311210'):
+								if conta.startswith('31121'):
 									contas2 = {
 											"is_advance": "No",
 											"cost_center": centrocusto[0]['cost_center'],
