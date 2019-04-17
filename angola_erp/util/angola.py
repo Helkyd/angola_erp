@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 #from __future__ import unicode_literals
 import sys
 reload (sys)
-sys.setdefaultencoding('utf8')
+sys.setdefaultencoding("UTF-8")
 
 
 from frappe.model.document import Document
@@ -2640,7 +2640,8 @@ def gerar_saft_ao():
 
 
 	#record the data...	
-	mydata = ET.tostring(data, encoding='utf8')
+	mydata = ET.tostring(data, encoding="UTF-8")
+#	mydata = ET.tostring(data)
 
 	myfile = open("/tmp/clientes.xml","w")
 

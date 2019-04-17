@@ -89,7 +89,7 @@ def set_faltas(mes,ano,empresa):
 		print int(mes)-1
 		print ano
 
-		j5 = frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Half Day' or status = 'Absent' and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 1  """,(tra.name,int(mes)-1,ano), as_dict=False)
+		j5 = frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and (status = 'Half Day' or status = 'Absent') and tipo_de_faltas = 'Falta Injustificada' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and processar_mes_seguinte = 1  """,(tra.name,int(mes)-1,ano), as_dict=False)
 
 		print 'RESULTA MES ', j5
 
