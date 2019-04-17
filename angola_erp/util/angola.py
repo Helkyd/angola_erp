@@ -2258,10 +2258,15 @@ def gerar_saft_ao():
 		systementrydate = ET.SubElement(invoice,'SystemEntryDate')
 		systementrydate.text = factura.creation.strftime("%Y-%m-%d %H:%M:%S")	#creation date
 
-		transactionid = ET.SubElement(invoice,'TransactionID')
+		transactions = ET.SubElement(invoice,'Transactions')
+
 		entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
 		if entradasgl:
-			transactionid.text = entradasgl[0].name	#entrada GL;single invoice can generate more than 2GL
+			for entradagl in entradasgl:
+				print 'transactions ids'
+				print entradagl
+				transactionid = ET.SubElement(transactions,'TransactionID')
+				transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
 
 		customerid = ET.SubElement(invoice,'CustomerID')
 		customerid.text = factura.customer	#cliente
@@ -2355,50 +2360,277 @@ def gerar_saft_ao():
 
 			creditamount = ET.SubElement(line,'CreditAmount')
 
-		#tax
-		tax = ET.SubElement(line,'Tax')
-		taxtype = ET.SubElement(tax,'TaxType')
-		taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-		taxcode = ET.SubElement(tax,'TaxCode')
-		taxpercentage = ET.SubElement(tax,'TaxPercentage')
-		taxamount = ET.SubElement(tax,'TaxAmount')
-		taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
-		taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
-		settlementamount = ET.SubElement(tax,'SettlementAmount')
+			#tax
+			tax = ET.SubElement(line,'Tax')
 
-		#customsinformation
-		customsinformation = ET.SubElement(line,'CustomsInformation')
-		arcno = ET.SubElement(customsinformation,'ARCNo')
-		iecamount = ET.SubElement(customsinformation,'IECAmount')
-		#documenttotals
-		documenttotals = ET.SubElement(line,'DocumentTotals')
-		taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-		nettotal = ET.SubElement(documenttotals,'NetTotal')
-		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+			#procura no recibo pelo IS
+			#recibos = frappe.db.sql(""" select * from `tabPayment Entry` where parent = %s """,(factura.name), as_dict=True)
+			recibosreferencias = frappe.db.sql(""" select * from `tabPayment Entry Reference` where reference_doctype = 'sales invoice' and reference_name = %s """,(factura.name), as_dict=True)
+			print 'recibos refenrecias'
+			print factura.name
+			print recibosreferencias
+
+			if recibosreferencias:
+				recibos = frappe.db.sql(""" select * from `tabPayment Entry` where name = %s """,(recibosreferencias[0].parent), as_dict=True)
+				print 'recibos'
+				print recibosreferencias[0].parent
+				print recibos
+
+				entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='payment entry' and company = %s and voucher_no = %s """,(empresa.name,recibosreferencias[0].parent), as_dict=True)
+
+				print 'entradasgl'
+				print entradasgl
+				if entradasgl:
+					for entradagl in entradasgl:
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						print entradagl.account
+						print entradagl.credit_in_account_currency
+						if "34210000" in retencao.name:
+							#imposto de producao
+							taxtype.text = "NS"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NS"
+
+						elif "34710000" in retencao.name:
+							#imposto de selo
+							taxtype.text = "IS"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NS"
+
+						elif "34140000" in retencao.name:
+							#retencao na fonte
+							taxtype.text = "NS"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NS"
+
+
+						elif "IVA" in retencao.name:
+							#IVA	ainda por rever
+							taxtype.text = "IVA"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NOR"
+
+						else:
+							taxcode.text = "NS"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NS"
+
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcountryregion.text = "AO"
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = "0"		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						taxamount.text = "0" 		
+
+						
+
+						taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
+						taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
+						settlementamount = ET.SubElement(tax,'SettlementAmount')
+
+						#customsinformation
+						customsinformation = ET.SubElement(line,'CustomsInformation')
+						arcno = ET.SubElement(customsinformation,'ARCNo')
+						iecamount = ET.SubElement(customsinformation,'IECAmount')
+
+						#documenttotals
+						documenttotals = ET.SubElement(line,'DocumentTotals')
+
+						taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+						taxamount.text = str(retencao.credit_in_account_currency)+"0" 		#por ir buscar
+
+		nettotal = ET.SubElement(invoice,'NetTotal')
+		nettotal.text = str(factura.net_total)+"0" 		#Sem Impostos Total Factura
+
+		grosstotal = ET.SubElement(invoice,'GrossTotal')
+		grosstotal.text = str(factura.rounded_total)+"0" 		#Total Factura + impostos.... por ir buscar
+
 		#currency
-		currency = ET.SubElement(line,'Currency')
+		currency = ET.SubElement(invoice,'Currency')
 		currencycode = ET.SubElement(currency,'CurrencyCode')
-		currencyamount = ET.SubElement(currency,'CurrencyAmount')
-		exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+		currencyamount = ET.SubElement(invoice,'CurrencyAmount')
+		currencyamount.text = str(factura.rounded_total)+"0" 		#Total Factura + impostos.... por ir buscar
+
+		exchangerate = ET.SubElement(invoice,'ExchangeRate')
+
 		#settlement
-		settlement = ET.SubElement(line,'Settlement')
+		settlement = ET.SubElement(invoice,'Settlement')
 		settlementdiscount = ET.SubElement(settlement,'SettlementDiscount')
 		settlementamount = ET.SubElement(settlement,'SettlementAmount')
 		settlementdate = ET.SubElement(settlement,'SettlementDate')
 		paymentterms = ET.SubElement(settlement,'PaymentTerms')
+
 		#payment
-		payment = ET.SubElement(line,'Payment')
-		paymentmechanism = ET.SubElement(payment,'PaymentMechanism')
-		paymentamount = ET.SubElement(payment,'PaymentAmount')
-		paymentdate = ET.SubElement(payment,'PaymentDate')
+		payment = ET.SubElement(invoice,'Payment')
+
+
+		if recibosreferencias:
+			recibos = frappe.db.sql(""" select * from `tabPayment Entry` where name = %s """,(recibosreferencias[0].parent), as_dict=True)
+			print 'recibos'
+			print recibosreferencias[0].parent
+			print recibos
+
+			for recibo in recibos:
+				paymentmechanism = ET.SubElement(payment,'PaymentMechanism')				
+
+				if "Transferência Bancária" in recibo.mode_of_payment:
+					paymentmechanism.text = "TB"
+				elif "Cash" in recibo.mode_of_payment:					
+					paymentmechanism.text = "NU"
+
+				elif "TPA" in recibo.mode_of_payment:					
+					paymentmechanism.text = "CD"
+
+				paymentamount = ET.SubElement(payment,'PaymentAmount')
+				paymentamount.text = str(recibo.paid_amount)+"0"
+
+				paymentdate = ET.SubElement(payment,'PaymentDate')
+				paymentdate.text = recibo.posting_date.strftime("%Y-%m-%d %H:%M:%S")
+
 		#witholdingtax
-		withholdingtax = ET.SubElement(line,'WithholdingTax')
-		withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
-		withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-		withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
+		withholdingtax = ET.SubElement(invoice,'WithholdingTax')
+
+		if recibosreferencias:
+			recibos = frappe.db.sql(""" select * from `tabPayment Entry` where name = %s """,(recibosreferencias[0].parent), as_dict=True)
+			print 'recibos'
+			print recibosreferencias[0].parent
+			print recibos
+
+			entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='payment entry' and company = %s and voucher_no = %s """,(empresa.name,recibosreferencias[0].parent), as_dict=True)
+
+			print 'entradasgl'
+			print entradasgl
+			if entradasgl:
+				for entradagl in entradasgl:
+
+					withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
+					print entradagl.account
+					if "34710000" in entradagl.account:
+						#imposto selo
+						withholdingtaxtype.text = "IS"
+
+					elif "34120000" in entradagl.account:
+						#imposto industrial
+						withholdingtaxtype.text = "II"
+
+					elif "34310000" in entradagl.account:
+						#IRT
+						withholdingtaxtype.text = "IRT"
+
+					withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
+					withholdingtaxdescription.text = entradagl.account
+
+					withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
+					withholdingtaxamount.text = str(entradagl.credit_in_account_currency)+"0"
 
 
 	#END OF SAlesInvoice
+
+
+	#create MovimentofGoods
+
+	#MovementOfGoods
+	movementofgoods = ET.SubElement(data,'MoveimentOfGoods')
+
+
+	movementofgoods = ET.Element('MovementOfGoods')
+	numberofmovementlines = ET.SubElement(movementofgoods,'NumberOfMovimentLines')
+	totalquantityissued = ET.SubElement(movementofgoods,'TotalQuantityIssued')
+	stockmovement = ET.SubElement(movementofgoods,'StockMovement')
+	documentnumber = ET.SubElement(movementofgoods,'DocumentNumber')
+	documentstatus = ET.SubElement(movementofgoods,'DocumentStatus')
+	movementstatus = ET.SubElement(movementofgoods,'MovementStatus')
+	movementstatusdate = ET.SubElement(movementofgoods,'MovementStatusDate')
+	reason = ET.SubElement(movementofgoods,'Reason')
+	sourceid = ET.SubElement(movementofgoods,'SourceID')
+	sourcebilling = ET.SubElement(movementofgoods,'SourceBilling')
+	movementofgoodshash = ET.SubElement(movementofgoods,'Hash')
+	movementofgoodshashcontrol = ET.SubElement(movementofgoods,'HashControl')
+	period = ET.SubElement(movementofgoods,'Period')
+	movementdate = ET.SubElement(movementofgoods,'MovementDate')
+	movementtype = ET.SubElement(movementofgoods,'MovementType')
+	systementrydate = ET.SubElement(movementofgoods,'SystemEntryDate')
+	transactionid = ET.SubElement(movementofgoods,'TransactionID')
+	customerid = ET.SubElement(movementofgoods,'CustomerID')
+	supplierid = ET.SubElement(movementofgoods,'SupplierID')
+	sourceid = ET.SubElement(movementofgoods,'SourceID')
+	eaccode = ET.SubElement(movementofgoods,'EACCode')
+	movementcomments = ET.SubElement(movementofgoods,'MovementComments')
+	shipto = ET.SubElement(movementofgoods,'ShipTo')
+	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
+	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
+	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
+	locationid = ET.SubElement(movementofgoods,'LocationId')
+	address = ET.SubElement(movementofgoods,'Address')
+	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
+	streetname = ET.SubElement(movementofgoods,'StreetName')
+	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
+	city = ET.SubElement(movementofgoods,'City')
+	postalcode = ET.SubElement(movementofgoods,'PostalCode')
+	region = ET.SubElement(movementofgoods,'Region')
+	country = ET.SubElement(movementofgoods,'Country')
+	shipfrom = ET.SubElement(movementofgoods,'ShipFrom')
+	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
+	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
+	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
+	locationid = ET.SubElement(movementofgoods,'LocationID')
+	address = ET.SubElement(movementofgoods,'Address')
+	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
+	streetname = ET.SubElement(movementofgoods,'StreetName')
+	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
+	city = ET.SubElement(movementofgoods,'City')
+	postalcode = ET.SubElement(movementofgoods,'PostalCode')
+	region = ET.SubElement(movementofgoods,'Region')
+	country = ET.SubElement(movementofgoods,'Country')
+	movementendtime = ET.SubElement(movementofgoods,'MovementEndTime')
+	movementstarttime = ET.SubElement(movementofgoods,'MovementStartTime')
+	codigoidentificacaodocumento = ET.SubElement(movementofgoods,'CodigoIdentificacaoDocumento')
+	line = ET.SubElement(movementofgoods,'Line')
+	linenumber = ET.SubElement(movementofgoods,'LineNumber')
+	orderreferences = ET.SubElement(movementofgoods,'OrderReferences')
+	originatingon = ET.SubElement(movementofgoods,'OriginatingON')
+	orderdate = ET.SubElement(movementofgoods,'OrderDate')
+	productcode = ET.SubElement(movementofgoods,'ProductCode')
+	productdescription = ET.SubElement(movementofgoods,'ProductDescription')
+	quantity = ET.SubElement(movementofgoods,'Quantity')
+	unitofmeasure = ET.SubElement(movementofgoods,'UnifOfMeasure')
+	unitprice = ET.SubElement(movementofgoods,'UnitPrice')
+	description = ET.SubElement(movementofgoods,'Description')
+	productserialnumber = ET.SubElement(movementofgoods,'ProductSerialNumber')
+	serialnumber = ET.SubElement(movementofgoods,'SerialNumber')
+	debitamount = ET.SubElement(movementofgoods,'DebitAmount')
+	creditamount = ET.SubElement(movementofgoods,'creditAmount')
+	tax = ET.SubElement(movementofgoods,'Tax')
+	taxtype = ET.SubElement(movementofgoods,'TaxType')
+	taxcountryregion = ET.SubElement(movementofgoods,'TaxCountryRegion')
+	taxcode = ET.SubElement(movementofgoods,'TaxCode')
+	taxpercentage = ET.SubElement(movementofgoods,'TaxPercentage')
+	taxexemptionreason = ET.SubElement(movementofgoods,'TaxExemptionReason')
+	taxexemptioncode = ET.SubElement(movementofgoods,'TaxExemptionCode')
+	settlementamount = ET.SubElement(movementofgoods,'SettlementAmount')
+
+	#customsinformation
+	customsinformation = ET.SubElement(movementofgoods,'CustomsInformation')
+	arcno = ET.SubElement(customsinformation,'ARCNo')
+	iecamount = ET.SubElement(customsinformation,'IECAmount')
+	#documenttotals
+	documenttotals = ET.SubElement(movementofgoods,'DocumentTotals')
+	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+	nettotal = ET.SubElement(documenttotals,'NetTotal')
+	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+	#currency
+	currency = ET.SubElement(movementofgoods,'Currency')
+	currencycode = ET.SubElement(currency,'CurrencyCode')
+	currencyamount = ET.SubElement(currency,'CurrencyAmount')
+	exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+
+	#END OF MovementOfGoods
+
 
 
 	#create WorkingDocuments...
