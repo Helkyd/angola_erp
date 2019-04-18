@@ -726,6 +726,13 @@ def gerar_saft_ao():
 	print AnoFiscal 
 	print datetime.today().year
 
+	print 'mes inicial ', angola.get_first_day(datetime.today())
+	print 'mes fim ', angola.get_last_day(datetime.today())
+
+	primeirodiames = angola.get_first_day(datetime.today())
+	ultimodiames = angola.get_last_day(datetime.today())
+
+
 	#### Create Header
 
 	data = ET.Element('AuditFile')
@@ -828,6 +835,7 @@ def gerar_saft_ao():
 
 	######## Inside MasterFiles
 		###GeneralLedgerAccounts
+			###Accounts
 		###Customer
 		###Supplier
 		###Product
@@ -1103,6 +1111,82 @@ def gerar_saft_ao():
 
 	#END OF Suppliers
 
+	##### Create GeneralLedgerAccounts
+	#GeneralLedgerAccounts
+	#masterfiles = ET.Element('MasterFiles')
+
+	generalledgeraccounts = ET.SubElement(masterfiles,'GeneralLedgerAccounts')
+	planocontas = frappe.db.sql(""" select * from `tabAccount` where docstatus = 0 and company = %s order by name, lft """,(empresa.name), as_dict=True)
+
+
+	for planoconta in planocontas:
+		account = ET.SubElement(generalledgeraccounts,'Account')
+		accountid = ET.SubElement(account,'AccountID')
+		accountid.text = str(planoconta.name)
+
+		accountdescription = ET.SubElement(account,'AccountDescription')		
+		accountdescription.text = str(planoconta.account_name)
+
+		openingdeditbalance = ET.SubElement(account,'OpeningDebitBalance')
+		openingcrebitbalance = ET.SubElement(account,'OpeningCreditBalance')
+		closingdebitbalance = ET.SubElement(account,'ClosingDebitBalance')
+		closingcreditbalance = ET.SubElement(account,'ClosingCreditBalance')
+
+		aberturadebitoanoprev = 0 
+		aberturacreditoanoprev = 0
+
+		#GL Entry from previous year
+		glentry = frappe.db.sql(""" select sum(debit), sum(credit), sum(debit-credit) from `tabGL Entry` where company = %s and fiscal_year = %s and account = %s """,(empresa.name,int(AnoFiscal[0].year)-1,planoconta.name), as_dict=True)
+
+
+		if glentry:	#for Previous YEAR
+			if flt(glentry[0]['sum(debit)']) != 0:
+				aberturadebitoanoprev = glentry[0]['sum(debit)']
+				openingdeditbalance.text = str(glentry[0]['sum(debit)'])+"0"
+			if flt(glentry[0]['sum(credit)']) != 0:
+				aberturacreditoanoprev = glentry[0]['sum(credit)']
+				openingcrebitbalance.text = str(glentry[0]['sum(credit)'])+"0"	
+		
+
+		glentry = frappe.db.sql(""" select sum(debit), sum(credit), sum(debit-credit) from `tabGL Entry` where company = %s and fiscal_year = %s and account = %s """,(empresa.name,int(AnoFiscal[0].year),planoconta.name), as_dict=True)
+
+		if glentry:	#Current YEAR
+			print flt(glentry[0]['sum(debit)'])
+			print flt(aberturadebitoanoprev)
+
+			print 'adasdfasfsafasfda'
+			print flt(glentry[0]['sum(debit-credit)'])
+
+			print 'close db'
+			print flt(glentry[0]['sum(debit)']) + flt(aberturadebitoanoprev)
+			print (flt(glentry[0]['sum(debit)']) + flt(aberturadebitoanoprev)) - flt(glentry[0]['sum(credit)']) 			
+
+
+			print 'ZERO ', flt(glentry[0]['sum(debit)']) == 0
+
+			fechodebitoano = 0
+			fechocreditoano = 0
+
+			if flt(glentry[0]['sum(debit)']) != 0:
+
+				fechodebitoano = (flt(glentry[0]['sum(debit)']) + flt(aberturadebitoanoprev)) - flt(glentry[0]['sum(credit)'])
+				closingdebitbalance.text = str(fechodebitoano)
+			if flt(glentry[0]['sum(credit)']) != 0:
+				if fechodebitoano == 0:
+					fechocreditoano = (flt(glentry[0]['sum(credit)']) + flt(aberturacreditoanoprev)) - flt(glentry[0]['sum(debit)'])
+					closingcreditbalance.text = str(fechocreditoano)
+
+#			if "2630" in planoconta.name: break
+
+		groupingcategory = ET.SubElement(account,'GroupingCategory')
+		if planoconta.is_group:	#fica GR
+			groupingcategory.text = "GR"	#Ainda por verificar com os Contabilistas
+		elif not planoconta.is_group:
+			groupingcategory.text = "GA"	#Ainda por verificar com os Contabilistas
+
+		groupingcode = ET.SubElement(account,'GroupingCode')
+		if planoconta.parent_account:
+			groupingcode.text = str(planoconta.parent_account)
 
 	#create Products / Services
 	#Products
@@ -1187,6 +1271,145 @@ def gerar_saft_ao():
 
 	#END OF TaxTable
 
+
+
+	#GeneralLEdgerEntries
+	generalledgerentries = ET.SubElement(masterfiles,'GeneralLedgerEntries')
+	#generalledgerentries = ET.Element('GeneralLedgerEntries')
+
+	primeirodiames = '2019-02-18'
+	ultimodiames = '2019-02-18'
+
+
+	jvs = frappe.db.sql(""" select count(name), sum(total_debit), sum(total_credit) from `tabJournal Entry` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	numberofentries = ET.SubElement(generalledgerentries,'NumberOfEntries')
+	numberofentries.text = str(jvs[0]['count(name)'])
+
+
+	totaldebit = ET.SubElement(generalledgerentries,'TotalDebit')
+	totaldebit.text = str(jvs[0]['sum(total_debit)'])
+
+	totalcredit = ET.SubElement(generalledgerentries,'TotalCredit')
+	totalcredit.text = str(jvs[0]['sum(total_credit)'])
+
+
+	print 'Journal Entry'
+	print 'Journal Entry'
+	print jvs
+
+
+	#JV
+	jvs = frappe.db.sql(""" select * from `tabJournal Entry` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for jv in jvs:
+		print jv.name
+		print jv.cheque_date	
+		journal = ET.SubElement(generalledgerentries,'Journal')
+		journalid = ET.SubElement(journal,'JournalID')
+		journalid.text = str(jv.name)
+		
+		description = ET.SubElement(journal,'Description')
+		description.text = str(jv.user_remark)
+
+		#transaction
+
+		transaction = ET.SubElement(journal,'Transaction')
+		transactionid = ET.SubElement(transaction,'TransactionID')
+		transactionid.text = str(jv.posting_date.strftime("%Y-%m-%d %H:%M:%S")) + "  " + str(jv.name)
+
+		period = ET.SubElement(transaction,'Period')
+		period.text = str(jv.modified.year)		#check date YEAR
+
+		transactiondate = ET.SubElement(transaction,'TransactionDate')
+		transactiondate.text = str(jv.cheque_date)
+
+		sourceid = ET.SubElement(transaction,'SourceID')
+		sourceid.text = str(jv.owner)	
+
+		description = ET.SubElement(transaction,'Description')
+		description.text = str(jv.remark)	
+
+		docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
+		#Sera o GL ou pode ser o jv.name !!!!
+
+		transactiontype = ET.SubElement(transaction,'TransactionType')
+		#jv.voucher_type
+		transactiontype.text = "N"	# default para APP
+
+		glpostingdate = ET.SubElement(transaction,'GLPostingDate')
+		glpostingdate.text = str(jv.posting_date.strftime("%Y-%m-%d %H:%M:%S"))	#Posting date to JV
+
+		customerid = ET.SubElement(transaction,'CustomerID')
+		supplierid = ET.SubElement(transaction,'SupplierID')
+
+		#lines
+		lines = ET.SubElement(transaction,'Lines')
+		jvaccounts = frappe.db.sql(""" select * from `tabJournal Entry Account` where parent = %s order by idx """,(jv.name), as_dict=True)
+		for jvaccount in jvaccounts:
+			#DEBIT
+			if jvaccount.debit != 0:
+				debitline = ET.SubElement(lines,'DebitLine')
+				recordid = ET.SubElement(debitline,'RecordID')
+				recordid.text = str(jvaccount.idx)
+
+				accountid = ET.SubElement(debitline,'AccountID')
+				accountid.text = str(jvaccount.account)
+
+				sourcedocumentid = ET.SubElement(debitline,'SourceDocumentID')
+				sourcedocumentid.text = str(jvaccount.account)
+
+				systementrydate = ET.SubElement(debitline,'SystemEntryDate')
+				systementrydate.text = str(jvaccount.creation.strftime("%Y-%m-%d %H:%M:%S"))	#Creation
+
+
+				description = ET.SubElement(debitline,'Description')
+				description.text = str(jvaccount.account)	
+
+				debitamount = ET.SubElement(debitline,'DebitAmount')
+				debitamount.text = str(jvaccount.debit)	
+
+				#para cliente ou supplier
+				if jvaccount.party_type == "Customer":
+					customerid.text = str(jvaccount.party)	
+
+				elif jvaccount.party_type == "Supplier":
+					supplierid.text = str(jvaccount.party)	
+
+			elif jvaccount.credit != 0:
+				#CREDIT
+				creditline = ET.SubElement(lines,'CreditLine')
+				recordid = ET.SubElement(creditline,'RecordID')
+				recordid.text = str(jvaccount.idx)
+
+				accountid = ET.SubElement(creditline,'AccountID')
+				accountid.text = str(jvaccount.account)
+
+				sourcedocumentid = ET.SubElement(creditline,'SourceDocumentID')
+				sourcedocumentid.text = str(jvaccount.account)
+
+				systementrydate = ET.SubElement(creditline,'SystemEntryDate')
+				systementrydate.text = str(jvaccount.creation.strftime("%Y-%m-%d %H:%M:%S"))	#Creation
+
+				description = ET.SubElement(creditline,'description')
+				description.text = str(jvaccount.account)	
+
+				creditamount = ET.SubElement(creditline,'CreditAmount')
+				creditamount.text = str(jvaccount.credit)	
+
+				#para cliente ou supplier
+				if jvaccount.party_type == "Customer":
+					customerid.text = str(jvaccount.party)	
+
+				elif jvaccount.party_type == "Supplier":
+					supplierid.text = str(jvaccount.party)	
+
+
+	#END OF GeneralLEdgerEntries
+
+
+
+
 	#create Sales Invoices
 
 
@@ -1194,11 +1417,6 @@ def gerar_saft_ao():
 	salesinvoices = ET.SubElement(data,'SalesInvoices')
 	#still need to filter per user request by MONTH or dates filter...
 	#Default CURRENT MONTH
-	print 'mes inicial ', angola.get_first_day(datetime.today())
-	print 'mes fim ', angola.get_last_day(datetime.today())
-
-	primeirodiames = angola.get_first_day(datetime.today())
-	ultimodiames = angola.get_last_day(datetime.today())
 
 	facturas = frappe.db.sql(""" select count(name) from `tabSales Invoice` where company = %s and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
@@ -1953,7 +2171,7 @@ def gerar_saft_ao():
 				originatingon.text = reciboreferencia.reference_name
 
 				invoicedate = ET.SubElement(sourcedocumentid,'InvoiceDate')
-				invoicedate.text = reciboreferencia.criation.strftime("%Y-%m-%d %H:%M:%S")	#still need to know if should be postingdate from SL
+				invoicedate.text = reciboreferencia.creation.strftime("%Y-%m-%d %H:%M:%S")	#still need to know if should be postingdate from SL
 
 				description = ET.SubElement(sourcedocumentid,'Description')
 
