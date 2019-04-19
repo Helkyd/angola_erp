@@ -1019,7 +1019,7 @@ def gerar_saft_ao():
 			if facturaitem.sales_order:
 				originatingon.text = facturaitem.sales_order
 				ordemvenda = frappe.db.sql(""" select * from `tabSales Order` where name = %s """,(facturaitem.sales_order), as_dict=True)
-				orderdate.text = ordemvenda.transaction_date
+				orderdate.text = ordemvenda[0].transaction_date.strftime("%Y-%m-%d")
 
 
 
@@ -1049,9 +1049,13 @@ def gerar_saft_ao():
 			if dn:
 				taxpointdate.text = dn[0].posting_date.strftime("%Y-%m-%d")	#DN
 
+			#Against .. in case of change or DN ?????
 			#references
 			references = ET.SubElement(line,'References')
 			reference = ET.SubElement(references,'Reference')
+			if factura.return_against != None:
+				reference.text = factura.return_against
+
 			reason = ET.SubElement(references,'Reason')
 
 			description = ET.SubElement(line,'Description')

@@ -1011,11 +1011,17 @@ def gerar_saft_ao():
 			linenumber = ET.SubElement(line,'LineNumber')
 			linenumber.text = str(facturaitem.idx)
 
-
+			#SALES ORDER
 			#orderreferences
 			orderreferences = ET.SubElement(line,'OrderReferences')
 			originatingon = ET.SubElement(orderreferences,'OriginatingON')
 			orderdate = ET.SubElement(orderreferences,'OrderDate')
+			if facturaitem.sales_order:
+				originatingon.text = facturaitem.sales_order
+				ordemvenda = frappe.db.sql(""" select * from `tabSales Order` where name = %s """,(facturaitem.sales_order), as_dict=True)
+				orderdate.text = ordemvenda[0].transaction_date
+
+
 
 			productcode = ET.SubElement(line,'ProductCode')
 			productcode.text = facturaitem.item_code
@@ -1043,9 +1049,13 @@ def gerar_saft_ao():
 			if dn:
 				taxpointdate.text = dn[0].posting_date.strftime("%Y-%m-%d")	#DN
 
+			#Against .. in case of change or DN ?????
 			#references
 			references = ET.SubElement(line,'References')
 			reference = ET.SubElement(references,'Reference')
+			if factura.return_against != None:
+				reference.text = factura.return_against
+
 			reason = ET.SubElement(references,'Reason')
 
 			description = ET.SubElement(line,'Description')
