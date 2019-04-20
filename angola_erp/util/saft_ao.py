@@ -53,10 +53,23 @@ def get_xml(args):
 
 	return response
 
+@frappe.whitelist()
+def update_acc_codes():
+	#Update account_number with the number of name
+	accs = frappe.db.sql(""" select name,account_number from `tabAccount` """,as_dict=True)
+	for acc in accs:
+		if acc.name[0:1].isnumeric() == True:
+			#starts with Numbers
+			conta = acc.name[0:acc.name.find("-")-1]
+			print acc.name[0:acc.name.find("-")-1]
+			#acc.account_number = conta
+			frappe.db.set_value('Account',acc.name,'account_number',conta)
+			frappe.db.commit()
+	
 
 @frappe.whitelist()
 def gerar_saft_ao():
-	#Versao 1.0.4 
+	#Versao 1.0.8 
 
 
 	######## Inside MasterFiles
@@ -83,7 +96,8 @@ def gerar_saft_ao():
 	######## END SourceDocuments
 
 	#read from source ...
-	empresa = frappe.get_doc('Company','Fazenda-Aurora') #('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
+	empresa = frappe.get_doc('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
+	#('Company','Fazenda-Aurora') #
 	emp_enderecos = angola.get_all_enderecos("Company",empresa.name)
 	print 'ENdereco Empresa'
 	print emp_enderecos
@@ -102,8 +116,8 @@ def gerar_saft_ao():
 	ultimodiames = angola.get_last_day(datetime.today())
 
 
-	primeirodiames = '2019-03-01'
-	ultimodiames = '2019-03-31'
+	primeirodiames = '2018-01-01'
+	ultimodiames = '2018-02-31'
 
 
 	#### Create Header
@@ -113,7 +127,7 @@ def gerar_saft_ao():
 	head = ET.SubElement(data,'Header')
 
 	auditfileversion = ET.SubElement(head,'AuditFileVersion')
-	auditfileversion.text = '1.0'
+	auditfileversion.text = '1.0.8'
 
 	companyid = ET.SubElement(head,'CompanyID')	
 	companyid.text = empresa.name
@@ -146,8 +160,8 @@ def gerar_saft_ao():
 	postalcode = ET.SubElement(companyaddress,'PostalCode')
 	postalcode.text = emp_enderecos.pincode
 
-	region = ET.SubElement(companyaddress,'Region')
-	region.text = emp_enderecos.state
+	province = ET.SubElement(companyaddress,'Province')
+	province.text = emp_enderecos.city
 
 	country = ET.SubElement(companyaddress,'Country')
 	country.text = "AO"	#default
@@ -221,7 +235,8 @@ def gerar_saft_ao():
 	for planoconta in planocontas:
 		account = ET.SubElement(generalledgeraccounts,'Account')
 		accountid = ET.SubElement(account,'AccountID')
-		accountid.text = str(planoconta.name)
+		accountid.text = str(planoconta.name)			#Due to 30 chars limit we have to add 
+		#accountid.text = str(planoconta.account_number)	#Make sure update_acc_codes was run before...
 
 		accountdescription = ET.SubElement(account,'AccountDescription')		
 		accountdescription.text = str(planoconta.account_name)
@@ -335,18 +350,28 @@ def gerar_saft_ao():
 					contascliente = frappe.db.sql(""" select * from `tabAccount` where name like '31121000%%' and company = %s """,(empresa.name), as_dict=True)
 					print contascliente
 					accountid.text = contascliente[0].account_name
+					#accountid.text = contascliente[0].account_number
 #				else:
 #					accountid.text = "Desconhecido"				
 			else:
 
 				accountid.text = contascliente[0].account
+				#In case we need to get account_number instead
+				#contascliente = frappe.db.sql(""" select * from `tabAccount` where name = %s and company = %s """,(contascliente[0].account,empresa.name), as_dict=True)
+				#accountid.text = contascliente[0].account_number
 
 
 			customertaxid = ET.SubElement(customer,'CustomerTaxID')
-			customertaxid.text = cliente.tax_id
+			if (cliente.tax_id != None and (cliente.tax != "N/A" or cliente.tax != "N-A")) :
+				customertaxid.text = cliente.tax_id
+			else:
+				customertaxid.text = "999999990"
 
 			companyname = ET.SubElement(customer,'CompanyName')
-			companyname.text = cliente.customer_name
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				companyname.text = "Consumidor final"
+			else:	
+				companyname.text = cliente.customer_name
 
 			contact = ET.SubElement(customer,'Contact')
 			if cliente.customer_primary_contact:
@@ -370,19 +395,36 @@ def gerar_saft_ao():
 				streetname.text = cliente_endereco.address_line1
 
 			addressdetail = ET.SubElement(billingaddress,'AddressDetail')
-			if cliente_endereco:				
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				addressdetail.text = "Consumidor final"
+			elif cliente_endereco:				
 				addressdetail.text = cliente_endereco.address_line1
 
 			else:
 				addressdetail.text = "Desconhecido"	#default
 
 			city = ET.SubElement(billingaddress,'City')
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				city.text = "Desconhecido"	#default
+			elif cliente_endereco:				
+				city.text = cliente_endereco.city
+
+			else:
+				city.text = "Desconhecido"	#default
+
+
 			if cliente_endereco:
 				city.text = cliente_endereco.city
 
 			postalcode = ET.SubElement(billingaddress,'PostalCode')
-			if cliente_endereco:
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				postalcode.text = "Desconhecido"	#default
+			elif cliente_endereco:				
 				postalcode.text = cliente_endereco.pincode
+
+			else:
+				postalcode.text = "Desconhecido"	#default
+
 
 			province = ET.SubElement(billingaddress,'Province')
 			if cliente_endereco:
@@ -390,11 +432,18 @@ def gerar_saft_ao():
 
 
 			country = ET.SubElement(billingaddress,'Country')
-			if cliente_endereco:
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				country.text = "Desconhecido"	#default
+			elif cliente_endereco:				
 				if cliente_endereco.country == 'Angola':
 					country.text = "AO"
 				else:
 					country.text = cliente_endereco.country
+
+
+			else:
+				country.text = "Desconhecido"	#default
+
 
 			#END BILLING address
 
@@ -408,30 +457,48 @@ def gerar_saft_ao():
 				streetname.text = cliente_endereco.address_line1
 
 			addressdetail = ET.SubElement(shiptoaddress,'AddressDetail')
-			if cliente_endereco:				
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				addressdetail.text = "Consumidor final"
+			elif cliente_endereco:				
 				addressdetail.text = cliente_endereco.address_line1
 
 			else:
 				addressdetail.text = "Desconhecido"	#default
 
 			city = ET.SubElement(shiptoaddress,'City')
-			if cliente_endereco:
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				city.text = "Desconhecido"	#default
+			elif cliente_endereco:				
 				city.text = cliente_endereco.city
 
+			else:
+				city.text = "Desconhecido"	#default
+
 			postalcode = ET.SubElement(shiptoaddress,'PostalCode')
-			if cliente_endereco:
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				postalcode.text = "Desconhecido"	#default
+			elif cliente_endereco:				
 				postalcode.text = cliente_endereco.pincode
+
+			else:
+				postalcode.text = "Desconhecido"	#default
 
 			province = ET.SubElement(shiptoaddress,'Province')
 			if cliente_endereco:
 				province.text = cliente_endereco.city
 
 			country = ET.SubElement(shiptoaddress,'Country')
-			if cliente_endereco:
+			if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
+				country.text = "Desconhecido"	#default
+			elif cliente_endereco:				
 				if cliente_endereco.country == 'Angola':
 					country.text = "AO"
 				else:
 					country.text = cliente_endereco.country
+
+
+			else:
+				country.text = "Desconhecido"	#default
 
 
 
@@ -494,7 +561,7 @@ def gerar_saft_ao():
 
 
 			supplier = ET.SubElement(suppliers,'Supplier')
-			supplierid = ET.SubElement(supplier,'SuplierID')
+			supplierid = ET.SubElement(supplier,'SupplierID')
 			supplierid.text = fornecedor.name
 
 		
@@ -504,15 +571,20 @@ def gerar_saft_ao():
 					contasfornecedor = frappe.db.sql(""" select * from `tabAccount` where name like '31121000%%' and company = %s """,(empresa.name), as_dict=True)
 					print contasfornecedor
 					accountid.text = contasfornecedor[0].account_name
+					#accountid.text = contasfornecedor[0].account_number
 #				else:
 #					accountid.text = "Desconhecido"				
 			else:
 
 				accountid.text = contasfornecedor[0].account
+				#In case we need to get account_number instead
+				#contasfornecedor = frappe.db.sql(""" select * from `tabAccount` where name = %s and company = %s """,(contascliente[0].account,empresa.name), as_dict=True)
+				#accountid.text = contasfornecedor[0].account_number
 
 
-			supliertaxid = ET.SubElement(supplier,'SuplierTaxID')
-			supliertaxid.text = fornecedor.tax_id
+
+			suppliertaxid = ET.SubElement(supplier,'SupplierTaxID')
+			suppliertaxid.text = fornecedor.tax_id
 
 			companyname = ET.SubElement(supplier,'CompanyName')
 			companyname.text = fornecedor.supplier_name
@@ -692,15 +764,15 @@ def gerar_saft_ao():
 
 		taxexpirationdate = ET.SubElement(taxtableentry,'TaxExpirationDate')
 		if retencao.data_limite:
-			taxexpirationdate.text = str(retencao.data_limite.strftime("%Y-%m-%d %H:%M:%S"))
+			taxexpirationdate.text = str(retencao.data_limite.strftime("%Y-%m-%d"))
 
 		taxpercentage = ET.SubElement(taxtableentry,'TaxPercentage')
 		taxamount = ET.SubElement(taxtableentry,'TaxAmount')
 		if retencao.percentagem:
 			taxpercentage.text = str(retencao.percentagem)
-			taxamount.text = "0"	#default 
+			taxamount.text = "0"	#default POR VERIFICAR
 		else:
-			taxamount.text = "VALOR"	#default 
+			taxamount.text = "0"	#default 
 
 
 
@@ -745,7 +817,13 @@ def gerar_saft_ao():
 			journalid.text = str(jv.name)
 		
 			description = ET.SubElement(journal,'Description')
-			description.text = str(jv.user_remark)
+			if jv.user_remark != None:
+				description.text = str(jv.user_remark)
+			elif jv.cheque_no != None:
+				description.text = str(jv.cheque_no)
+			elif jv.remark != None:
+				description.text = str(jv.remark)
+
 
 			#transaction
 
@@ -757,13 +835,17 @@ def gerar_saft_ao():
 			period.text = str(jv.modified.year)		#check date YEAR
 
 			transactiondate = ET.SubElement(transaction,'TransactionDate')
-			transactiondate.text = str(jv.cheque_date)
+			if jv.cheque_date:
+				transactiondate.text = str(jv.cheque_date)
+			else:
+				transactiondate.text = str(jv.posting_date.strftime("%Y-%m-%d"))
 
 			sourceid = ET.SubElement(transaction,'SourceID')
 			sourceid.text = str(jv.owner)	
 
 			description = ET.SubElement(transaction,'Description')
-			description.text = str(jv.remark)	
+			if jv.user_remark != None:
+				description.text = str(jv.remark)	
 
 			docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
 			#Sera o GL ou pode ser o jv.name !!!!
@@ -782,7 +864,12 @@ def gerar_saft_ao():
 			#lines
 			lines = ET.SubElement(transaction,'Lines')
 			jvaccounts = frappe.db.sql(""" select * from `tabJournal Entry Account` where parent = %s order by idx """,(jv.name), as_dict=True)
+
 			for jvaccount in jvaccounts:
+				#In case we need to get account_number instead
+				#conta = frappe.db.sql(""" select * from `tabAccount` where name = %s and company = %s """,(jvaccount.account,empresa.name), as_dict=True)
+				#accountid.text = conta[0].account_number
+
 				#DEBIT
 				if jvaccount.debit != 0:
 					debitline = ET.SubElement(lines,'DebitLine')
@@ -791,7 +878,9 @@ def gerar_saft_ao():
 
 					accountid = ET.SubElement(debitline,'AccountID')
 					accountid.text = str(jvaccount.account)
+					#accountid.text = conta[0].account_number
 
+					#Is this SI/DN or the JV ID
 					sourcedocumentid = ET.SubElement(debitline,'SourceDocumentID')
 					sourcedocumentid.text = str(jvaccount.account)
 
@@ -820,6 +909,7 @@ def gerar_saft_ao():
 
 					accountid = ET.SubElement(creditline,'AccountID')
 					accountid.text = str(jvaccount.account)
+					#accountid.text = conta[0].account_number
 
 					sourcedocumentid = ET.SubElement(creditline,'SourceDocumentID')
 					sourcedocumentid.text = str(jvaccount.account)
@@ -857,7 +947,9 @@ def gerar_saft_ao():
 	#still need to filter per user request by MONTH or dates filter...
 	#Default CURRENT MONTH
 
-	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	#Debitos ou pagamentos
+	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' ) and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
 
 	print facturas
 	print int(facturas[0]['count(name)'])
@@ -873,6 +965,11 @@ def gerar_saft_ao():
 	if int(facturas[0]['count(name)']) !=0:
 		numberofentries.text = str(int(facturas[0]['count(name)']))
 		totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
+
+	#Creditos ou devolucoes
+	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and (status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	if int(facturas[0]['count(name)']) !=0:
+		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 
 
 
@@ -903,10 +1000,14 @@ def gerar_saft_ao():
 
 		invoicestatusdate = ET.SubElement(documentstatus,'InvoiceStatusDate')
 		#Will be needed to add T between date and time!!!!!!!
-		invoicestatusdate.text = factura.modified.strftime("%Y-%m-%d %H:%M:%S")	#ultima change
+		invoicestatusdate.text = factura.modified.strftime("%Y-%m-%dT%H:%M:%S")	#ultima change
 
 		reason = ET.SubElement(documentstatus,'Reason')
 		#Pode ser os Comments when deleted the Documents ....
+		if factura.remarks != 'No Remarks':
+			reason.text = factura.remarks
+		elif factura._comments != None:
+			reason.text = factura._comments
 
 		sourceid = ET.SubElement(documentstatus,'SourceID')
 		sourceid.text = factura.modified_by	#User
@@ -967,6 +1068,7 @@ def gerar_saft_ao():
 
 		customerid = ET.SubElement(invoice,'CustomerID')
 		customerid.text = factura.customer	#cliente
+
 
 		#shipto
 		shipto = ET.SubElement(invoice,'ShipTo')
@@ -1066,11 +1168,13 @@ def gerar_saft_ao():
 			serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
 			serialnumber.text = facturaitem.serial_no
 
-			debitamount = ET.SubElement(line,'DebitAmount')
-			debitamount.text = str(facturaitem.amount)
+			###If invoice was cancelled or deleted should not add...!!!!!
+			if factura.status !="Cancelled" and factura.docstatus != 2:
+				debitamount = ET.SubElement(line,'DebitAmount')
+				debitamount.text = str(facturaitem.amount)
 
-			creditamount = ET.SubElement(line,'CreditAmount')
-			#POR VER SE TEM....
+				creditamount = ET.SubElement(line,'CreditAmount')
+				#POR VER SE TEM....
 
 			#tax
 			taxes = ET.SubElement(line,'Taxes')
@@ -1079,12 +1183,16 @@ def gerar_saft_ao():
 
 			#procura no recibo pelo IS
 			#recibos = frappe.db.sql(""" select * from `tabPayment Entry` where parent = %s """,(factura.name), as_dict=True)
-			recibosreferencias = frappe.db.sql(""" select * from `tabPayment Entry Reference` where reference_doctype = 'sales invoice' and reference_name = %s """,(factura.name), as_dict=True)
+			recibosreferencias = frappe.db.sql(""" select * from `tabPayment Entry Reference` where reference_doctype = 'sales invoice' and docstatus = 1 and reference_name = %s """,(factura.name), as_dict=True)
 			print 'recibos refenrecias'
 			print factura.name
 			print recibosreferencias
+			if factura.name == 'FT0029/18-1':
+				print 'TEM IPC'
+				print facturaitem.imposto_de_consumo
+				
 
-			if facturaitem.imposto_de_consumo:	#Caso tem IPC
+			if facturaitem.imposto_de_consumo:	#Caso tem IPC or IVA
 
 				if recibosreferencias:
 					recibos = frappe.db.sql(""" select * from `tabPayment Entry` where name = %s """,(recibosreferencias[0].parent), as_dict=True)
@@ -1095,19 +1203,24 @@ def gerar_saft_ao():
 					entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='payment entry' and company = %s and voucher_no = %s """,(empresa.name,recibosreferencias[0].parent), as_dict=True)
 
 					print 'entradasgl+++++'
+
 					#print entradasgl
+					#return
+
+
 					if entradasgl:
 						for entradagl in entradasgl:
-							tax = ET.SubElement(taxes,'Tax')
-							taxtype = ET.SubElement(tax,'TaxType')
-
-							taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-							taxcountryregion.text = "AO"
 
 							print entradagl.account
 							print entradagl.credit_in_account_currency
-							if "34210000" in retencao.name:
-								#imposto de producao
+							if "34210000" in entradagl.account:
+								tax = ET.SubElement(taxes,'Tax')
+								taxtype = ET.SubElement(tax,'TaxType')
+
+								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+								taxcountryregion.text = "AO"
+
+								#imposto de producao e consumo IPC
 								taxtype.text = "NS"
 								taxcode = ET.SubElement(tax,'TaxCode')
 								taxcode.text = "NS"
@@ -1115,7 +1228,21 @@ def gerar_saft_ao():
 								retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'ipc' """,as_dict=True)
 								print retn
 
-							elif "34710000" in retencao.name:
+
+								taxpercentage = ET.SubElement(tax,'TaxPercentage')
+								taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+								taxamount = ET.SubElement(tax,'TaxAmount')
+								taxamount.text = str(entradagl.credit) 		
+
+
+							elif "34710000" in entradagl.account:
+								tax = ET.SubElement(taxes,'Tax')
+								taxtype = ET.SubElement(tax,'TaxType')
+
+								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+								taxcountryregion.text = "AO"
+
 								#imposto de selo
 								taxtype.text = "IS"
 								taxcode = ET.SubElement(tax,'TaxCode')
@@ -1125,7 +1252,20 @@ def gerar_saft_ao():
 								print retn
 
 
-							elif "34140000" in retencao.name:
+								taxpercentage = ET.SubElement(tax,'TaxPercentage')
+								taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+								taxamount = ET.SubElement(tax,'TaxAmount')
+								taxamount.text = str(entradagl.credit) 		
+
+
+							elif "34140000" in entradagl.account:
+								tax = ET.SubElement(taxes,'Tax')
+								taxtype = ET.SubElement(tax,'TaxType')
+
+								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+								taxcountryregion.text = "AO"
+
 								#retencao na fonte
 								taxtype.text = "NS"
 								taxcode = ET.SubElement(tax,'TaxCode')
@@ -1135,23 +1275,37 @@ def gerar_saft_ao():
 								print retn
 
 
-							elif "IVA" in retencao.name:
+								taxpercentage = ET.SubElement(tax,'TaxPercentage')
+								taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+								taxamount = ET.SubElement(tax,'TaxAmount')
+								taxamount.text = str(entradagl.debit) 		
+
+
+
+							elif "IVA" in entradagl.account:
+								tax = ET.SubElement(taxes,'Tax')
+								taxtype = ET.SubElement(tax,'TaxType')
+
+								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+								taxcountryregion.text = "AO"
+
 								#IVA	ainda por rever
 								taxtype.text = "IVA"
 								taxcode = ET.SubElement(tax,'TaxCode')
 								taxcode.text = "NOR"
 
-							else:
-								taxtype.text = "NS"
-								taxcode = ET.SubElement(tax,'TaxCode')
-								taxcode.text = "NS"
+							#else:
+							#	taxtype.text = "NS"
+							#	taxcode = ET.SubElement(tax,'TaxCode')
+							#	taxcode.text = "NS"
 
 
-							taxpercentage = ET.SubElement(tax,'TaxPercentage')
-							taxpercentage.text = "0"		#por ir buscar
+								taxpercentage = ET.SubElement(tax,'TaxPercentage')
+								taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-							taxamount = ET.SubElement(tax,'TaxAmount')
-							taxamount.text = "0" 		
+								taxamount = ET.SubElement(tax,'TaxAmount')
+								taxamount.text = str(entradagl.credit) 		
 			
 							#return			
 
@@ -1170,7 +1324,18 @@ def gerar_saft_ao():
 		documenttotals = ET.SubElement(invoice,'DocumentTotals')
 
 		taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-		taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar
+		print 'factura Referencia'
+		if factura.docstatus != 2:
+			salestaxescharges = frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parent = %s """,(factura.name),as_dict=True)
+			print salestaxescharges
+
+			if salestaxescharges: 
+				print salestaxescharges[0].tax_amount
+				taxpayable.text = str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+
+
+		#if retencao.credit_in_account_currency:
+		#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 		nettotal = ET.SubElement(documenttotals,'NetTotal')
 		nettotal.text = str(factura.net_total)		#Sem Impostos Total Factura
@@ -1235,6 +1400,9 @@ def gerar_saft_ao():
 
 			print 'entradasgl'
 			print entradasgl
+
+
+
 			if entradasgl:
 				for entradagl in entradasgl:
 
@@ -1249,7 +1417,7 @@ def gerar_saft_ao():
 						withholdingtaxdescription.text = entradagl.account
 
 						withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
-						withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
+						withholdingtaxamount.text = str(entradagl.credit)
 
 					elif "34120000" in entradagl.account:
 						#imposto industrial
@@ -1338,7 +1506,7 @@ def gerar_saft_ao():
 				movementstatus.text = "N"
 
 			movementstatusdate = ET.SubElement(documentstatus,'MovementStatusDate')
-			movementstatusdate.text = guiaremessa.modified.strftime("%Y-%m-%d %H:%M:%S")
+			movementstatusdate.text = guiaremessa.modified.strftime("%Y-%m-%dT%H:%M:%S")
 
 			reason = ET.SubElement(documentstatus,'Reason')
 			sourceid = ET.SubElement(documentstatus,'SourceID')
@@ -1359,7 +1527,7 @@ def gerar_saft_ao():
 			period.text = str(guiaremessa.modified.month)	#last modified month
 
 			movementdate = ET.SubElement(stockmovement,'MovementDate')
-			movementdate.text = guiaremessa.modified.strftime("%Y-%m-%d %H:%M:%S")
+			movementdate.text = guiaremessa.modified.strftime("%Y-%m-%dT%H:%M:%S")
 
 			movementtype = ET.SubElement(stockmovement,'MovementType')
 			movementtype.text = "GR"	#default Delivery Note
@@ -1697,7 +1865,7 @@ def gerar_saft_ao():
 				paymentstatus.text = "A"
 
 			paymentstatusdate = ET.SubElement(documentstatus,'PaymentStatusDate')
-			paymentstatusdate.text = recibo.modified.strftime("%Y-%m-%d %H:%M:%S")
+			paymentstatusdate.text = recibo.modified.strftime("%Y-%m-%dT%H:%M:%S")
 
 			reason = ET.SubElement(documentstatus,'Reason')
 
@@ -1757,12 +1925,108 @@ def gerar_saft_ao():
 				creditamount = ET.SubElement(line,'CreditAmount')
 
 				#tax
-				tax = ET.SubElement(line,'Tax')
-				taxtype = ET.SubElement(tax,'TaxType')
-				taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-				taxcode = ET.SubElement(tax,'TaxCode')
-				taxpercentage = ET.SubElement(tax,'TaxPercentage')
-				taxamount = ET.SubElement(tax,'TaxAmount')
+				#tax = ET.SubElement(line,'Tax')
+
+				entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='payment entry' and company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
+
+
+				for entradagl in entradasgl:
+
+					if "34210000" in entradagl.account:
+						tax = ET.SubElement(line,'Tax')
+
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
+
+						#imposto de producao e consumo IPC
+						taxtype.text = "NS"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NS"
+
+						retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'ipc' """,as_dict=True)
+						print retn
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						taxamount.text = str(entradagl.credit) 		
+
+
+					elif "34710000" in entradagl.account:
+						tax = ET.SubElement(line,'Tax')
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
+
+						#imposto de selo
+						taxtype.text = "IS"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NS"
+
+						retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  like '%%selo' """,as_dict=True)
+						print retn
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						taxamount.text = str(entradagl.credit) 		
+
+
+					elif "34140000" in entradagl.account:
+						tax = ET.SubElement(line,'Tax')
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
+
+						#retencao na fonte
+						taxtype.text = "NS"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NS"
+
+						retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  like '%%fonte' """,as_dict=True)
+						print retn
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						taxamount.text = str(entradagl.debit) 		
+
+
+
+					elif "IVA" in entradagl.account:
+						tax = ET.SubElement(line,'Tax')
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
+
+						#IVA	ainda por rever
+						taxtype.text = "IVA"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NOR"
+
+					#else:
+					#	taxtype.text = "NS"
+					#	taxcode = ET.SubElement(tax,'TaxCode')
+					#	taxcode.text = "NS"
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						taxamount.text = str(entradagl.credit) 		
+			
 				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
 				taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
 
@@ -1925,662 +2189,4 @@ def validar_xml_xsd(xml_path, xsd_path):
 
 	print result
 
-
-
-def convert_xml():
-	
-
-	print 'creating Header'
-
-	head = ET.Element('Header')
-	auditfileversion = ET.SubElement(head,'AuditFile Version')
-	companyid = ET.SubElement(head,'Company ID')	
-	taxregistrationnumber = ET.SubElement(head,'Tax Registration Number')
-	taxaccountingbasis = ET.SubElement(head,'Tax Accounting Basis')
-
-	companyname = ET.SubElement(head,'Company Name')
-	businessname = ET.SubElement(companyname,'Business Name')
-	companyaddress = ET.SubElement(companyname,'Company Address')
-	buildingnumber = ET.SubElement(companyname,'Building Number')
-	streetname = ET.SubElement(companyname,'Street Name')
-	addressdetail = ET.SubElement(companyname,'Address Detail')
-	city = ET.SubElement(companyname,'City')
-	postalcode = ET.SubElement(companyname,'Postal Code')
-	region = ET.SubElement(companyname,'Region')
-	country = ET.SubElement(companyname,'Country')
-	fiscalyear = ET.SubElement(companyname,'Fiscal Year')
-	startdate = ET.SubElement(companyname,'Sart Date')
-	enddate = ET.SubElement(companyname,'End Date')
-	currencycode = ET.SubElement(companyname,'Currency Code')
-	datecreated = ET.SubElement(companyname,'Date Created')
-	taxentity = ET.SubElement(companyname,'Tax Entity')
-	productcompanytaxid = ET.SubElement(head,'Product Company Tax ID')
-	softwarevalidationnumber = ET.SubElement(head,'Software Validation Number')
-	productid = ET.SubElement(head,'Product ID')
-	productversion = ET.SubElement(head,'Product Version')
-	headercomment = ET.SubElement(head,'Header Comment')
-	telephone = ET.SubElement(companyname,'Telephone')
-	fax = ET.SubElement(companyname,'Fax')
-	email = ET.SubElement(companyname,'Email')
-	website = ET.SubElement(companyname,'Website')
-
-	# END OF HEADER
-	#Set os textos dos campos acima ..... using TEXT
-	
-	#Still need to add DATA FOR HEADER
-
-	#MasterFiles
-	#GeneralLedgerAccounts
-	masterfiles = ET.Element('MasterFiles')
-
-	generalledgeraccounts = ET.SubElement(masterfiles,'GeneralLedgerAccounts')
-	account = ET.SubElement(generalledgeraccounts,'Account')
-	accountid = ET.SubElement(account,'AccountID')
-	accountdescription = ET.SubElement(account,'AccountDescription')		
-	openingcreditbalance = ET.SubElement(account,'Opening Debit Balance')
-	openingdebitbalance = ET.SubElement(account,'Opening Credit Balance')
-	closingdebitbalance = ET.SubElement(account,'Closing Debit Balance')
-	closingdebitbalance = ET.SubElement(account,'Closing Credit Balance')
-	groupingcategory = ET.SubElement(account,'GroupingCategory')
-	groupingcode = ET.SubElement(account,'GroupingCode')
-
-	#END OF GeneralLedgerAccounts
-
-	#Still need to add DATA GeneralLedgerAccounts
-
-	#Customers
-	customers = ET.SubElement(masterfiles,'Customers')
-	customer = ET.SubElement(customers,'Customer')
-	customerid = ET.SubElement(customer,'CustomerID')
-	accountid = ET.SubElement(customer,'AccountID')
-	cutomertaxid = ET.SubElement(customer,'Customer Tax ID')
-	companyname = ET.SubElement(customer,'Company Name')
-	contact = ET.SubElement(customer,'Contact')
-	#address
-	address = ET.SubElement(customer,'Address')
-	billingaddress = ET.SubElement(address,'Billing Address')
-	streetname = ET.SubElement(address,'Street Name')
-	addressdetail = ET.SubElement(address,'Address Detail')
-	city = ET.SubElement(address,'City')
-	postalcode = ET.SubElement(address,'PostalCode')
-	region = ET.SubElement(address,'Region')
-	country = ET.SubElement(address,'Country')
-	shiptoaddress = ET.SubElement(address,'ShipToAddress')
-	buildingnumber = ET.SubElement(address,'BuildingNumber')
-	#address 1
-	address1 = ET.SubElement(customer,'Address1')
-	streetname = ET.SubElement(address1,'Street Name')
-	addressdetail = ET.SubElement(address1,'Address Detail')
-	city = ET.SubElement(address1,'City')
-	postalcode = ET.SubElement(address1,'PostalCode')
-	region = ET.SubElement(address1,'Region')
-	country = ET.SubElement(address1,'Country')
-	telephone = ET.SubElement(customer,'Telephone')
-	fax = ET.SubElement(customer,'Fax')
-	email = ET.SubElement(customer,'Email')
-	website = ET.SubElement(customer,'Website')
-	selfbillingindicator = ET.SubElement(customer,'SelfBillingIndicator')
-
-
-	#END OF Customers
-
-	#Still need to add DATA Customers
-
-	#Suppliers
-	suppliers = ET.SubElement(masterfiles,'Suppliers')
-	supplier = ET.SubElement(suppliers,'Supplier')
-	supplierid = ET.SubElement(supplier,'SuplierID')
-	accountid = ET.SubElement(supplier,'AccountID')
-	supliertaxid = ET.SubElement(supplier,'SuplierTaxID')
-	companyname = ET.SubElement(supplier,'CompanyName')
-	#address
-	address = ET.SubElement(supplier,'Address')
-	billingaddress = ET.SubElement(address,'Billing Address')
-	streetname = ET.SubElement(address,'Street Name')
-	addressdetail = ET.SubElement(address,'Address Detail')
-	city = ET.SubElement(address,'City')
-	postalcode = ET.SubElement(address,'PostalCode')
-	region = ET.SubElement(address,'Region')
-	country = ET.SubElement(address,'Country')
-	shipfromaddress = ET.SubElement(address,'ShipFromAddress')
-	buildingnumber = ET.SubElement(address,'BuildingNumber')
-	#address 1
-	address1 = ET.SubElement(supplier,'Address1')
-	streetname = ET.SubElement(address1,'Street Name')
-	addressdetail = ET.SubElement(address1,'Address Detail')
-	city = ET.SubElement(address1,'City')
-	postalcode = ET.SubElement(address1,'PostalCode')
-	region = ET.SubElement(address1,'Region')
-	country = ET.SubElement(address1,'Country')
-	telephone = ET.SubElement(supplier,'Telephone')
-	fax = ET.SubElement(supplier,'Fax')
-	email = ET.SubElement(supplier,'Email')
-	website = ET.SubElement(supplier,'Website')
-	selfbillingindicator = ET.SubElement(supplier,'SelfBillingIndicator')
-
-	#END OF Suppliers
-
-	#Still need to add DATA Suppliers
-
-
-	#Products
-
-	products = ET.SubElement(masterfiles,'Products')
-	product = ET.SubElement(products,'Product')
-	producttype = ET.SubElement(product,'Product Type')
-	productcode = ET.SubElement(product,'Product Code')
-	productgroup = ET.SubElement(product,'Product Group')
-	productdescription = ET.SubElement(product,'Product Description')
-	productnumbercode = ET.SubElement(product,'Product Number Code')
-	customsdetails = ET.SubElement(product,'Customs Details')
-	unnumber = ET.SubElement(product,'UNNumber')
-
-	#END OF Products
-
-	#Still need to add DATA Products
-
-
-	#TaxTable
-
-	taxtable = ET.SubElement(masterfiles,'TaxTable')
-	taxtableentry = ET.SubElement(taxtable,'TaxTableEntry')
-	taxtype = ET.SubElement(taxtableentry,'Tax Type')
-	taxcountryregion = ET.SubElement(taxtableentry,'Tax Country Region')
-	taxcode = ET.SubElement(taxtableentry,'Tax Code')
-	description = ET.SubElement(taxtableentry,'Description')
-	taxexpirationdate = ET.SubElement(taxtableentry,'Tax Expiration Date')
-	taxpercentage = ET.SubElement(taxtableentry,'Tax Percentage')
-	taxamount = ET.SubElement(taxtableentry,'Tax Amount')
-
-	#END OF TaxTable
-
-	#Still need to add DATA TaxTable
-
-
-
-	###### FECHA O MASTER FILES
-
-	#GeneralLEdgerEntries
-	generalledgerentries = ET.Element('GeneralLedgerEntries')
-	numberofentries = ET.SubElement(generalledgerentries,'NumberOfEntries')
-	totaldebit = ET.SubElement(generalledgerentries,'TotalDebit')
-	totalcredit = ET.SubElement(generalledgerentries,'TotalCredit')
-	journal = ET.SubElement(generalledgerentries,'Journal')
-	journalid = ET.SubElement(journal,'JournalID')
-	description = ET.SubElement(journal,'Description')
-	#transaction
-	transaction = ET.SubElement(journal,'Transaction')
-	transactionid = ET.SubElement(transaction,'TransactionID')
-	period = ET.SubElement(transaction,'Period')
-	transactiondate = ET.SubElement(transaction,'TransactionDate')
-	sourceid = ET.SubElement(transaction,'SourceID')
-	description = ET.SubElement(transaction,'Description')
-	docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
-	transactiontype = ET.SubElement(transaction,'TransactionType')
-	glpostingdate = ET.SubElement(transaction,'GLPostingDate')
-	customerid = ET.SubElement(transaction,'CustomerID')
-	supplierid = ET.SubElement(transaction,'SupplierID')
-	#lines
-	lines = ET.SubElement(generalledgerentries,'Lines')
-	debitline = ET.SubElement(lines,'Debit Line')
-	recordid = ET.SubElement(lines,'Record ID')
-	accountid = ET.SubElement(lines,'Account ID')
-	sourcedocumentid = ET.SubElement(lines,'Source Document ID')
-	systementrydate = ET.SubElement(lines,'System Entry Date')
-	description = ET.SubElement(lines,'Description')
-	debitamount = ET.SubElement(lines,'Debit Amount')
-	#lines 1
-	lines1 = ET.SubElement(generalledgerentries,'Lines1')
-	creditline = ET.SubElement(lines1,'Credit Line')
-	recordid = ET.SubElement(lines1,'RecordID')
-	accountid = ET.SubElement(lines1,'Account ID')
-	sourcedocumentid = ET.SubElement(lines1,'Source Document ID')
-	systementrydate = ET.SubElement(lines1,'System Entry Date')
-	description = ET.SubElement(lines1,'description')
-	creditamount = ET.SubElement(lines1,'CreditAmount')
-
-
-
-	#END OF GeneralLEdgerEntries
-
-	#Still need to add DATA GeneralLEdgerEntries
-
-
-
-	#SalesInvoices
-	salesinvoices = ET.Element('SalesInvoices')
-	numberofentries = ET.SubElement(salesinvoices,'NumberOfEntries')
-	totaldebit = ET.SubElement(salesinvoices,'TotalDebit')
-	totalcredit = ET.SubElement(salesinvoices,'TotalCredit')
-	#invoice
-	invoice = ET.SubElement(salesinvoices,'Invoice')
-	invoiceno = ET.SubElement(invoice,'InvoiceNo')
-	#documentstatus
-	documentstatus = ET.SubElement(invoice,'DocumentStatus')
-	invoicestatus = ET.SubElement(documentstatus,'InvoiceStatus')
-	invoicestatusdate = ET.SubElement(documentstatus,'InvoiceStatusDate')
-	reason = ET.SubElement(documentstatus,'Reason')
-	sourceid = ET.SubElement(documentstatus,'SourceID')
-	sourcebilling = ET.SubElement(documentstatus,'SourceBilling')
-
-	salesinvoicehash = ET.SubElement(invoice,'Hash')
-	salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-	period = ET.SubElement(invoice,'Period')
-	invoicedate = ET.SubElement(invoice,'InvoiceDate')
-	invoicetype = ET.SubElement(invoice,'InvoiceType')
-	#specialRegimes
-	specialregimes = ET.SubElement(invoice,'SpecialRegimes')
-	selfbillingindicator = ET.SubElement(specialregimes,'SelfBillingIndicator')
-	cashvatschemeindicator = ET.SubElement(specialregimes,'CashVATSchemeIndicator')
-	thirdpartiesbillingindicator = ET.SubElement(specialregimes,'ThirdPartiesBillingIndicator')
-
-	sourceid = ET.SubElement(invoice,'SourceID')
-	eaccode = ET.SubElement(invoice,'EACCode')
-	systementrydate = ET.SubElement(invoice,'SystemEntryDate')
-	transactionid = ET.SubElement(invoice,'TransactionID')
-	customerid = ET.SubElement(invoice,'CustomerID')
-	#shipto
-	shipto = ET.SubElement(invoice,'ShipTo')
-	deliveryid = ET.SubElement(shipto,'DeliveryID')
-	deliverydate = ET.SubElement(shipto,'DeliveryDate')
-	warehouseid = ET.SubElement(shipto,'WarehouseID')
-	locationid = ET.SubElement(shipto,'LocationID')
-	#address
-	address = ET.SubElement(shipto,'Address')	
-	buildingnumber = ET.SubElement(address,'BuildingNumber')
-	streetname = ET.SubElement(address,'StreetName')
-	addressdetail = ET.SubElement(address,'AddressDetail')
-	city = ET.SubElement(address,'City')
-	postalcode = ET.SubElement(address,'PostalCode')
-	region = ET.SubElement(address,'Region')
-	country = ET.SubElement(address,'Country')
-	#shipfrom
-	shipfrom = ET.SubElement(invoice,'ShipFrom')
-	deliveryid = ET.SubElement(shipfrom,'DeliveryID')
-	deliverydate = ET.SubElement(shipfrom,'DeliveryDate')
-	warehouseid = ET.SubElement(shipfrom,'WarehouseID')
-	locationid = ET.SubElement(shipfrom,'LocationID')
-	#address
-	address = ET.SubElement(shipfrom,'Address')
-	buildingnumber = ET.SubElement(address,'BuildingNumber')
-	streetname = ET.SubElement(address,'StreetName')
-	addressdetail = ET.SubElement(address,'AddressDetail')
-	city = ET.SubElement(address,'City')
-	postalcode = ET.SubElement(address,'PostalCode')
-	region = ET.SubElement(address,'Region')
-	country = ET.SubElement(address,'Country')
-
-	movementendtime = ET.SubElement(invoice,'MovementEndTime')
-	movementstarttime = ET.SubElement(invoice,'MovementStartTime')
-	#line
-	line = ET.SubElement(invoice,'Line')
-	linenumber = ET.SubElement(line,'LineNumber')
-	#orderreferences
-	orderreferences = ET.SubElement(line,'OrderReferences')
-	originatingon = ET.SubElement(orderreferences,'OriginatingON')
-	orderdate = ET.SubElement(orderreferences,'OrderDate')
-	productdate = ET.SubElement(line,'ProductDate')
-	productdescription = ET.SubElement(line,'ProductDescription')
-	quantity = ET.SubElement(line,'Quantity')
-	unifofmeasure = ET.SubElement(line,'UnifOfMeasure')
-	unitprice = ET.SubElement(line,'UnitPrice')
-	taxbase = ET.SubElement(line,'TaxBase')
-	taxpointdate = ET.SubElement(line,'TaxPointDate')
-	#references
-	references = ET.SubElement(line,'References')
-	reference = ET.SubElement(references,'Reference')
-	reason = ET.SubElement(references,'Reason')
-	description = ET.SubElement(references,'Description')
-	#productserialnumber
-	productserialnumber = ET.SubElement(line,'ProductSerialNumber')
-	serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
-	debitamount = ET.SubElement(line,'DebitAmount')
-	creditamount = ET.SubElement(line,'CreditAmount')
-	#tax
-	tax = ET.SubElement(line,'Tax')
-	taxtype = ET.SubElement(tax,'TaxType')
-	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-	taxcode = ET.SubElement(tax,'TaxCode')
-	taxpercentage = ET.SubElement(tax,'TaxPercentage')
-	taxamount = ET.SubElement(tax,'TaxAmount')
-	taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
-	taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
-	settlementamount = ET.SubElement(tax,'SettlementAmount')
-	#customsinformation
-	customsinformation = ET.SubElement(line,'CustomsInformation')
-	arcno = ET.SubElement(customsinformation,'ARCNo')
-	iecamount = ET.SubElement(customsinformation,'IECAmount')
-	#documenttotals
-	documenttotals = ET.SubElement(line,'DocumentTotals')
-	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-	nettotal = ET.SubElement(documenttotals,'NetTotal')
-	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-	#currency
-	currency = ET.SubElement(line,'Currency')
-	currencycode = ET.SubElement(currency,'CurrencyCode')
-	currencyamount = ET.SubElement(currency,'CurrencyAmount')
-	exchangerate = ET.SubElement(currency,'ExchangeRate')
-	#settlement
-	settlement = ET.SubElement(line,'Settlement')
-	settlementdiscount = ET.SubElement(settlement,'SettlementDiscount')
-	settlementamount = ET.SubElement(settlement,'SettlementAmount')
-	settlementdate = ET.SubElement(settlement,'SettlementDate')
-	paymentterms = ET.SubElement(settlement,'PaymentTerms')
-	#payment
-	payment = ET.SubElement(line,'Payment')
-	paymentmechanism = ET.SubElement(payment,'PaymentMechanism')
-	paymentamount = ET.SubElement(payment,'PaymentAmount')
-	paymentdate = ET.SubElement(payment,'PaymentDate')
-	#witholdingtax
-	withholdingtax = ET.SubElement(line,'WithholdingTax')
-	withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
-	withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-	withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
-
-
-	#END OF SAlesInvoice
-
-	#Still need to add DATA SAlesInvoice
-
-
-	#MovementOfGoods
-	movementofgoods = ET.Element('MovementOfGoods')
-	numberofmovementlines = ET.SubElement(movementofgoods,'NumberOfMovimentLines')
-	totalquantityissued = ET.SubElement(movementofgoods,'TotalQuantityIssued')
-	stockmovement = ET.SubElement(movementofgoods,'StockMovement')
-	documentnumber = ET.SubElement(movementofgoods,'DocumentNumber')
-	documentstatus = ET.SubElement(movementofgoods,'DocumentStatus')
-	movementstatus = ET.SubElement(movementofgoods,'MovementStatus')
-	movementstatusdate = ET.SubElement(movementofgoods,'MovementStatusDate')
-	reason = ET.SubElement(movementofgoods,'Reason')
-	sourceid = ET.SubElement(movementofgoods,'SourceID')
-	sourcebilling = ET.SubElement(movementofgoods,'SourceBilling')
-	movementofgoodshash = ET.SubElement(movementofgoods,'Hash')
-	movementofgoodshashcontrol = ET.SubElement(movementofgoods,'HashControl')
-	period = ET.SubElement(movementofgoods,'Period')
-	movementdate = ET.SubElement(movementofgoods,'MovementDate')
-	movementtype = ET.SubElement(movementofgoods,'MovementType')
-	systementrydate = ET.SubElement(movementofgoods,'SystemEntryDate')
-	transactionid = ET.SubElement(movementofgoods,'TransactionID')
-	customerid = ET.SubElement(movementofgoods,'CustomerID')
-	supplierid = ET.SubElement(movementofgoods,'SupplierID')
-	sourceid = ET.SubElement(movementofgoods,'SourceID')
-	eaccode = ET.SubElement(movementofgoods,'EACCode')
-	movementcomments = ET.SubElement(movementofgoods,'MovementComments')
-	shipto = ET.SubElement(movementofgoods,'ShipTo')
-	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
-	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
-	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
-	locationid = ET.SubElement(movementofgoods,'LocationId')
-	address = ET.SubElement(movementofgoods,'Address')
-	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
-	streetname = ET.SubElement(movementofgoods,'StreetName')
-	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
-	city = ET.SubElement(movementofgoods,'City')
-	postalcode = ET.SubElement(movementofgoods,'PostalCode')
-	region = ET.SubElement(movementofgoods,'Region')
-	country = ET.SubElement(movementofgoods,'Country')
-	shipfrom = ET.SubElement(movementofgoods,'ShipFrom')
-	deliveryid = ET.SubElement(movementofgoods,'DeliveryID')
-	deliverydate = ET.SubElement(movementofgoods,'DeliveryDate')
-	warehouseid = ET.SubElement(movementofgoods,'WarehouseID')
-	locationid = ET.SubElement(movementofgoods,'LocationID')
-	address = ET.SubElement(movementofgoods,'Address')
-	buildingnumber = ET.SubElement(movementofgoods,'BuildingNumber')
-	streetname = ET.SubElement(movementofgoods,'StreetName')
-	addressdetail = ET.SubElement(movementofgoods,'AddressDetail')
-	city = ET.SubElement(movementofgoods,'City')
-	postalcode = ET.SubElement(movementofgoods,'PostalCode')
-	region = ET.SubElement(movementofgoods,'Region')
-	country = ET.SubElement(movementofgoods,'Country')
-	movementendtime = ET.SubElement(movementofgoods,'MovementEndTime')
-	movementstarttime = ET.SubElement(movementofgoods,'MovementStartTime')
-	codigoidentificacaodocumento = ET.SubElement(movementofgoods,'CodigoIdentificacaoDocumento')
-	line = ET.SubElement(movementofgoods,'Line')
-	linenumber = ET.SubElement(movementofgoods,'LineNumber')
-	orderreferences = ET.SubElement(movementofgoods,'OrderReferences')
-	originatingon = ET.SubElement(movementofgoods,'OriginatingON')
-	orderdate = ET.SubElement(movementofgoods,'OrderDate')
-	productcode = ET.SubElement(movementofgoods,'ProductCode')
-	productdescription = ET.SubElement(movementofgoods,'ProductDescription')
-	quantity = ET.SubElement(movementofgoods,'Quantity')
-	unitofmeasure = ET.SubElement(movementofgoods,'UnifOfMeasure')
-	unitprice = ET.SubElement(movementofgoods,'UnitPrice')
-	description = ET.SubElement(movementofgoods,'Description')
-	productserialnumber = ET.SubElement(movementofgoods,'ProductSerialNumber')
-	serialnumber = ET.SubElement(movementofgoods,'SerialNumber')
-	debitamount = ET.SubElement(movementofgoods,'DebitAmount')
-	creditamount = ET.SubElement(movementofgoods,'creditAmount')
-	tax = ET.SubElement(movementofgoods,'Tax')
-	taxtype = ET.SubElement(movementofgoods,'TaxType')
-	taxcountryregion = ET.SubElement(movementofgoods,'TaxCountryRegion')
-	taxcode = ET.SubElement(movementofgoods,'TaxCode')
-	taxpercentage = ET.SubElement(movementofgoods,'TaxPercentage')
-	taxexemptionreason = ET.SubElement(movementofgoods,'TaxExemptionReason')
-	taxexemptioncode = ET.SubElement(movementofgoods,'TaxExemptionCode')
-	settlementamount = ET.SubElement(movementofgoods,'SettlementAmount')
-
-	#customsinformation
-	customsinformation = ET.SubElement(movementofgoods,'CustomsInformation')
-	arcno = ET.SubElement(customsinformation,'ARCNo')
-	iecamount = ET.SubElement(customsinformation,'IECAmount')
-	#documenttotals
-	documenttotals = ET.SubElement(movementofgoods,'DocumentTotals')
-	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-	nettotal = ET.SubElement(documenttotals,'NetTotal')
-	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-	#currency
-	currency = ET.SubElement(movementofgoods,'Currency')
-	currencycode = ET.SubElement(currency,'CurrencyCode')
-	currencyamount = ET.SubElement(currency,'CurrencyAmount')
-	exchangerate = ET.SubElement(currency,'ExchangeRate')
-
-
-	#END OF MovementOfGoods
-
-	#Still need to add DATA MovementOfGoods
-
-
-	#WorkingDocuments
-	workingdocuments = ET.Element('WorkingDocuments')
-	numberofentries = ET.SubElement(workingdocuments,'NumberOfEntries')
-	totaldebit = ET.SubElement(workingdocuments,'TotalDebit')
-	totalcredit = ET.SubElement(workingdocuments,'TotalCredit')
-	workdocument = ET.SubElement(workingdocuments,'WorkDocument')
-	documentnumber = ET.SubElement(workingdocuments,'DocumentNumber')
-	codigounicodocumento = ET.SubElement(workingdocuments,'CodigoUnicoDocumento')
-	documentstatus = ET.SubElement(workingdocuments,'DocumentStatus')
-	workstatus = ET.SubElement(workingdocuments,'WorkStatus')
-	workstatusdate = ET.SubElement(workingdocuments,'WorkStatusDate')
-	reason = ET.SubElement(workingdocuments,'Reason')
-	sourceid = ET.SubElement(workingdocuments,'SourceID')
-	sourcebilling = ET.SubElement(workingdocuments,'SourceBilling')
-	workingdocumentshash = ET.SubElement(workingdocuments,'Hash')
-	workingdocumentshashcontrol = ET.SubElement(workingdocuments,'HashControl')
-	period = ET.SubElement(workingdocuments,'Period')
-	workdate = ET.SubElement(workingdocuments,'WorkDate')
-	worktype = ET.SubElement(workingdocuments,'WorkType')
-	sourceid = ET.SubElement(workingdocuments,'SourceID')
-	eaccode = ET.SubElement(workingdocuments,'EACCode')
-	systementrydate = ET.SubElement(workingdocuments,'SystemEntryDate')
-	transactionid = ET.SubElement(workingdocuments,'TransactionID')
-
-	customerid = ET.SubElement(workingdocuments,'CustomerID')
-	#line
-	line = ET.SubElement(workingdocuments,'Line')
-	linenumber = ET.SubElement(line,'LineNumber')
-	orderreferences = ET.SubElement(line,'OrderReferences')
-	originatingon = ET.SubElement(orderreferences,'OriginatingON')
-	orderdate = ET.SubElement(orderreferences,'OrderDate')
-
-	productcode = ET.SubElement(line,'ProductCode')
-	productdescription = ET.SubElement(line,'ProductDescription')
-	quantity = ET.SubElement(line,'Quantity')
-	unitofmeasure = ET.SubElement(line,'UnifOfMeasure')
-	unitprice = ET.SubElement(line,'UnitPrice')
-	taxbase = ET.SubElement(line,'TaxBase')
-	taxpointdate = ET.SubElement(line,'TaxPointDate')
-	#references
-	references = ET.SubElement(line,'References')
-	reference = ET.SubElement(references,'Reference')
-	reason = ET.SubElement(references,'Reason')
-	description = ET.SubElement(references,'Description')
-	#productserialnumber
-	productserialnumber = ET.SubElement(line,'ProductSerialNumber')
-	serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
-	debitamount = ET.SubElement(line,'DebitAmount')
-	creditamount = ET.SubElement(line,'CreditAmount')
-	#tax
-	tax = ET.SubElement(line,'Tax')
-	taxtype = ET.SubElement(tax,'TaxType')
-	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-	taxcode = ET.SubElement(tax,'TaxCode')
-	taxpercentage = ET.SubElement(tax,'TaxPercentage')
-	taxamount = ET.SubElement(tax,'TaxAmount')
-	taxexemptionreason = ET.SubElement(tax,'TaxExemptionReason')
-	taxexemptioncode = ET.SubElement(tax,'TaxExemptionCode')
-
-	settlementamount = ET.SubElement(tax,'SettlementAmount')
-	#customsinformation
-	customsinformation = ET.SubElement(line,'CustomsInformation')
-	arcno = ET.SubElement(customsinformation,'ARCNo')
-	iecamount = ET.SubElement(customsinformation,'IECAmount')
-	#documenttotals
-	documenttotals = ET.SubElement(workingdocuments,'DocumentTotals')
-	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-	nettotal = ET.SubElement(documenttotals,'NetTotal')
-	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-	#currency
-	currency = ET.SubElement(documenttotals,'Currency')
-	currencycode = ET.SubElement(currency,'CurrencyCode')
-	currencyamount = ET.SubElement(currency,'CurrencyAmount')
-	exchangerate = ET.SubElement(currency,'ExchangeRate')
-
-
-	#END OF WorkingDocuments
-
-	#Still need to add DATA WorkingDocuments
-
-
-	#Payments
-	payments = ET.Element('Payments')
-	numberofentries = ET.SubElement(payments,'NumberOfEntries')
-	totaldebit = ET.SubElement(payments,'TotalDebit')
-	totalcredit = ET.SubElement(payments,'TotalCredit')
-	#payment
-	payment = ET.SubElement(payments,'Payment')
-	paymentrefno = ET.SubElement(payment,'PaymentRefNo')
-	period = ET.SubElement(payment,'Period')
-	transactionid = ET.SubElement(payment,'TransactionID')
-	transactiondate = ET.SubElement(payment,'TransactionDate')
-	paymenttype = ET.SubElement(payment,'PaymentType')
-	description = ET.SubElement(payment,'Description')
-	systemid = ET.SubElement(payment,'SystemID')
-	documentstatus = ET.SubElement(payment,'DocumentStatus')
-	paymentstatus = ET.SubElement(documentstatus,'PaymentStatus')	
-	paymentstatusdate = ET.SubElement(documentstatus,'PaymentStatusDate')
-	reason = ET.SubElement(documentstatus,'Reason')
-	sourceid = ET.SubElement(documentstatus,'SourceID')
-	sourcepayment = ET.SubElement(documentstatus,'SourcePayment')
-	paymentmethod = ET.SubElement(payment,'PaymentMethod')
-	paymentmechanism = ET.SubElement(paymentmethod,'PaymentMechanism')
-	paymentamount = ET.SubElement(paymentmethod,'PaymentAmount')
-	paymentdate = ET.SubElement(paymentmethod,'PaymentDate')
-	sourceid = ET.SubElement(payment,'SourceID')
-	systementrydate = ET.SubElement(payment,'SystemEntryDate')
-	customerid = ET.SubElement(payment,'CustomerID')
-
-	#line
-	line = ET.SubElement(payment,'Line')
-	linenumber = ET.SubElement(line,'LineNumber')
-	sourcedocumentid = ET.SubElement(line,'SourceDocumentID')
-	originatingon = ET.SubElement(sourcedocumentid,'OriginatingON')
-	invoicedate = ET.SubElement(sourcedocumentid,'InvoiceDate')
-	description = ET.SubElement(sourcedocumentid,'Description')
-
-	settlementamount = ET.SubElement(line,'SettlementAmount')
-	debitamount = ET.SubElement(line,'DebitAmount')
-	creditamount = ET.SubElement(line,'CreditAmount')
-	#tax
-	tax = ET.SubElement(line,'Tax')
-	taxtype = ET.SubElement(tax,'TaxType')
-	taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-	taxcode = ET.SubElement(tax,'TaxCode')
-	taxpercentage = ET.SubElement(tax,'TaxPercentage')
-	taxamount = ET.SubElement(tax,'TaxAmount')
-	taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
-	taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
-	#documenttotals
-	documenttotals = ET.SubElement(payment,'DocumentTotals')
-	taxpayable = ET.SubElement(documenttotals,'TaxPayable')
-	nettotal = ET.SubElement(documenttotals,'NetTotal')
-	grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-	#settlement
-	settlement = ET.SubElement(documenttotals,'Settlement')
-	settlementamount = ET.SubElement(settlement,'SettlementAmount')
-	#currency
-	currency = ET.SubElement(documenttotals,'Currency')
-	currencycode = ET.SubElement(currency,'CurrencyCode')
-	currencyamount = ET.SubElement(currency,'CurrencyAmount')
-	exchangerate = ET.SubElement(currency,'ExchangeRate')
-	#witholdingtax
-	withholdingtax = ET.SubElement(payment,'WithholdingTax')
-	withholdingtaxtype = ET.SubElement(withholdingtax,'WithholdingTaxType')
-	withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-	withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
-
-
-	#END OF Payments
-
-	#Still need to add DATA Payments
-
-
-	#Invoices
-	invoices = ET.Element('Invoices')
-	numberofentries = ET.SubElement(invoices,'NumberOfEntries')
-	invoicedate = ET.SubElement(invoices,'InvoiceDate')
-	period = ET.SubElement(invoices,'Period')
-	invoicetype = ET.SubElement(invoices,'InvoiceType')
-	sourceid = ET.SubElement(invoices,'SourceID')
-	supplierid = ET.SubElement(invoices,'SupplierID')
-	invoiceno = ET.SubElement(invoices,'InvoiceNo')
-	documenttotals = ET.SubElement(invoices,'DocumentTotals')
-	inputtax = ET.SubElement(invoices,'InputTax')
-	taxbase = ET.SubElement(invoices,'TaxBase')
-	grosstotal = ET.SubElement(invoices,'GrossTotal')
-	deductibletax = ET.SubElement(invoices,'DeductibleTax')
-	deductiblepercentage = ET.SubElement(invoices,'DeductiblePercentage')
-	currencycode = ET.SubElement(invoices,'CurrencyCode')
-	currencyamount = ET.SubElement(invoices,'CurrencyAmount')
-	operationtype = ET.SubElement(invoices,'OperationType')
-
-	#END OF Invoices
-
-	#Still need to add DATA Invoices
-
-
-	print 'Convert XML'
-
-	data = ET.Element('root')
-	row = ET.SubElement(data,'row')
-	#Campos do file CSV....
-	cust = ET.SubElement(row,'customer_name')
-	custtype = ET.SubElement(row,'customer_type')
-
-	custgroup = ET.SubElement(row,'customer_group')
-
-	cust.text= 'Virgilio Luis'
-
-	custtype.text = 'Individual'
-
-	custgroup.text = 'Funcionarios'
-
-	#record the data...	
-	mydata = ET.tostring(data, encoding='utf8')
-
-	myfile = open("/tmp/clientes.xml","w")
-
-	myfile.write(mydata)
-
-	print 'file created'
 
