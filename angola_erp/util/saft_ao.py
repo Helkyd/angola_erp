@@ -27,8 +27,7 @@ from frappe.email.doctype.email_group.email_group import add_subscribers
 from frappe.contacts.doctype.address.address import get_company_address # for make_facturas_venda
 from frappe.model.utils import get_fetch_values
 
-#import json, os 
-#import csv, codecs, cStringIO
+import os 
 
 import csv 
 import json
@@ -38,6 +37,8 @@ from xml.dom import minidom
 from datetime import datetime, date, timedelta
 
 import angola
+import re
+
 
 @frappe.whitelist()
 def get_xml(args):
@@ -68,7 +69,7 @@ def update_acc_codes():
 	
 
 @frappe.whitelist()
-def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_codes = False):
+def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = False):
 	Versao = "1.0.10" 
 
 
@@ -95,14 +96,44 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 
 	######## END SourceDocuments
 
+	'''
+	Documentos Gerais devem ter Header, Customer, TaxTable, Payments
+
+	Documentos Accounting/Contabilidade: GeneralLedgerAccounts, Supppier, GeneralLedgerEntries
+	
+	Documentos Invoices: Supplier, Products, SalesInvoice, WorkingDocuments, Payments 																																																																																																																																
+	'''
+
+	'''
+	Para gerar:	openssl genrsa -out ChavePrivada.pem 1024
+	Para gerar:	openssl rsa -in ChavePrivada.pem -out ChavePublica.pem -outform PEM –pubout
+
+
+
+	'''
+	
 	#read from source ...
-	if company == None:
+	print company == None
+	print processar
+	print datainicio
+	print datafim
+	print update_acc_codes
+
+	if company == None or company =="None":
 		empresa = frappe.get_doc('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
 		#('Company','Farmacia Xixa') #
 		#('Company', '2MS - Comercio e Representacoes, Lda')	#Should get as arg or based on default...
 		#('Company','Fazenda-Aurora') #
 	else:
 		empresa = frappe.get_doc('Company', company)	#Should get as arg or based on default...
+		#nome do file sera a (Empresa + "_" + SAFT_AO + "_" + NIF + data today)
+		nomeficheiro = re.sub(r",|-|\s+","",empresa.name) + "_SAFT_AO_" + empresa.tax_id + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
+		#re.sub(r",|-|\s+","",s)
+
+		agtvalidationnumber = "111111111"	#AGT Validation Number
+		print 'nome file ', nomeficheiro
+		print 'agt validar ', agtvalidationnumber
+
 
 
 	emp_enderecos = angola.get_all_enderecos("Company",empresa.name)
@@ -114,6 +145,11 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 		#updates 
 		update_acc_codes()
 
+	'''
+	DEFAULT processar = Mensal
+	Processar pode ser Mensal, Semanal ou Diario
+	'''
+
 	print 'mes inicial ', angola.get_first_day(datetime.today())
 	print 'mes fim ', angola.get_last_day(datetime.today())
 
@@ -122,20 +158,38 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 		primeirodiames = angola.get_first_day(datetime.today())
 		ultimodiames = angola.get_last_day(datetime.today())
 
-		primeirodiames = '2019-01-01'
-		ultimodiames = '2019-04-31'
+		primeirodiames = datetime.strptime('2019-01-01',"%Y-%m-%d")
+		ultimodiames = datetime.strptime('2019-04-30',"%Y-%m-%d")
+
 		AnoFiscal = frappe.db.sql(""" select year, year_start_date, year_end_date, disabled from `tabFiscal Year` where year = %s """,(datetime.today().year)
 ,as_dict=True)
 
 	else:
-		primeirodiames = angola.get_first_day(datainicio) #datetime.datetime.strptime(datainicio,("%Y-%m-%d"))
-		ultimodiames = angola.get_last_day(datafim) #datetime.datetime.strptime(datafim,("%Y-%m-%d"))
+		print 'User type'
+		print type(datainicio)
+		print str(datetime.strptime(datainicio,"%Y-%m-%d").year)	
+		print datafim
+		#datainicio = datetime.strptime(datainicio,"%Y-%m-%d").year
+		primeirodiames = angola.get_first_day(datetime.strptime(datainicio,"%Y-%m-%d")) #datetime.datetime.strptime(datainicio,("%Y-%m-%d"))
+		ultimodiames = angola.get_last_day(datetime.strptime(datafim,"%Y-%m-%d")) #datetime.datetime.strptime(datafim,("%Y-%m-%d"))
 
-		#primeirodiames = '2019-01-01'
-		#ultimodiames = '2019-04-31'
+		print 'Processar ', processar
+		#case Semanal changes datafim
+		#case Diario changes datafim to datainicio
+		if processar.upper() == 'SEMANAL':
+			primeirodiames, ultimodiames = angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
+			print angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
+			print primeirodiames.strftime("%Y-%m-%d")
+			print ultimodiames.strftime("%Y-%m-%d")
 
-		AnoFiscal = frappe.db.sql(""" select year, year_start_date, year_end_date, disabled from `tabFiscal Year` where year = %s """,(str(datetime.strptime(datainicio,("%Y-%m-%d")).year)
-	),as_dict=True)
+		if processar.upper() == 'DIARIO':
+			ultimodiames = primeirodiames
+			print primeirodiames.strftime("%Y-%m-%d")
+			print ultimodiames.strftime("%Y-%m-%d")
+
+
+
+		AnoFiscal = frappe.db.sql(""" select year, year_start_date, year_end_date, disabled from `tabFiscal Year` where year = %s """,(str(datetime.strptime(datainicio,"%Y-%m-%d").year)),as_dict=True)
 
 	print 'AnoFiscal'
 	print AnoFiscal 
@@ -195,11 +249,11 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 	print 'Ano Inicio'
 	print AnoFiscal[0].year_start_date
 
-	startdate = ET.SubElement(head,'SartDate')
-	startdate.text = AnoFiscal[0].year_start_date.strftime("%Y-%m-%d")
+	startdate = ET.SubElement(head,'SartDate')	#iniciomes
+	startdate.text = primeirodiames.strftime("%Y-%m-%d") #AnoFiscal[0].year_start_date.strftime("%Y-%m-%d")
 
-	enddate = ET.SubElement(head,'EndDate')
-	enddate.text = AnoFiscal[0].year_end_date.strftime("%Y-%m-%d")
+	enddate = ET.SubElement(head,'EndDate')		#fimmes
+	enddate.text = ultimodiames.strftime("%Y-%m-%d") #AnoFiscal[0].year_end_date.strftime("%Y-%m-%d")
 
 	currencycode = ET.SubElement(head,'CurrencyCode')
 	currencycode.text = "AOA"	#default
@@ -215,7 +269,7 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 
 	
 	softwarevalidationnumber = ET.SubElement(head,'SoftwareValidationNumber')
-	softwarevalidationnumber.text = 0	#TeorLogico for now
+	softwarevalidationnumber.text = agtvalidationnumber	#AGT number
 
 	productid = ET.SubElement(head,'ProductID')
 	productid.text = "AngolaERP / TeorLogico"	#TeorLogico
@@ -971,9 +1025,17 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 
 	#SalesInvoices
 	salesinvoices = ET.SubElement(sourcedocuments,'SalesInvoices')
-	#still need to filter per user request by MONTH or dates filter...
-	#Default CURRENT MONTH
 
+	'''
+	A data de criação do documento de venda [campo 4.1.4.7 - data do documento de venda (InvoiceDate) do SAF-T (AO)];
+	ii. A data e hora da criação do documento de venda [campo 4.1.4.12 - data de gravação do documento (SystemEntryDate) do SAF-T (AO)];
+	iii. O número do documento de venda [campo 4.1.4.1 - identificação única do documento de venda (InvoiceNo) do SAF-T (AO)];
+	iv. O valor do documento de venda [campo 4.1.4.20.3 - total do documento com impostos (GrossTotal) do SAF-T (AO)];
+	v. A assinatura gerada no documento anterior, do mesmo tipo e série de documento [campo 4.1.4.4 - chave do documento (Hash) do SAF-T (AO)].
+
+	Para assinar [Registo1.txt = 2010-05-18;2010-05-18T11:22:19;FAC 001/14;3.12;]
+	openssl dgst -sha1 -sign ChavePrivada.pem -out Registo1.sha1 Registo1.txt
+	'''
 	#Debitos ou pagamentos
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' ) and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
@@ -1002,6 +1064,11 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 
 	#invoice
 	facturas = frappe.db.sql(""" select * from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
 
 	for factura in facturas:
 		print factura.name
@@ -1043,10 +1110,10 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 		sourcebilling.text = "P"	#Default
 
 		salesinvoicehash = ET.SubElement(invoice,'Hash')
-		salesinvoicehash.text = 0	#por rever...
+		#salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = 0	#por rever
+		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -1605,6 +1672,64 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 							withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
 
 						variasentradas = True	#para garar varias entradas
+		#HASH key to generate	
+		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
+		hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+
+		print 'HASH do SALESINVOICE ', hashinfo
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","w")
+		hashfile.write(hashinfo)
+
+		ficheirosha1  = str(fileregisto) + str(fileregistocontador) + ".sha1"
+		ficheirotxt  = str(fileregisto) + str(fileregistocontador) + ".txt"
+		myCMD = "openssl dgst -sha1 -sign /tmp/angolaer.cert/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt + " > /tmp/resultado.txt"
+
+		myCMD1 = " dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
+		myCMD2 =  " /tmp/angolaerp.cert/privkey.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
+
+#		print myCMD
+		from subprocess import *
+
+#		decrypted = call(myCMD,shell=True)
+#		print decrypted
+		p = Popen(["/tmp/angolaerp.cert2/bb.sh"], stdout=PIPE, stderr=PIPE)
+		output, errors = p.communicate()
+		p.wait()
+		print output
+		print errors
+
+#		os.system("/tmp/angolaer.cert/bb1.sh " + myCMD1)	#execute
+
+		#encoding base 64
+		#ficheirosha1  = str(fileregisto) + str(fileregistocontador) + ".sha1"
+		ficheirob64  = str(fileregisto) + str(fileregistocontador) + ".b64"
+
+		myCMD1 = 'openssl enc -base64 -in /tmp/' +  ficheirosha1 + ' -out /tmp/' + ficheirob64 + ' -A' #+ ' > /tmp/resultado.txt'
+
+		print myCMD1
+#		os.system(myCMD1)	#Encondingi
+
+	
+		hashfile.close()	#close previous ...
+		#hashfile.close()	#close previous ...
+
+#		hashcriado = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + '.b64','r')	#open the file created to HASH
+		print 'Hash criado'
+		#print hashcriado.read()
+#		salesinvoicehash.text = str(hashcriado.read())	#Hash created
+		
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+		return	
+		
+		'''
+		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
+		A table Angolaerp_hash must be created with 
+			Documenttype, DocumentNumber, Hash, Hashcontrol or Hashversion
+
+		'''
+
 
 
 	#END OF SAlesInvoice
@@ -1691,7 +1816,7 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 		salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = 0	#por rever
+		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -2210,7 +2335,7 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 			movementofgoodshash.text = 0	#default nossa app nao precisa.
 
 			movementofgoodshashcontrol = ET.SubElement(stockmovement,'HashControl')
-			movementofgoodshashcontrol.text = 0	#default nossa app nao precisa.
+			movementofgoodshashcontrol.text = "Nao validado pela AGT"	#default for now
 
 
 			period = ET.SubElement(stockmovement,'Period')
@@ -2410,6 +2535,10 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 	#create WorkingDocuments...
 
 	#WorkingDocuments
+	'''
+		Campo Workdate, SystemEntryDate, DocumentNumber, GrossTotal, Last Hash from previous Doc.
+	'''
+
 
 	workingdocuments = ET.SubElement(sourcedocuments,'WorkingDocuments')
 
@@ -2488,7 +2617,7 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 		salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = 0	#por rever
+		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -2907,7 +3036,7 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 		salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = 0	#por rever
+		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -3645,7 +3774,7 @@ def gerar_saft_ao(company = None, datainicio = None, datafim = None, update_acc_
 	reparsed = minidom.parseString(mydata)
 	
 
-	myfile = open("/tmp/clientes.xml","w")
+	myfile = open("/tmp/" + nomeficheiro + ".xml","w")
 
 
 	myfile.write(reparsed.toprettyxml(indent=" "))

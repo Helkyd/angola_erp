@@ -1043,3 +1043,36 @@ def get_first_day(dt, d_years=0, d_months=0):
 
 def get_last_day(dt):
     return get_first_day(dt, 0, 1) + timedelta(-1)
+
+def get_firstlast_week_day(dt):
+		
+	start = dt - timedelta(days=dt.weekday()) 
+	end = start + timedelta(days=6)
+	print dt
+	print dt.day
+	if dt.day == 1:
+		#keep dt
+		start = dt
+	print 'start ', start.strftime("%Y-%m-%d")
+	print 'last ', end.strftime("%Y-%m-%d")
+	return start,end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
