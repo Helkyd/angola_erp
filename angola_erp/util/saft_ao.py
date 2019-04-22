@@ -1674,17 +1674,26 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						variasentradas = True	#para garar varias entradas
 		#HASH key to generate	
 		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
-		hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		if chaveanterior == "":
+			#1st record
+			print 'primeiro registo'
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		else:
+			print 'segundo registo'
+			print chaveanterior
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+
 
 		print 'HASH do SALESINVOICE ', hashinfo
 		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","w")
 		hashfile.write(hashinfo)
 
-		ficheirosha1  = str(fileregisto) + str(fileregistocontador) + ".sha1"
-		ficheirotxt  = str(fileregisto) + str(fileregistocontador) + ".txt"
-		myCMD = "openssl dgst -sha1 -sign /tmp/angolaer.cert/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt + " > /tmp/resultado.txt"
+		ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
+		ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
 
-		myCMD1 = " dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
+#		myCMD = "openssl dgst -sha1 -sign /tmp/angolaer.cert/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt + " > /tmp/resultado.txt"
+
+#		myCMD1 = " dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
 		myCMD2 =  " /tmp/angolaerp.cert/privkey.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
 
 #		print myCMD
@@ -1692,9 +1701,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 #		decrypted = call(myCMD,shell=True)
 #		print decrypted
-		p = Popen(["/tmp/angolaerp.cert2/bb.sh"], stdout=PIPE, stderr=PIPE)
+#		p = Popen(["/tmp/angolaerp.cert2/bb.sh"], stdout=PIPE, stderr=PIPE)
+		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",ficheirosha1,ficheirotxt], stdout=PIPE, stderr=PIPE)
 		output, errors = p.communicate()
 		p.wait()
+		print 'Openssl Signing and Verifying...'
 		print output
 		print errors
 
@@ -1702,26 +1713,39 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		#encoding base 64
 		#ficheirosha1  = str(fileregisto) + str(fileregistocontador) + ".sha1"
-		ficheirob64  = str(fileregisto) + str(fileregistocontador) + ".b64"
+		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
 
-		myCMD1 = 'openssl enc -base64 -in /tmp/' +  ficheirosha1 + ' -out /tmp/' + ficheirob64 + ' -A' #+ ' > /tmp/resultado.txt'
+		myCMD1 = 'openssl enc -base64 -in ' +  ficheirosha1 + ' -out ' + ficheirob64 + ' -A' #+ ' > /tmp/resultado.txt'
 
 		print myCMD1
-#		os.system(myCMD1)	#Encondingi
+		print 'Openssl Encoding...'
+		print ficheirosha1
+		print ficheirob64
+		os.system(myCMD1)	#Encondingi
+#		p = Popen([myCMD1], stdout=PIPE, stderr=PIPE)
+#		output, errors = p.communicate()
+#		p.wait()
+
+#		print output
+#		print errors
 
 	
 		hashfile.close()	#close previous ...
 		#hashfile.close()	#close previous ...
 
-#		hashcriado = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + '.b64','r')	#open the file created to HASH
+		hashcriado = open(ficheirob64,'r')	#open the file created to HASH
 		print 'Hash criado'
 		#print hashcriado.read()
-#		salesinvoicehash.text = str(hashcriado.read())	#Hash created
+		chaveanterior = str(hashcriado.read())	#para usar no next record...
+
+		salesinvoicehash.text = str(chaveanterior)	#Hash created
 		
 
 		fileregistocontador += 1	#contador para registo1, registo2 ....
 
-		return	
+
+#		if fileregistocontador == 4:
+#			return	
 		
 		'''
 		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
@@ -3902,3 +3926,66 @@ def validar_xml_xsd(xml_path, xsd_path):
 	print result
 
 
+
+
+import requests
+from M2Crypto import BIO, RSA, EVP, X509
+
+@frappe.whitelist()
+def verify_message(pem, msg, sig):
+    f = open(pem,"r")
+    pem1 = f.read()	
+    cert = X509.load_cert(pem)	
+    cert1 = X509.load_cert_string(pem1)
+    pubkey = cert.get_pubkey()
+    sig = sig.decode('base64')
+
+    # Write a few files to disk for debugging purposes
+    f = open("sig", "wb")
+    f.write(sig)
+    f.close()
+
+#    f = open("msg", "w")
+#    f.write(msg)
+#    f.close()
+
+    f = open("mypubkey.pem", "w")
+    f.write(pubkey.get_rsa().as_pem())
+    f.close()
+
+    pubkey.reset_context(md='sha1')
+    pubkey.verify_init()
+    pubkey.verify_update(msg)
+    return pubkey.verify_final(sig)
+
+'''
+
+PEM = """-----BEGIN CERTIFICATE-----
+MIICsDCCAhmgAwIBAgIJAJrZExFauz5pMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTMwMzA3MDkzNjQyWhcNMTgwMzA3MDkzNjQyWjBF
+MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
+gQDRiW70Ea0CIrJmv9nwO0882mZ51ygAqQrQLfaYB2EUE5SRE99GaQbT9TsmcPK1
+aG5ZDmazWRGBWe8UCL0W6fFrkg6Cb6VwFGqUSAsFhlT+XhOqAF9p3dfqu3S85zyY
+7zJ5YIAMgDbd8/KmaqP8xn2aNY1cUxN/0HxOB4fz2/f/YQIDAQABo4GnMIGkMB0G
+A1UdDgQWBBRj2EiZsFFFc4IbLHJa9CupE9ynbzB1BgNVHSMEbjBsgBRj2EiZsFFF
+c4IbLHJa9CupE9ynb6FJpEcwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgTClNvbWUt
+U3RhdGUxITAfBgNVBAoTGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZIIJAJrZExFa
+uz5pMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAip8XS5JX3hFG8wjZ
+0FxqU/FLjSJkGrAscs16y7iq9YnUIfPt0Fha4a36vB5nG42vai10BtLgZEP/mifJ
+DQXbDZA46G7gBiV9AvqtJWDNOfn7c34g23G9lxIEuU8ptLoyN+38TFdS+eWQDo/q
+a/1IvCESUYYY43s+aOp6nbkDoGw=
+-----END CERTIFICATE-----
+"""
+
+MSG = """
+"""
+
+SIG = """
+FFOSR4UhPjheKN3hNAXIh/XL5OByp23+Gk+NRgonsZoI0eQHJn7nCEr/b1NbL/DP7UVL7o
+nM6+RC1/yjiSi4J8wj4kqs19PY4ZGQXbnnDxutJoMfo+lhRA/H+jTPL5u8bs/d07ln0eHl
+AzyOCxee3DRTxJKbmQewb48xhmou4jQ=
+"""
+
+'''
