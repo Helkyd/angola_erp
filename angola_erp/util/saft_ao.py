@@ -1715,7 +1715,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#ficheirosha1  = str(fileregisto) + str(fileregistocontador) + ".sha1"
 		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
 
-		myCMD1 = 'openssl enc -base64 -in ' +  ficheirosha1 + ' -out ' + ficheirob64 + ' -A' #+ ' > /tmp/resultado.txt'
+		myCMD1 = 'openssl enc -base64 -in ' +  ficheirosha1 + ' -out ' + ficheirob64 + ' -a' #+ ' > /tmp/resultado.txt'
 
 		print myCMD1
 		print 'Openssl Encoding...'
