@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "nome_da_seguradora", 
  "beta": 0, 
@@ -144,7 +144,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-04-22 19:33:20.615929", 
+ "modified": "2019-04-23 20:11:52.279015", 
  "modified_by": "Administrator", 
  "module": "Angola ERPNext", 
  "name": "Seguradoras", 
