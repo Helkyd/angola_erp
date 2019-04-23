@@ -171,6 +171,10 @@ doc_events = {
 	"Project": {
 		"validate": "angola_erp.angola_erpnext.validations.project.validate",
 	},
+	"Student": {
+		"validate": "angola_erp.angola_erpnext.validations.student.validate",
+
+	},
 
 
 #	"System Settings": {

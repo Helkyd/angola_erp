@@ -2,9 +2,15 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 12/03/2019
+#Date Changed: 16/04/2019
 
 from __future__ import unicode_literals
+
+#from __future__ import unicode_literals
+import sys
+reload (sys)
+sys.setdefaultencoding("utf-8")
+
 
 from frappe.model.document import Document
 import frappe.model
@@ -22,6 +28,16 @@ from frappe.model.utils import get_fetch_values
 
 #import json, os 
 #import csv, codecs, cStringIO
+
+import csv 
+import json
+
+import xml.etree.ElementTree as ET
+import xml.dom.minidom 
+from datetime import datetime, date, timedelta
+
+
+
 
 @frappe.whitelist()
 def check_caixa_aberto():
@@ -512,6 +528,16 @@ def get_versao_erp():
 	print frappe.get_attr("erpnext"+".__version__")
 
 	return frappe.get_attr("erpnext"+".__version__")
+
+@frappe.whitelist()
+def get_versao_aoerp():
+	""" Due to School renamed to Education ....
+	
+	"""
+
+	print frappe.get_attr("angola_erp"+".__version__")
+
+	return frappe.get_attr("angola_erp"+".__version__")
 
 @frappe.whitelist()
 def cancel_gl_entry_fee(fee_number):
@@ -1005,5 +1031,58 @@ def get_all_enderecos(doctipo,partyname):
 			if data1:
 				return data1
 
+
+@frappe.whitelist()
+def get_all_enderecos_a(doctipo,partyname):
+
+	print 'Todos Enderecos Address ONLY!!!'
+	print doctipo
+	print partyname.encode('utf-8')
+	dadoscliente = frappe.db.sql(""" select parent from `tabDynamic Link` where link_doctype like %s and link_name like %s and parenttype = 'Address' """,(doctipo,partyname),as_dict=False)
+	if dadoscliente:
+		data1 = frappe.get_doc("Address", dadoscliente[0][0])
+		if data1:
+			return data1
 				
+
+def get_first_day(dt, d_years=0, d_months=0):
+    # d_years, d_months are "deltas" to apply to dt
+    y, m = dt.year + d_years, dt.month + d_months
+    a, m = divmod(m-1, 12)
+    return date(y+a, m+1, 1)
+
+def get_last_day(dt):
+    return get_first_day(dt, 0, 1) + timedelta(-1)
+
+def get_firstlast_week_day(dt):
+		
+	start = dt - timedelta(days=dt.weekday()) 
+	end = start + timedelta(days=6)
+	print dt
+	print dt.day
+	if dt.day == 1:
+		#keep dt
+		start = dt
+	print 'start ', start.strftime("%Y-%m-%d")
+	print 'last ', end.strftime("%Y-%m-%d")
+	return start,end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

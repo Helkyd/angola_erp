@@ -166,6 +166,7 @@ doc_events = {
 	},
 	"Patient": {
 		"after_insert": "angola_erp.angola_erpnext.validations.patient.after_insert",
+		"validate": "angola_erp.angola_erpnext.validations.patient.validate",
 
 	},
 	"Project": {

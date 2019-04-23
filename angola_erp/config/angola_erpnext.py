@@ -50,6 +50,25 @@ def get_data():
 		},
 
 		{
+			"label": _("Seguradoras - Saude - Clinicas"),
+			"items": [
+				 {
+				   "description": "Lista de Seguradoras", 
+				   "name": "Seguradoras", 
+				   "type": "doctype"
+				  }, 
+				{
+				   "type": "doctype", 
+				   "description": "Planos das Seguradoras", 
+				   "name": "Seguradora Planos", 
+				  },
+
+
+			]
+		},
+
+
+		{
 			"label": _("Relatorios RH"),
 			"items": [
 				 {

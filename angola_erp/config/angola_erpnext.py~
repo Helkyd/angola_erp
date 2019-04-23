@@ -40,7 +40,7 @@ def get_data():
 				   "type": "doctype"
 				  }, 
 				{
-				   "type": "list", 
+				   "type": "doctype", 
 				   "description": "Atualizacao Cambios", 
 				   "name": "Atualizacao Cambios", 
 				  },
@@ -48,6 +48,25 @@ def get_data():
 
 			]
 		},
+
+		{
+			"label": _("Seguradoras - Saude - Clinicas"),
+			"items": [
+				 {
+				   "description": "Lista de Seguradoras", 
+				   "name": "Seguradoras", 
+				   "type": "doctype"
+				  }, 
+				{
+				   "type": "doctype", 
+				   "description": "Planos das Seguradoras", 
+				   "name": "Seguradoras Planos", 
+				  },
+
+
+			]
+		},
+
 
 		{
 			"label": _("Relatorios RH"),
