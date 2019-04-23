@@ -57,6 +57,9 @@ def get_xml(args):
 @frappe.whitelist()
 def update_acc_codes():
 	#Update account_number with the number of name
+
+#Check is eating the last digit.
+
 	accs = frappe.db.sql(""" select name,account_number from `tabAccount` """,as_dict=True)
 	for acc in accs:
 		if acc.name[0:1].isnumeric() == True:
@@ -70,6 +73,7 @@ def update_acc_codes():
 
 @frappe.whitelist()
 def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = False):
+
 	Versao = "1.0.10" 
 
 
@@ -275,7 +279,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	productid.text = "AngolaERP / TeorLogico"	#TeorLogico
 
 	productversion = ET.SubElement(head,'ProductVersion')
-	productversion.text = str(angola.get_versao_erp())
+	productversion.text = str(angola.get_versao_aoerp())
 
 
 	headercomment = ET.SubElement(head,'HeaderComment')
@@ -285,13 +289,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	telephone.text = emp_enderecos.phone
 
 	fax = ET.SubElement(head,'Fax')
-	productid.text = emp_enderecos.fax
+	fax.text = emp_enderecos.fax
 
 	email = ET.SubElement(head,'Email')
-	productid.text = emp_enderecos.email_id
+	email.text = emp_enderecos.email_id
 
 	website = ET.SubElement(head,'Website')
-	productid.text = empresa.website
+	website.text = empresa.website
 
 
 	# END OF HEADER
@@ -370,15 +374,21 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		groupingcategory = ET.SubElement(account,'GroupingCategory')
 		if planoconta.is_group:	#fica GR
-			groupingcategory.text = "GR"	#Ainda por verificar com os Contabilistas
+			#len(1 digit)
+			if len(planoconta.account_number) == 1:
+				groupingcategory.text = "GR"	#Ainda por verificar com os Contabilistas
+			else:
+				groupingcategory.text = "GA"	#Ainda por verificar com os Contabilistas
 		elif not planoconta.is_group:
-			groupingcategory.text = "GA"	#Ainda por verificar com os Contabilistas
+			#len(2,3,4... digits)
+			groupingcategory.text = "GM"	#Ainda por verificar com os Contabilistas
 
 		groupingcode = ET.SubElement(account,'GroupingCode')
 		if planoconta.parent_account:
 			groupingcode.text = str(planoconta.parent_account)
 
 	#Customers
+
 	customers = ET.SubElement(masterfiles,'Customers')
 
 	#masterfiles = ET.Element('MasterFiles')
@@ -438,7 +448,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 			customertaxid = ET.SubElement(customer,'CustomerTaxID')
-			if (cliente.tax_id != None and (cliente.tax != "N/A" or cliente.tax != "N-A")) :
+			if (cliente.tax_id != None and (cliente.tax != "N/A" or cliente.tax != "N-A" or cliente.tax != "ND")) :
 				customertaxid.text = cliente.tax_id
 			else:
 				customertaxid.text = "999999990"
@@ -818,11 +828,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		taxtableentry = ET.SubElement(taxtable,'TaxTableEntry')
 		taxtype = ET.SubElement(taxtableentry,'TaxType')
-		if "IPC" in retencao.name:
+		if "IPC" in retencao.name.upper():
 			taxtype.text = "NS"
-		elif "SELO" in retencao.name:
+		elif "SELO" in retencao.name.upper():
 			taxtype.text = "IS"
-		elif "IVA" in retencao.name:
+		elif "IVA" in retencao.name.upper():
 			taxtype.text = "IVA"
 		else:
 			taxtype.text = "NS"
@@ -831,11 +841,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 		taxcode = ET.SubElement(taxtableentry,'TaxCode')
-		if "IPC" in retencao.name:
+		if "IPC" in retencao.name.upper():
 			taxcode.text = "NS"
-		elif "SELO" in retencao.name:
+		elif "SELO" in retencao.name.upper():
 			taxcode.text = "ISE"
-		elif "IVA" in retencao.name:
+		elif "IVA" in retencao.name.upper():
 			taxcode.text = "ISE"
 		else:
 			taxcode.text = "NS"
@@ -1036,7 +1046,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	Para assinar [Registo1.txt = 2010-05-18;2010-05-18T11:22:19;FAC 001/14;3.12;]
 	openssl dgst -sha1 -sign ChavePrivada.pem -out Registo1.sha1 Registo1.txt
 	'''
-	#Debitos ou pagamentos
+	#Paid and Cancelled
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' ) and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 
@@ -1050,7 +1060,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	totalcredit = ET.SubElement(salesinvoices,'TotalCredit')
 
 	####### POR FAZER
+	#Facturas com PAID ou Cancelado nao precisa...
+	#NOT Paid and Cancelled
+	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and (status != 'Paid' or status != 'Cancelled' ) and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
+#	if facturas[0].status != 'Paid' and facturas[0].status != 'Cancelled':
 	if int(facturas[0]['count(name)']) !=0:
 		numberofentries.text = str(int(facturas[0]['count(name)']))
 		totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
@@ -1690,30 +1704,49 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
 		ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
+		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
 
 #		myCMD = "openssl dgst -sha1 -sign /tmp/angolaer.cert/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt + " > /tmp/resultado.txt"
 
 #		myCMD1 = " dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
-		myCMD2 =  " /tmp/angolaerp.cert/privkey.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
+#		myCMD2 =  " /tmp/angolaerp.cert/privkey.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
 
 #		print myCMD
 		from subprocess import *
+		import subprocess
 
 #		decrypted = call(myCMD,shell=True)
 #		print decrypted
 #		p = Popen(["/tmp/angolaerp.cert2/bb.sh"], stdout=PIPE, stderr=PIPE)
-		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",ficheirosha1,ficheirotxt], stdout=PIPE, stderr=PIPE)
+
+#		p = Popen("/tmp/angolaerp.cert2/bb1.sh", shell=True, stdout=PIPE, stderr=PIPE)
+#		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",str(ficheirosha1),str(ficheirotxt),str(ficheirob64)], shell=True, stdout=PIPE, stderr=PIPE)
+
+		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",str(ficheirosha1),str(ficheirotxt),str(ficheirob64)],shell=False, stdout=PIPE, stderr=PIPE)
+
 		output, errors = p.communicate()
 		p.wait()
-		print 'Openssl Signing and Verifying...'
+		print 'Openssl Signing...'
 		print output
 		print errors
+
+		#encoding
+#		p = Popen(["/tmp/angolaerp.cert2/bb2.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",ficheirosha1,ficheirotxt,ficheirob64], shell=True, stdout=PIPE, stderr=PIPE)
+#		output, errors = p.communicate()
+#		p.wait()
+#		print 'Openssl Signing...'
+#		print output
+#		print errors
+
+
+
+
 
 #		os.system("/tmp/angolaer.cert/bb1.sh " + myCMD1)	#execute
 
 		#encoding base 64
 		#ficheirosha1  = str(fileregisto) + str(fileregistocontador) + ".sha1"
-		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
+		
 
 		myCMD1 = 'openssl enc -base64 -in ' +  ficheirosha1 + ' -out ' + ficheirob64 + ' -a' #+ ' > /tmp/resultado.txt'
 
@@ -1721,7 +1754,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print 'Openssl Encoding...'
 		print ficheirosha1
 		print ficheirob64
-		os.system(myCMD1)	#Encondingi
+
+#		os.system(myCMD1)	#Encondingi
 #		p = Popen([myCMD1], stdout=PIPE, stderr=PIPE)
 #		output, errors = p.communicate()
 #		p.wait()
@@ -1736,7 +1770,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		hashcriado = open(ficheirob64,'r')	#open the file created to HASH
 		print 'Hash criado'
 		#print hashcriado.read()
+		print hashcriado.read()
 		chaveanterior = str(hashcriado.read())	#para usar no next record...
+		print chaveanterior
 
 		salesinvoicehash.text = str(chaveanterior)	#Hash created
 		
@@ -1744,8 +1780,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		fileregistocontador += 1	#contador para registo1, registo2 ....
 
 
-#		if fileregistocontador == 4:
-#			return	
+		if fileregistocontador == 3:
+			return	
 		
 		'''
 		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
@@ -1775,7 +1811,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	print facturas
 	print int(facturas[0]['count(name)'])
 
-
+	
 	numberofentries = ET.SubElement(purchaseinvoices,'NumberOfEntries')
 	totaldebit = ET.SubElement(purchaseinvoices,'TotalDebit')
 	##### POR FAZER
@@ -1785,14 +1821,16 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	if int(facturas[0]['count(name)']) !=0:
 		numberofentries.text = str(int(facturas[0]['count(name)']))
-		totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
+		#Not need
+		#totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
 
+	'''
 	#Creditos ou devolucoes
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabPurchase Invoice` where company = %s and (status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	if int(facturas[0]['count(name)']) !=0:
 		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 
-
+	'''
 
 	#invoice
 	facturas = frappe.db.sql(""" select * from `tabPurchase Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)

@@ -1050,8 +1050,11 @@ def get_firstlast_week_day(dt):
 	end = start + timedelta(days=6)
 	print dt
 	print dt.day
-	print 'start ', start
-	print 'last ', end
+	if dt.day == 1:
+		#keep dt
+		start = dt
+	print 'start ', start.strftime("%Y-%m-%d")
+	print 'last ', end.strftime("%Y-%m-%d")
 	return start,end
 
 
