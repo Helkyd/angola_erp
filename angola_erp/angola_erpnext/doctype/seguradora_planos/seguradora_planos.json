@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "plano", 
  "beta": 0, 
@@ -147,7 +147,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-04-22 20:04:50.055914", 
+ "modified": "2019-04-23 20:12:18.048375", 
  "modified_by": "Administrator", 
  "module": "Angola ERPNext", 
  "name": "Seguradora Planos", 
