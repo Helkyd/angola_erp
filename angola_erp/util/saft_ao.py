@@ -74,7 +74,7 @@ def update_acc_codes():
 @frappe.whitelist()
 def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = False):
 
-	Versao = "1.0.10" 
+	Versao = "0.1.5" 
 
 
 	######## Inside MasterFiles
@@ -315,11 +315,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	for planoconta in planocontas:
 		account = ET.SubElement(generalledgeraccounts,'Account')
 		accountid = ET.SubElement(account,'AccountID')
-		accountid.text = str(planoconta.name)			#Due to 30 chars limit we have to add 
+		accountid.text = str(planoconta.name.strip())			#Due to 30 chars limit we have to add 
 		#accountid.text = str(planoconta.account_number)	#Make sure update_acc_codes was run before...
 
 		accountdescription = ET.SubElement(account,'AccountDescription')		
-		accountdescription.text = str(planoconta.account_name)
+		accountdescription.text = str(planoconta.account_name.strip())
 
 		openingdeditbalance = ET.SubElement(account,'OpeningDebitBalance')
 		openingcrebitbalance = ET.SubElement(account,'OpeningCreditBalance')
@@ -435,7 +435,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			if not contascliente:
 					contascliente = frappe.db.sql(""" select * from `tabAccount` where name like '31121000%%' and company = %s """,(empresa.name), as_dict=True)
 					print contascliente
-					accountid.text = contascliente[0].account_name
+					accountid.text = contascliente[0].account_name.strip()
 					#accountid.text = contascliente[0].account_number
 #				else:
 #					accountid.text = "Desconhecido"				
@@ -448,7 +448,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 			customertaxid = ET.SubElement(customer,'CustomerTaxID')
-			if (cliente.tax_id != None and (cliente.tax != "N/A" or cliente.tax != "N-A" or cliente.tax != "ND")) :
+			if (cliente.tax_id != None and cliente.tax_id.upper() != "N/A" and cliente.tax_id.upper() != "N-A" and cliente.tax_id.upper() != "ND") :
 				customertaxid.text = cliente.tax_id
 			else:
 				customertaxid.text = "999999990"
@@ -656,7 +656,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			if not contasfornecedor:
 					contasfornecedor = frappe.db.sql(""" select * from `tabAccount` where name like '31121000%%' and company = %s """,(empresa.name), as_dict=True)
 					print contasfornecedor
-					accountid.text = contasfornecedor[0].account_name
+					accountid.text = contasfornecedor[0].account_name.strip()
 					#accountid.text = contasfornecedor[0].account_number
 #				else:
 #					accountid.text = "Desconhecido"				
@@ -671,7 +671,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			suppliertaxid = ET.SubElement(supplier,'SupplierTaxID')
 			suppliertaxid.text = fornecedor.tax_id
-			if (fornecedor.tax_id != None and (fornecedor.tax != "N/A" or fornecedor.tax != "N-A")) :	
+			if (fornecedor.tax_id != None and fornecedor.tax_id.upper() != "N/A" and fornecedor.tax_id.upper() != "N-A") :	
 				suppliertaxid.text = fornecedor.tax_id
 			else:
 				suppliertaxid.text = "999999990"
@@ -806,7 +806,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		productgroup.text = produto.item_group
 
 		productdescription = ET.SubElement(product,'ProductDescription')
-		productdescription.text = produto.item_name
+		productdescription.text = produto.item_name.strip()
 
 		productnumbercode = ET.SubElement(product,'ProductNumberCode')
 		productnumbercode.text = produto.barcode
@@ -851,7 +851,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			taxcode.text = "NS"
 
 		description = ET.SubElement(taxtableentry,'Description')
-		description.text = retencao.descricao
+		description.text = retencao.descricao.strip()
 
 		taxexpirationdate = ET.SubElement(taxtableentry,'TaxExpirationDate')
 		if retencao.data_limite:
@@ -909,11 +909,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		
 			description = ET.SubElement(journal,'Description')
 			if jv.user_remark != None:
-				description.text = str(jv.user_remark)
+				description.text = str(jv.user_remark.strip())
 			elif jv.cheque_no != None:
-				description.text = str(jv.cheque_no)
+				description.text = str(jv.cheque_no.strip())
 			elif jv.remark != None:
-				description.text = str(jv.remark)
+				description.text = str(jv.remark.strip())
 
 
 			#transaction
@@ -936,7 +936,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			description = ET.SubElement(transaction,'Description')
 			if jv.user_remark != None:
-				description.text = str(jv.remark)	
+				description.text = str(jv.remark.strip())	
 
 			docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
 			#Sera o GL ou pode ser o jv.name !!!!
@@ -968,7 +968,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					recordid.text = str(jvaccount.idx)
 
 					accountid = ET.SubElement(debitline,'AccountID')
-					accountid.text = str(jvaccount.account)
+					accountid.text = str(jvaccount.account.strip())
 					#accountid.text = conta[0].account_number
 
 					#Is this SI/DN or the JV ID
@@ -980,7 +980,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 					description = ET.SubElement(debitline,'Description')
-					description.text = str(jvaccount.account)	
+					description.text = str(jvaccount.account.strip())	
 
 					debitamount = ET.SubElement(debitline,'DebitAmount')
 					debitamount.text = str(jvaccount.debit)	
@@ -999,7 +999,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					recordid.text = str(jvaccount.idx)
 
 					accountid = ET.SubElement(creditline,'AccountID')
-					accountid.text = str(jvaccount.account)
+					accountid.text = str(jvaccount.account.strip())
 					#accountid.text = conta[0].account_number
 
 					sourcedocumentid = ET.SubElement(creditline,'SourceDocumentID')
@@ -1009,7 +1009,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					systementrydate.text = str(jvaccount.creation.strftime("%Y-%m-%dT%H:%M:%S"))	#Creation
 
 					description = ET.SubElement(creditline,'Description')
-					description.text = str(jvaccount.account)	
+					description.text = str(jvaccount.account.strip())	
 
 					creditamount = ET.SubElement(creditline,'CreditAmount')
 					creditamount.text = str(jvaccount.credit)	
@@ -1288,7 +1288,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			productcode.text = facturaitem.item_code
 
 			productdescription = ET.SubElement(line,'ProductDescription')
-			productdescription.text = facturaitem.item_name
+			productdescription.text = facturaitem.item_name.strip()
 
 			quantity = ET.SubElement(line,'Quantity')
 			quantity.text = str(facturaitem.qty)
@@ -1320,7 +1320,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			reason = ET.SubElement(references,'Reason')
 
 			description = ET.SubElement(line,'Description')
-			description.text = facturaitem.item_description
+			description.text = facturaitem.description.strip()
 
 			#productserialnumber
 			productserialnumber = ET.SubElement(line,'ProductSerialNumber')
@@ -1346,9 +1346,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'recibos refenrecias'
 			print factura.name
 			print recibosreferencias
-			if factura.name == 'FT19/0061':
-				print 'TEM IPC'
-				print facturaitem.imposto_de_consumo
+#			if factura.name == 'FT19/0061':
+#				print 'TEM IPC'
+#				print facturaitem.imposto_de_consumo
 				
 			
 			#if facturaitem.imposto_de_consumo or factura.is_pos == 1 :	#Caso tem IPC or IVA or IS_POS
@@ -1700,7 +1700,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							withholdingtaxtype.text = "IS"
 
 							withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-							withholdingtaxdescription.text = entradagl.account
+							withholdingtaxdescription.text = entradagl.account.strip()
 
 							withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
 							withholdingtaxamount.text = str(entradagl.credit)
@@ -1714,7 +1714,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							withholdingtaxtype.text = "II"
 
 							withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-							withholdingtaxdescription.text = entradagl.account
+							withholdingtaxdescription.text = entradagl.account.strip()
 
 							withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
 							withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
@@ -1728,7 +1728,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							withholdingtaxtype.text = "IRT"
 
 							withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-							withholdingtaxdescription.text = entradagl.account
+							withholdingtaxdescription.text = entradagl.account.strip()
 
 							withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
 							withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
@@ -1762,8 +1762,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #		myCMD2 =  " /tmp/angolaerp.cert/privkey.pem -out /tmp/" +  ficheirosha1 + " /tmp/" + ficheirotxt
 
 #		print myCMD
-		from subprocess import *
-		import subprocess
+#		from subprocess import *
+#		import subprocess
 
 #		decrypted = call(myCMD,shell=True)
 #		print decrypted
@@ -1912,6 +1912,54 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 
 	'''
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
+	'''
+	Gera primeiro o HASH e depois o sistema pega os files e apaga....
+
+	'''
+	#invoice para HASH
+	facturas = frappe.db.sql(""" select * from `tabPurchase Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for factura in facturas:
+		if chaveanterior == "":
+			#1st record
+			print 'primeiro registo'
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		else:
+			print 'segundo registo'
+			print chaveanterior
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+
+		print fileregistocontador
+		print str(factura.posting_date.strftime("%Y-%m-%d"))
+		print str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S"))
+		print str(factura.name)
+
+		print 'HASH do SALESINVOICE ', hashinfo
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
+		hashfile.write(hashinfo)
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+#		if fileregistocontador == 240:	
+#			return
+
+#	return
+	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+#	return	
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
 
 	#invoice
 	facturas = frappe.db.sql(""" select * from `tabPurchase Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
@@ -2287,7 +2335,43 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		operationtype = ET.SubElement(documenttotals,'OperationType')
 		#How to know if is CMN-compras nacional PSN-prestacao nacional PSN-prestacao estrangeiro OBN-outros bens ICN-investimento
+		operationtype.text = "CMN"	#default ... 
 
+
+
+		#HASH key to generate	
+		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
+
+		ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
+		ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
+		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
+
+
+	
+		hashfile.close()	#close previous ...
+
+		hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
+		print 'Hash criado'
+		chaveanterior = str(hashcriado.read())	#para usar no next record...
+
+		salesinvoicehash.text = str(chaveanterior)	#Hash created
+		
+		hashcriado.close()
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+
+#		if fileregistocontador == 4:
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64))
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem /tmp/registo1.sha1 /tmp/registo1.txt /tmp/registo1.b64")  
+#			return	
+		
+		'''
+		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
+		A table Angolaerp_hash must be created with 
+			Documenttype, DocumentNumber, Hash, Hashcontrol or Hashversion
+
+		'''
 
 		'''
 		print 'factura Referencia'
@@ -2405,6 +2489,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
 
 		'''
+	#Deve no fim apagar todos os regis* criados ....
+	os.system("rm /tmp/registo* ")	#execute
 
 	#END OF BuyingInvoices
 	#create MovimentofGoods
@@ -2421,6 +2507,55 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	#primeirodiames = '2019-03-01'
 	#ultimodiames = '2019-03-01'
+
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
+	'''
+	Gera primeiro o HASH e depois o sistema pega os files e apaga....
+
+	'''
+	#invoice para HASH
+	facturas = frappe.db.sql(""" select * from `tabDelivery Note` where company = %s and docstatus <> 0 and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for factura in facturas:
+		if chaveanterior == "":
+			#1st record
+			print 'primeiro registo'
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		else:
+			print 'segundo registo'
+			print chaveanterior
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+
+		print fileregistocontador
+		print str(factura.posting_date.strftime("%Y-%m-%d"))
+		print str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S"))
+		print str(factura.name)
+
+		print 'HASH do SALESINVOICE ', hashinfo
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
+		hashfile.write(hashinfo)
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+#		if fileregistocontador == 240:	
+#			return
+
+#	return
+	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+#	return	
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
 
 	guiasremessa = frappe.db.sql(""" select count(dn.name), sum(dni.qty) from `tabDelivery Note Item` dni join `tabDelivery Note` dn on dni.parent = dn.name where dn.company = %s and dn.docstatus <> 0 and dn.posting_date >= %s and dn.posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
@@ -2478,7 +2613,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 			movementofgoodshash = ET.SubElement(stockmovement,'Hash')
-			movementofgoodshash.text = 0	#default nossa app nao precisa.
+			#movementofgoodshash.text = 0	#default nossa app nao precisa.
 
 			movementofgoodshashcontrol = ET.SubElement(stockmovement,'HashControl')
 			#movementofgoodshashcontrol.text = "Nao validado pela AGT"	#default for now
@@ -2492,7 +2627,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			movementtype = ET.SubElement(stockmovement,'MovementType')
 			movementtype.text = "GR"	#default Delivery Note
-			salesinvoicehashcontrol.text = "1" + "GR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+			movementofgoodshashcontrol.text = "1" + "GR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			systementrydate = ET.SubElement(stockmovement,'SystemEntryDate')
 			systementrydate.text = guiaremessa.creation.strftime("%Y-%m-%dT%H:%M:%S")
@@ -2618,12 +2753,17 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				orderreferences = ET.SubElement(line,'OrderReferences')
 				originatingon = ET.SubElement(orderreferences,'OriginatingON')
 				orderdate = ET.SubElement(orderreferences,'OrderDate')
+				if guiaremessaitem.against_sales_order:
+					originatingon.text = guiaremessaitem.against_sales_order
+					ordemvenda = frappe.db.sql(""" select * from `tabSales Order` where name = %s """,(guiaremessaitem.against_sales_order), as_dict=True)
+					orderdate.text = ordemvenda[0].transaction_date.strftime("%Y-%m-%d")
+
 
 				productcode = ET.SubElement(line,'ProductCode')
 				productcode.text = guiaremessaitem.item_code
 
 				productdescription = ET.SubElement(line,'ProductDescription')
-				productdescription.text = guiaremessaitem.item_name
+				productdescription.text = guiaremessaitem.item_name.strip()
 
 				quantity = ET.SubElement(line,'Quantity')
 				quantity.text = str(guiaremessaitem.qty)
@@ -2635,7 +2775,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				unitprice.text = str(guiaremessaitem.rate) 
 
 				description = ET.SubElement(line,'Description')
-				description.text = guiaremessaitem.description
+				description.text = guiaremessaitem.description.strip()
 
 				productserialnumber = ET.SubElement(line,'ProductSerialNumber')
 				serialnumber = ET.SubElement(productserialnumber,'SerialNumber')
@@ -2643,10 +2783,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				#Sera que is o valor Valuation TAX or amount!!!
 				debitamount = ET.SubElement(line,'DebitAmount')
-				debitamount.text = 0
+				debitamount.text = "0.00"
 
 				creditamount = ET.SubElement(line,'CreditAmount')
-				creditamount.text = 0
+				creditamount.text = "0.00"
 
 				tax = ET.SubElement(line,'Tax')
 				taxtype = ET.SubElement(tax,'TaxType')
@@ -2673,6 +2813,44 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			currencycode = ET.SubElement(currency,'CurrencyCode')
 			currencyamount = ET.SubElement(currency,'CurrencyAmount')
 			exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+
+			#HASH key to generate	
+			#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
+
+			ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
+			ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
+			ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
+
+
+	
+			hashfile.close()	#close previous ...
+
+			hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
+			print 'Hash criado'
+			chaveanterior = str(hashcriado.read())	#para usar no next record...
+
+			movementofgoodshash.text = str(chaveanterior)	#Hash created
+		
+			hashcriado.close()
+
+			fileregistocontador += 1	#contador para registo1, registo2 ....
+
+
+	#		if fileregistocontador == 4:
+	#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64))
+	#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem /tmp/registo1.sha1 /tmp/registo1.txt /tmp/registo1.b64")  
+	#			return	
+		
+			'''
+			In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
+			A table Angolaerp_hash must be created with 
+				Documenttype, DocumentNumber, Hash, Hashcontrol or Hashversion
+
+			'''
+		#Deve no fim apagar todos os regis* criados ....
+		os.system("rm /tmp/registo* ")	#execute
+
 
 
 	#END OF MovementOfGoods
@@ -2715,6 +2893,54 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and (status != 'Draft' and status != 'Cancelled') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	if int(facturas[0]['count(name)']) !=0:
 		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
+	'''
+	Gera primeiro o HASH e depois o sistema pega os files e apaga....
+
+	'''
+	#invoice para HASH
+	facturas = frappe.db.sql(""" select * from `tabQuotation` where company = %s and (status != 'Draft' and status != 'Cancelled') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for factura in facturas:
+		if chaveanterior == "":
+			#1st record
+			print 'primeiro registo'
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		else:
+			print 'segundo registo'
+			print chaveanterior
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+
+		print fileregistocontador
+		print str(factura.posting_date.strftime("%Y-%m-%d"))
+		print str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S"))
+		print str(factura.name)
+
+		print 'HASH do SALESINVOICE ', hashinfo
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
+		hashfile.write(hashinfo)
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+#		if fileregistocontador == 240:	
+#			return
+
+#	return
+	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+#	return	
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
 
 
 
@@ -2761,7 +2987,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		sourcebilling.text = "P"	#Default
 
 		salesinvoicehash = ET.SubElement(invoice,'Hash')
-		salesinvoicehash.text = 0	#por rever...
+		#salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
 		#salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
@@ -2878,7 +3104,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			productcode.text = facturaitem.item_code
 
 			productdescription = ET.SubElement(line,'ProductDescription')
-			productdescription.text = facturaitem.item_name
+			productdescription.text = facturaitem.item_name.strip()
 
 			quantity = ET.SubElement(line,'Quantity')
 			quantity.text = str(facturaitem.qty)
@@ -2910,7 +3136,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			reason = ET.SubElement(references,'Reason')
 
 			description = ET.SubElement(line,'Description')
-			description.text = facturaitem.item_description
+			description.text = facturaitem.description.strip()
 
 			#productserialnumber
 			productserialnumber = ET.SubElement(line,'ProductSerialNumber')
@@ -3093,7 +3319,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		nettotal.text = str(factura.net_total)		#Sem Impostos Total Factura
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-		grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+		if factura.rounded_total:
+			grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+		else:
+			grosstotal.text = "0.00"
 
 		####ONLY IF NOT AOA .... POR VERIFICAR
 		#currency
@@ -3104,6 +3333,44 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#currencyamount.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 
 		exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+
+		#HASH key to generate	
+		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
+
+		ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
+		ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
+		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
+
+
+	
+		hashfile.close()	#close previous ...
+
+		hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
+		print 'Hash criado'
+		chaveanterior = str(hashcriado.read())	#para usar no next record...
+
+		salesinvoicehash.text = str(chaveanterior)	#Hash created
+		
+		hashcriado.close()
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+
+#		if fileregistocontador == 4:
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64))
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem /tmp/registo1.sha1 /tmp/registo1.txt /tmp/registo1.b64")  
+#			return	
+		
+		'''
+		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
+		A table Angolaerp_hash must be created with 
+			Documenttype, DocumentNumber, Hash, Hashcontrol or Hashversion
+
+		'''
+	#Deve no fim apagar todos os regis* criados ....
+	os.system("rm /tmp/registo* ")	#execute
+
 
 
 	#### Purchase ORDER
@@ -3135,6 +3402,59 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	#facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and (status = 'Return') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	#if int(facturas[0]['count(name)']) !=0:
 	#	totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+
+
+	'''
+		PURCHASE ORDER
+	'''
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
+	'''
+	Gera primeiro o HASH e depois o sistema pega os files e apaga....
+
+	'''
+	#invoice para HASH
+	facturas = frappe.db.sql(""" select * from `tabPurchase Order` where company = %s and status != 'Draft' and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for factura in facturas:
+		if chaveanterior == "":
+			#1st record
+			print 'primeiro registo'
+			hashinfo = str(factura.transaction_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		else:
+			print 'segundo registo'
+			print chaveanterior
+			hashinfo = str(factura.transaction_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+
+		print fileregistocontador
+		print str(factura.transaction_date.strftime("%Y-%m-%d"))
+		print str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S"))
+		print str(factura.name)
+
+		print 'HASH do SALESINVOICE ', hashinfo
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
+		hashfile.write(hashinfo)
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+#		if fileregistocontador == 240:	
+#			return
+
+#	return
+	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+#	return	
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
 
 
 
@@ -3181,7 +3501,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		sourcebilling.text = "P"	#Default
 
 		salesinvoicehash = ET.SubElement(invoice,'Hash')
-		salesinvoicehash.text = 0	#por rever...
+		#salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
 		#salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
@@ -3287,18 +3607,21 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			orderreferences = ET.SubElement(line,'OrderReferences')
 			originatingon = ET.SubElement(orderreferences,'OriginatingON')
 			orderdate = ET.SubElement(orderreferences,'OrderDate')
-			#if facturaitem.sales_order:
-			#	originatingon.text = facturaitem.sales_order
-			#	ordemvenda = frappe.db.sql(""" select * from `tabSales Order` where name = %s """,(facturaitem.sales_order), as_dict=True)
-			#	orderdate.text = ordemvenda[0].transaction_date.strftime("%Y-%m-%d")
-
+			if facturaitem.supplier_quotation:	#Pode ser ou tambem Material Request only...
+				originatingon.text = facturaitem.supplier_quotation
+				ordemvenda = frappe.db.sql(""" select * from `tabSupplier Quotation` where name = %s """,(facturaitem.supplier_quotation), as_dict=True)
+				orderdate.text = ordemvenda[0].transaction_date.strftime("%Y-%m-%d")
+			elif facturaitem.material_request:	#Pode ser ou tambem Material Request only...
+				originatingon.text = facturaitem.material_request
+				ordemvenda = frappe.db.sql(""" select * from `tabMaterial Request` where name = %s """,(facturaitem.material_request), as_dict=True)
+				orderdate.text = ordemvenda[0].transaction_date.strftime("%Y-%m-%d")
 
 
 			productcode = ET.SubElement(line,'ProductCode')
 			productcode.text = facturaitem.item_code
 
 			productdescription = ET.SubElement(line,'ProductDescription')
-			productdescription.text = facturaitem.item_name
+			productdescription.text = facturaitem.item_name.strip()
 
 			quantity = ET.SubElement(line,'Quantity')
 			quantity.text = str(facturaitem.qty)
@@ -3330,7 +3653,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			reason = ET.SubElement(references,'Reason')
 
 			description = ET.SubElement(line,'Description')
-			description.text = facturaitem.item_description
+			description.text = facturaitem.description.strip()
 
 			#productserialnumber
 			productserialnumber = ET.SubElement(line,'ProductSerialNumber')
@@ -3513,7 +3836,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		nettotal.text = str(factura.net_total)		#Sem Impostos Total Factura
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-		grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+		if factura.rounded_total:
+			grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+		else:
+			grosstotal.text = "0.00"
 
 		####ONLY IF NOT AOA .... POR VERIFICAR
 		#currency
@@ -3524,6 +3850,44 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#currencyamount.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 
 		exchangerate = ET.SubElement(currency,'ExchangeRate')
+
+
+
+		#HASH key to generate	
+		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
+
+		ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
+		ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
+		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
+
+
+	
+		hashfile.close()	#close previous ...
+
+		hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
+		print 'Hash criado'
+		chaveanterior = str(hashcriado.read())	#para usar no next record...
+
+		salesinvoicehash.text = str(chaveanterior)	#Hash created
+		
+		hashcriado.close()
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+
+#		if fileregistocontador == 4:
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64))
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem /tmp/registo1.sha1 /tmp/registo1.txt /tmp/registo1.b64")  
+#			return	
+		
+		'''
+		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
+		A table Angolaerp_hash must be created with 
+			Documenttype, DocumentNumber, Hash, Hashcontrol or Hashversion
+
+		'''
+	#Deve no fim apagar todos os regis* criados ....
+	os.system("rm /tmp/registo* ")	#execute
 
 
 	###END OF Purchase ORDER
@@ -3586,7 +3950,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			paymenttype.text = "RC"	#default SAFT
 
 			description = ET.SubElement(payment,'Description')
-			description.text = recibo.remarks
+			description.text = recibo.remarks.strip()
 
 			systemid = ET.SubElement(payment,'SystemID')
 			systemid.text = recibo.name
@@ -3874,7 +4238,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								withholdingtaxtype.text = "IS"
 
 								withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-								withholdingtaxdescription.text = entradagl.account
+								withholdingtaxdescription.text = entradagl.account.strip()
 
 								withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
 								withholdingtaxamount.text = str(entradagl.credit)
@@ -3888,7 +4252,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								withholdingtaxtype.text = "II"
 
 								withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-								withholdingtaxdescription.text = entradagl.account
+								withholdingtaxdescription.text = entradagl.account.strip()
 
 								withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
 								withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
@@ -3902,7 +4266,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								withholdingtaxtype.text = "IRT"
 
 								withholdingtaxdescription = ET.SubElement(withholdingtax,'WithholdingTaxDescription')
-								withholdingtaxdescription.text = entradagl.account
+								withholdingtaxdescription.text = entradagl.account.strip()
 
 								withholdingtaxamount = ET.SubElement(withholdingtax,'WithholdingTaxAmount')
 								withholdingtaxamount.text = str(entradagl.credit_in_account_currency)
