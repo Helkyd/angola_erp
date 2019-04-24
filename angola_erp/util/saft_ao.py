@@ -1076,13 +1076,55 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 
-	#invoice
-	facturas = frappe.db.sql(""" select * from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 	#Hash
 	chaveanterior =""
 	fileregisto = "registo"
 	fileregistocontador = 1	
+
+	'''
+	Gera primeiro o HASH e depois o sistema pega os files e apaga....
+
+	'''
+	#invoice para HASH
+	facturas = frappe.db.sql(""" select * from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	for factura in facturas:
+		if chaveanterior == "":
+			#1st record
+			print 'primeiro registo'
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+		else:
+			print 'segundo registo'
+			print chaveanterior
+			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+
+		print fileregistocontador
+		print str(factura.posting_date.strftime("%Y-%m-%d"))
+		print str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S"))
+		print str(factura.name)
+
+		print 'HASH do SALESINVOICE ', hashinfo
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
+		hashfile.write(hashinfo)
+
+		fileregistocontador += 1	#contador para registo1, registo2 ....
+
+#		if fileregistocontador == 240:	
+#			return
+
+#	return
+	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+#	return	
+
+
+	#Hash
+	chaveanterior =""
+	fileregisto = "registo"
+	fileregistocontador = 1	
+
+	#invoice
+	facturas = frappe.db.sql(""" select * from `tabSales Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' or status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 	for factura in facturas:
 		print factura.name
@@ -1127,7 +1169,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
+#		salesinvoicehashcontrol.text = "1" 	#default ver 1 as per the certificate
+		#"Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -1139,15 +1182,20 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print 'NC ', factura.return_against
 		if factura.is_pos == 1 and factura.status == 'Credit Note Issued':
 			invoicetype.text = "NC"	#POS NC usually mistaken...
+			salesinvoicehashcontrol.text = "1" + "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 		if factura.is_pos == 1 :
 			invoicetype.text = "FR"	#POS deve ser FR ou TV
+			salesinvoicehashcontrol.text = "1" + "FR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 		elif factura.return_against != None:
 			invoicetype.text = "NC"	#Retorno / Credit Note
-
+			salesinvoicehashcontrol.text = "1" + "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 		else:
 			invoicetype.text = "FT"	#default sales invoice
+			salesinvoicehashcontrol.text = "1" + "FT" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
+
+	
 		#specialRegimes
 		specialregimes = ET.SubElement(invoice,'SpecialRegimes')
 		selfbillingindicator = ET.SubElement(specialregimes,'SelfBillingIndicator')
@@ -1688,6 +1736,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						variasentradas = True	#para garar varias entradas
 		#HASH key to generate	
 		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
+		'''
 		if chaveanterior == "":
 			#1st record
 			print 'primeiro registo'
@@ -1699,9 +1748,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 		print 'HASH do SALESINVOICE ', hashinfo
-		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","w")
+		hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
 		hashfile.write(hashinfo)
 
+		'''
 		ficheirosha1  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".sha1"
 		ficheirotxt  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt"
 		ficheirob64  = "/tmp/" + str(fileregisto) + str(fileregistocontador) + ".b64"
@@ -1717,28 +1767,54 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 #		decrypted = call(myCMD,shell=True)
 #		print decrypted
-#		p = Popen(["/tmp/angolaerp.cert2/bb.sh"], stdout=PIPE, stderr=PIPE)
+#		p = Popen(["./home/helio/pp1.py"], stdout=PIPE, stderr=PIPE)
+		x = "echo -n " + hashinfo
+		print x
+#		os.system("/tmp/angolaerp.cert2/bb3.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+
+		print "blablalbla"
+
+
+#		os.system("python /tmp/angolaerp.cert2/pp1.py")
 
 #		p = Popen("/tmp/angolaerp.cert2/bb1.sh", shell=True, stdout=PIPE, stderr=PIPE)
 #		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",str(ficheirosha1),str(ficheirotxt),str(ficheirob64)], shell=True, stdout=PIPE, stderr=PIPE)
 
-		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",str(ficheirosha1),str(ficheirotxt),str(ficheirob64)],shell=False, stdout=PIPE, stderr=PIPE)
+#		p = Popen(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",str(ficheirosha1),str(ficheirotxt),str(ficheirob64)],shell=True, stdout=PIPE, stderr=PIPE)
 
-		output, errors = p.communicate()
-		p.wait()
-		print 'Openssl Signing...'
-		print output
-		print errors
+#		with open('output','wb',0) as out:
+#			subprocess.run(["/tmp/angolaerp.cert2/bb1.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",str(ficheirosha1),str(ficheirotxt),str(ficheirob64)],shell=False, stdout=out, stderr=PIPE)
 
-		#encoding
-#		p = Popen(["/tmp/angolaerp.cert2/bb2.sh","/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem",ficheirosha1,ficheirotxt,ficheirob64], shell=True, stdout=PIPE, stderr=PIPE)
+
+#		p = Popen(['openssl dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out ' + ficheirosha1 + ficheirotxt  ],shell=True, stdout=PIPE, stderr=PIPE)
+#		print 'ficheiro para executar'
+		ddd = '/tmp/angolaerp.cert2/bb1.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out ' + ficheirosha1 + ficheirotxt + ficheirob64
+		dd1 = "/bin/sh -c /usr/bin/openssl " #dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out " #+ ficheirosha1 + ficheirotxt
+		dd2 = '/tmp/angolaerp.cert2/bb.sh'
+#		print ddd
+#		p = Popen([dd1],shell=True, stdout=PIPE, stderr=PIPE)
 #		output, errors = p.communicate()
 #		p.wait()
-#		print 'Openssl Signing...'
+		print 'Openssl Signing...'
+#		print output
+#		print errors
+
+		#encoding
+
+#		p = Popen(['openssl enc -base64 -in ' + ficheirosha1 + ' -out ' + ficheirob64 + ' -A' ],shell=True, stdout=PIPE, stderr=PIPE)
+
+#		output, errors = p.communicate()
+#		p.wait()
+#		print 'Openssl Encoding...'
 #		print output
 #		print errors
 
 
+#		sts = call("/usr/bin/openssl dgst -sha1 -sign /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem -out /tmp/registo1.sha1 /tmp/registo1.txt", shell=True)
+
+#		print sts
+
+#		sts1 = call("/usr/bin/openssl enc -base64 -in /tmp/registo1.sha1 -out /tmp/registo1.b64 -A", shell=True)
 
 
 
@@ -1767,21 +1843,24 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		hashfile.close()	#close previous ...
 		#hashfile.close()	#close previous ...
 
-		hashcriado = open(ficheirob64,'r')	#open the file created to HASH
+		hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
 		print 'Hash criado'
 		#print hashcriado.read()
-		print hashcriado.read()
+#		print hashcriado.read()
 		chaveanterior = str(hashcriado.read())	#para usar no next record...
-		print chaveanterior
+#		print chaveanterior
 
 		salesinvoicehash.text = str(chaveanterior)	#Hash created
 		
+		hashcriado.close()
 
 		fileregistocontador += 1	#contador para registo1, registo2 ....
 
 
-		if fileregistocontador == 3:
-			return	
+#		if fileregistocontador == 4:
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64))
+#			os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem /tmp/registo1.sha1 /tmp/registo1.txt /tmp/registo1.b64")  
+#			return	
 		
 		'''
 		In case we need to generate Hash for all records on the APP ... this will be done when SAFT export required
@@ -1789,9 +1868,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			Documenttype, DocumentNumber, Hash, Hashcontrol or Hashversion
 
 		'''
+	#Deve no fim apagar todos os regis* criados ....
+	os.system("rm /tmp/registo* ")	#execute
 
-
-
+#	os.system("/tmp/angolaerp.cert2/bb6.sh /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+#	return
 	#END OF SAlesInvoice
 
 
@@ -1878,7 +1959,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
+		#salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -1890,11 +1971,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print 'NC ', factura.return_against
 		if factura.is_pos == 1:
 			invoicetype.text = "FR"	#POS deve ser FR ou TV
+			salesinvoicehashcontrol.text = "1" + "FR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 		elif factura.return_against != None:
 			invoicetype.text = "NC"	#Retorno / Credit Note
+			salesinvoicehashcontrol.text = "1" + "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 		else:
 			invoicetype.text = "FT"	#default sales invoice
+			salesinvoicehashcontrol.text = "1" + "FT" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 		'''
 		#specialRegimes
@@ -2397,7 +2481,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			movementofgoodshash.text = 0	#default nossa app nao precisa.
 
 			movementofgoodshashcontrol = ET.SubElement(stockmovement,'HashControl')
-			movementofgoodshashcontrol.text = "Nao validado pela AGT"	#default for now
+			#movementofgoodshashcontrol.text = "Nao validado pela AGT"	#default for now
 
 
 			period = ET.SubElement(stockmovement,'Period')
@@ -2408,6 +2492,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			movementtype = ET.SubElement(stockmovement,'MovementType')
 			movementtype.text = "GR"	#default Delivery Note
+			salesinvoicehashcontrol.text = "1" + "GR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			systementrydate = ET.SubElement(stockmovement,'SystemEntryDate')
 			systementrydate.text = guiaremessa.creation.strftime("%Y-%m-%dT%H:%M:%S")
@@ -2679,7 +2764,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
+		#salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -2696,6 +2781,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		#else:
 		invoicetype.text = "PF"	#default Proforma
+		salesinvoicehashcontrol.text = "1" + "PF" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 		'''
 		#specialRegimes
@@ -3098,7 +3184,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
-		salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
+		#salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
 
 		period = ET.SubElement(invoice,'Period')
 		period.text = str(factura.modified.month)	#last modified month
@@ -3115,6 +3201,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		#else:
 		invoicetype.text = "PF"	#default Proforma
+		salesinvoicehashcontrol.text = "1" + "PF" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 		'''
 		#specialRegimes
