@@ -2,7 +2,7 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 18/04/2019
+#Date Changed: 24/04/2019
 #Version: 1.0.4
 
 from __future__ import unicode_literals
@@ -39,6 +39,17 @@ from datetime import datetime, date, timedelta
 import angola
 import re
 
+#HASH
+import OpenSSL
+from OpenSSL import crypto
+import base64
+from oauth2client._helpers import _to_bytes
+
+
+@frappe.whitelist()
+def gerar_hash_erp():
+
+	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh")
 
 @frappe.whitelist()
 def get_xml(args):
@@ -187,7 +198,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print ultimodiames.strftime("%Y-%m-%d")
 
 		if processar.upper() == 'DIARIO':
-			ultimodiames = primeirodiames
+	
+			ultimodiames = primeirodiames = datetime.strptime(datainicio,"%Y-%m-%d")
 			print primeirodiames.strftime("%Y-%m-%d")
 			print ultimodiames.strftime("%Y-%m-%d")
 
@@ -1075,7 +1087,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 
 
-
+	
 
 	#Hash
 	chaveanterior =""
@@ -1114,9 +1126,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
-
+	
 
 	#Hash
 	chaveanterior =""
@@ -1850,7 +1862,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		chaveanterior = str(hashcriado.read())	#para usar no next record...
 #		print chaveanterior
 
-		salesinvoicehash.text = str(chaveanterior)	#Hash created
+		#verifica se tem HASH
+		if factura.hash_erp:
+			salesinvoicehash.text = str(factura.hash_erp)	#Hash created
+		else:
+			salesinvoicehash.text = str(chaveanterior)	#do System
 		
 		hashcriado.close()
 
@@ -1951,7 +1967,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -2004,7 +2020,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		sourcebilling.text = "P"	#Default
 
 		salesinvoicehash = ET.SubElement(invoice,'Hash')
-		salesinvoicehash.text = 0	#por rever...
+		#salesinvoicehash.text = 0	#por rever...
 
 		salesinvoicehashcontrol = ET.SubElement(invoice,'HashControl')
 		#salesinvoicehashcontrol.text = "Nao validado pela AGT"	#default for now
@@ -2353,8 +2369,12 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
 		print 'Hash criado'
 		chaveanterior = str(hashcriado.read())	#para usar no next record...
+		#verifica se tem HASH
+		if factura.hash_erp:
+			salesinvoicehash.text = str(factura.hash_erp)	#Hash created
+		else:
+			salesinvoicehash.text = str(chaveanterior)	#do System
 
-		salesinvoicehash.text = str(chaveanterior)	#Hash created
 		
 		hashcriado.close()
 
@@ -2547,7 +2567,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -2933,7 +2953,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -3349,8 +3369,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		hashcriado = open(ficheirob64,'rb')	#open the file created to HASH
 		print 'Hash criado'
 		chaveanterior = str(hashcriado.read())	#para usar no next record...
-
-		salesinvoicehash.text = str(chaveanterior)	#Hash created
+		#verifica se tem HASH
+		if factura.hash_erp:
+			salesinvoicehash.text = str(factura.hash_erp)	#Hash created
+		else:
+			salesinvoicehash.text = str(chaveanterior)	#do System
 		
 		hashcriado.close()
 
@@ -3446,7 +3469,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("/tmp/angolaerp.cert2/bb6.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -3868,7 +3891,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print 'Hash criado'
 		chaveanterior = str(hashcriado.read())	#para usar no next record...
 
-		salesinvoicehash.text = str(chaveanterior)	#Hash created
+		if factura.hash_erp:
+			salesinvoicehash.text = str(factura.hash_erp)	#Hash created
+		else:
+			salesinvoicehash.text = str(chaveanterior)	#do System
 		
 		hashcriado.close()
 
@@ -4446,6 +4472,99 @@ def verify_message(pem, msg, sig):
     pubkey.verify_init()
     pubkey.verify_update(msg)
     return pubkey.verify_final(sig)
+
+@frappe.whitelist()
+def assinar_ssl():
+
+
+	datas = open("/tmp/registo1.txt","rb")
+	data = datas.read()
+	datas.close()
+	key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	key = key_file.read()
+#	key = key.encode('ascii')
+	key_file.close()
+
+	if key.startswith('-----BEGIN '):
+		pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, key)
+
+
+
+	print data
+	#data ='2019-04-24;2019-04-24T20:54:34;FAU-19/01516;1050.0;'
+	message = _to_bytes(data, encoding='utf-8')
+	sign = OpenSSL.crypto.sign(pkey, message, _to_bytes("sha1"))
+	#print sign
+
+	data_base64 = base64.b64encode(sign)
+	print 'CODIGO xxxxxxx'
+	print data_base64
+
+@frappe.whitelist()
+def assinar_ssl1(hashinfo):
+
+
+
+	key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
+	key0 = key_file0.read()
+#	key = key.encode('ascii')
+	key_file0.close()
+
+
+	key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	key = key_file.read()
+#	key = key.encode('ascii')
+	key_file.close()
+
+	key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
+	key1 = key_file1.read()
+
+	key_file1.close()
+
+
+	if key0.startswith('-----BEGIN '):	#cert
+		pkey0 = crypto.load_certificate(crypto.FILETYPE_PEM, key0)
+
+	if key.startswith('-----BEGIN '):
+		pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, key)
+
+	if key1.startswith('-----BEGIN '):	#public
+		pkey1 = crypto.load_publickey(crypto.FILETYPE_PEM, key1)
+
+
+
+	#message = _to_bytes(hashinfo, encoding='utf-8')
+	sign = OpenSSL.crypto.sign(pkey, hashinfo, _to_bytes("sha1"))
+	#print sign
+
+	data_base64 = base64.b64encode(sign)
+	print 'CODIGO xxxxxxx'
+	print data_base64
+
+	print 'VERIFICAR CERTIFCATE......'
+	verificar0 = OpenSSL.crypto.verify(pkey0,sign,hashinfo,_to_bytes("sha1"))
+	if verificar0:
+		print "CERTIFICATE VERIFICAO ERRADA"
+	else:
+		print "CERTIFICATE VERIFICAO OK"
+
+
+	print 'VERIFICAR PUBLIC KEY......'
+	x509 = OpenSSL.crypto.X509()
+	x509.set_pubkey(pkey1)
+	verificar1 = OpenSSL.crypto.verify(x509,sign,hashinfo,_to_bytes("sha1"))
+	if verificar1:
+		print "PUBLIC KEY VERIFICAO ERRADA"
+	else:
+		print "PUBLIC KEY VERIFICAO OK"
+
+	return data_base64
+
+
+'''
+Eh9lq4L1+uw48J/Wf/dPVetijSFNimx0dQOI2b5huJyIoT0BMOG/kuxUFaNJ3wjZxd+UiI0Unclv1XgYzS9BKJ1PmxnxzZI7UKoKmP6XuUkBSDIvwiLmNYObvt3xrKYVVlAanZx3QRt+RsB7bA4tkR3Iz/oRlEGcUKzQpR8p2YM=
+Eh9lq4L1+uw48J/Wf/dPVetijSFNimx0dQOI2b5huJyIoT0BMOG/kuxUFaNJ3wjZxd+UiI0Unclv1XgYzS9BKJ1PmxnxzZI7UKoKmP6XuUkBSDIvwiLmNYObvt3xrKYVVlAanZx3QRt+RsB7bA4tkR3Iz/oRlEGcUKzQpR8p2YM=
+'''
 
 '''
 
