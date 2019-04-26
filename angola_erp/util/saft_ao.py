@@ -994,7 +994,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					#Is this SI/DN or the JV ID
 					sourcedocumentid = ET.SubElement(debitline,'SourceDocumentID')
-					sourcedocumentid.text = str(jvaccount.account)
+					sourcedocumentid.text = str(jv.name) #str(jvaccount.account)
 
 					systementrydate = ET.SubElement(debitline,'SystemEntryDate')
 					systementrydate.text = str(jvaccount.creation.strftime("%Y-%m-%dT%H:%M:%S"))	#Creation
@@ -1004,7 +1004,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					description.text = str(jvaccount.account.strip())	
 
 					debitamount = ET.SubElement(debitline,'DebitAmount')
-					debitamount.text = str(jvaccount.debit)	
+					debitamount.text = str("{0:.2f}".format(jvaccount.debit)) #str(jvaccount.debit)	
 
 					#para cliente ou supplier
 					if jvaccount.party_type == "Customer":
@@ -1036,7 +1036,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					description.text = str(jvaccount.account.strip())	
 
 					creditamount = ET.SubElement(creditline,'CreditAmount')
-					creditamount.text = str(jvaccount.credit)	
+					creditamount.text = str("{0:.2f}".format(jvaccount.credit)) #str(jvaccount.credit)	
 
 					#para cliente ou supplier
 					if jvaccount.party_type == "Customer":
@@ -1377,7 +1377,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 				creditamount = ET.SubElement(line,'CreditAmount')
-				creditamount.text = str(facturaitem.amount)
+				creditamount.text = str("{0:.2f}".format(facturaitem.amount)) #str(facturaitem.amount)
 				#POR VER SE TEM....
 
 			#tax
@@ -2908,7 +2908,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				creditamount = ET.SubElement(line,'CreditAmount')
 				#creditamount.text = "0.00"
-				creditamount.text = str(guiaremessaitem.amount)
+				creditamount.text = str("{0:.2f}".format(guiaremessaitem.amount)) #str(guiaremessaitem.amount)
 
 				tax = ET.SubElement(line,'Tax')
 				taxtype = ET.SubElement(tax,'TaxType')
@@ -3292,7 +3292,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 				creditamount = ET.SubElement(line,'CreditAmount')
-				creditamount.text = str(facturaitem.amount)
+				creditamount.text = str("{0:.2f}".format(facturaitem.amount)) #str(facturaitem.amount)
 				#POR VER SE TEM....
 
 			#tax
@@ -3846,7 +3846,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 				creditamount = ET.SubElement(line,'CreditAmount')
-				creditamount.text = str(facturaitem.amount)
+				creditamount.text = str("{0:.2f}".format(facturaitem.amount)) #str(facturaitem.amount)
 				#POR VER SE TEM....
 
 			#tax
