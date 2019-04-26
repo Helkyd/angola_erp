@@ -173,8 +173,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		primeirodiames = angola.get_first_day(datetime.today())
 		ultimodiames = angola.get_last_day(datetime.today())
 
-		primeirodiames = datetime.strptime('2019-01-01',"%Y-%m-%d")
-		ultimodiames = datetime.strptime('2019-04-30',"%Y-%m-%d")
+		#primeirodiames = datetime.strptime('2019-01-01',"%Y-%m-%d")
+		#ultimodiames = datetime.strptime('2019-04-30',"%Y-%m-%d")
 
 		AnoFiscal = frappe.db.sql(""" select year, year_start_date, year_end_date, disabled from `tabFiscal Year` where year = %s """,(datetime.today().year)
 ,as_dict=True)
@@ -191,11 +191,12 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print 'Processar ', processar
 		#case Semanal changes datafim
 		#case Diario changes datafim to datainicio
-		if processar.upper() == 'SEMANAL':
+		if processar.upper() == 'SEMANA':
 			primeirodiames, ultimodiames = angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
 			print angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
 			print primeirodiames.strftime("%Y-%m-%d")
 			print ultimodiames.strftime("%Y-%m-%d")
+
 
 		if processar.upper() == 'DIARIO':
 	
@@ -231,20 +232,20 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	taxaccountingbasis.text = "I"	#I contab. integrada c/Factur, C - Contab, F - Fact, Q - bens, services, Fact.
 
 	companyname = ET.SubElement(head,'CompanyName')
-	companyname.text = str(empresa.name)
+	companyname.text = str(empresa.name).strip()
 
 	businessname = ET.SubElement(head,'BusinessName')
-	businessname.text = empresa.name
+	businessname.text = str(empresa.name).strip()
 
 	#START CompanyAddress
 	companyaddress = ET.SubElement(head,'CompanyAddress')
 	buildingnumber = ET.SubElement(companyaddress,'BuildingNumber')
 
 	streetname = ET.SubElement(companyaddress,'StreetName')
-	streetname.text = emp_enderecos.address_line1
+	streetname.text = str(emp_enderecos.address_line1).strip()
 
 	addressdetail = ET.SubElement(companyaddress,'AddressDetail')
-	addressdetail.text = emp_enderecos.address_line1
+	addressdetail.text = str(emp_enderecos.address_line1).strip()
 
 	city = ET.SubElement(companyaddress,'City')
 	city.text = emp_enderecos.city
@@ -321,17 +322,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	#masterfiles = ET.Element('MasterFiles')
 
 	generalledgeraccounts = ET.SubElement(masterfiles,'GeneralLedgerAccounts')
-	planocontas = frappe.db.sql(""" select * from `tabAccount` where docstatus = 0 and company = %s order by name, lft """,(empresa.name), as_dict=True)
+	planocontas = frappe.db.sql(""" select * from `tabAccount` where docstatus = 0 and company = %s and mid(name,1,1) REGEXP '[0-9]' order by name, lft """,(empresa.name), as_dict=True)
 
 
 	for planoconta in planocontas:
 		account = ET.SubElement(generalledgeraccounts,'Account')
 		accountid = ET.SubElement(account,'AccountID')
-		accountid.text = str(planoconta.name.strip())			#Due to 30 chars limit we have to add 
-		#accountid.text = str(planoconta.account_number)	#Make sure update_acc_codes was run before...
+		#accountid.text = str(planoconta.name.strip())			#Due to 30 chars limit we have to add 
+		accountid.text = str(planoconta.account_number)	#Make sure update_acc_codes was run before...
 
 		accountdescription = ET.SubElement(account,'AccountDescription')		
-		accountdescription.text = str(planoconta.account_name.strip())
+		#accountdescription.text = str(planoconta.account_name.strip())
+		accountdescription.text = str(planoconta.account_name[planoconta.account_name.find('-')+1:len(planoconta.account_name)])
+		# str(planoconta.account_name[planoconta.account_name.find('-')+1:planoconta.account_name.rfind('-')])
 
 		openingdeditbalance = ET.SubElement(account,'OpeningDebitBalance')
 		openingcrebitbalance = ET.SubElement(account,'OpeningCreditBalance')
@@ -397,7 +400,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		groupingcode = ET.SubElement(account,'GroupingCode')
 		if planoconta.parent_account:
-			groupingcode.text = str(planoconta.parent_account)
+			groupingcode.text = str(planoconta.parent_account[planoconta.parent_account.find('-')+1:len(planoconta.parent_account)])
+			# str(planoconta.parent_account)
 
 	#Customers
 
@@ -850,6 +854,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			taxtype.text = "NS"
 
 		taxcountryregion = ET.SubElement(taxtableentry,'TaxCountryRegion')
+		taxcountryregion.text = "AO"
 
 
 		taxcode = ET.SubElement(taxtableentry,'TaxCode')
@@ -1684,18 +1689,18 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			if salestaxescharges: 
 				print salestaxescharges[0].tax_amount
-				taxpayable.text = str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+				taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 		#if retencao.credit_in_account_currency:
 		#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 		nettotal = ET.SubElement(documenttotals,'NetTotal')
-		nettotal.text = str(factura.net_total)		#Sem Impostos Total Factura
+		nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 		if factura.rounded_total:
-			grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+			grosstotal.text = str("{0:.2f}".format(factura.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 		else:
 			grosstotal.text = "0.00"
 
@@ -1738,7 +1743,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					paymentmechanism.text = "CD"
 
 				paymentamount = ET.SubElement(payment,'PaymentAmount')
-				paymentamount.text = str(recibo.paid_amount)
+				paymentamount.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)
 
 				paymentdate = ET.SubElement(payment,'PaymentDate')
 				paymentdate.text = recibo.posting_date.strftime("%Y-%m-%d")
@@ -3029,14 +3034,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		if chaveanterior == "":
 			#1st record
 			print 'primeiro registo'
-			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
+			hashinfo = str(factura.transaction_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";"
 		else:
 			print 'segundo registo'
 			print chaveanterior
-			hashinfo = str(factura.posting_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
+			hashinfo = str(factura.transaction_date.strftime("%Y-%m-%d")) + ";" + str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S")) + ";" + str(factura.name) + ";" + str(factura.rounded_total) + ";" + str(chaveanterior)
 
 		print fileregistocontador
-		print str(factura.posting_date.strftime("%Y-%m-%d"))
+		print str(factura.transaction_date.strftime("%Y-%m-%d"))
 		print str(factura.creation.strftime("%Y-%m-%dT%H:%M:%S"))
 		print str(factura.name)
 
@@ -3459,7 +3464,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			if salestaxescharges: 
 				print salestaxescharges[0].tax_amount
-				taxpayable.text = str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+				taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 
@@ -3469,11 +3474,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 		nettotal = ET.SubElement(documenttotals,'NetTotal')
-		nettotal.text = str(factura.net_total)		#Sem Impostos Total Factura
+		nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 		if factura.rounded_total:
-			grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+			grosstotal.text = str("{0:.2f}".format(factura.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 		else:
 			grosstotal.text = "0.00"
 
@@ -4015,7 +4020,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			if salestaxescharges: 
 				print salestaxescharges[0].tax_amount
-				taxpayable.text = str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+				taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 
@@ -4025,11 +4030,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 		nettotal = ET.SubElement(documenttotals,'NetTotal')
-		nettotal.text = str(factura.net_total)		#Sem Impostos Total Factura
+		nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 		if factura.rounded_total:
-			grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+			grosstotal.text = str("{0:.2f}".format(factura.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 		else:
 			grosstotal.text = "0.00"
 
@@ -4203,7 +4208,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#	paymentmechanism.text = "CD"
 
 			paymentamount = ET.SubElement(paymentmethod,'PaymentAmount')
-			paymentamount.text = str(recibo.paid_amount) 
+			paymentamount.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount) 
 
 			paymentdate = ET.SubElement(paymentmethod,'PaymentDate')
 			paymentdate.text = recibo.modified.strftime("%Y-%m-%d")
@@ -4254,7 +4259,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						settlementamount.text = str(factura[0].discount_amount) 
 	
 				debitamount = ET.SubElement(line,'DebitAmount')
-				debitamount.text = str(reciboreferencia.allocated_amount) 
+				debitamount.text = str("{0:.2f}".format(reciboreferencia.allocated_amount))
+				#str(reciboreferencia.allocated_amount) 
 
 				creditamount = ET.SubElement(line,'CreditAmount')
 
@@ -4387,19 +4393,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#Ainda falta pegar o valor do IVA caso o mesmo tenha....
 			if pagamentotaxas: 
 				print pagamentotaxas[0].amount
-				taxpayable.text = str(entradagl.credit)	 
+				taxpayable.text = str("{0:.2f}".format(entradagl.credit)) #str(entradagl.credit)	 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 
 
 			#Should it get from Each invoice the NETtotal and GrossTotal and do SUM
 			nettotal = ET.SubElement(documenttotals,'NetTotal')
-			nettotal.text = str(recibo.paid_amount)	#Paid amount...
+			nettotal.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)	#Paid amount...
 
 			pagamentofinal = frappe.db.sql(""" select sum(debit) from `tabGL Entry` where company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
 
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-			grosstotal.text = str(pagamentofinal[0])	#Total Allocated Amount
+			grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
 
 			#settlement
 			settlement = ET.SubElement(documenttotals,'Settlement')
