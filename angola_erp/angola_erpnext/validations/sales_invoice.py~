@@ -288,7 +288,7 @@ def validate(doc,method):
 		doc.in_words = money_in_words(doc.rounded_total, company_currency)
 
 	
-	ultimodoc = frappe.db.sql(""" select max(name),creation,docstatus,hash_erp,hashcontrol_erp from `tabSales Invoice` where docstatus = 1  and hash_erp <> '' """,as_dict=True)
+	ultimodoc = frappe.db.sql(""" select max(name),creation,docstatus,hash_erp,hashcontrol_erp from `tabSales Invoice` where (docstatus = 1 or docstatus = 2)  and hash_erp <> '' """,as_dict=True)
 	print 'VALIDARrrrrrrrrrrrrrrrrrr'
 	print ultimodoc
 	global ultimoreghash
@@ -307,13 +307,6 @@ def before_submit(doc,method):
 			print("RETIRA As PO aqui ....")
 			doc.po_no = ""
 
-	
-def before_save(doc,method):
-	#check if PO_NO lenght more than 140 chars
-	if doc.po_no:
-		if len(doc.po_no) > 140:
-			print("RETIRA As PO aqui ....")
-			doc.po_no = ""
 
 	#HASH and HASH CONTROL...
 	fileregisto = "registo"
@@ -381,6 +374,14 @@ def before_save(doc,method):
 	
 	#Deve no fim apagar todos os regis* criados ....
 #	os.system("rm /tmp/registo* ")	#execute
+	
+def before_save(doc,method):
+	#check if PO_NO lenght more than 140 chars
+	if doc.po_no:
+		if len(doc.po_no) > 140:
+			print("RETIRA As PO aqui ....")
+			doc.po_no = ""
+
 
 
 def on_submit(doc,method):

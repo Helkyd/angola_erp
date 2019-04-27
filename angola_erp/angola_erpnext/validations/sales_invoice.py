@@ -288,7 +288,7 @@ def validate(doc,method):
 		doc.in_words = money_in_words(doc.rounded_total, company_currency)
 
 	
-	ultimodoc = frappe.db.sql(""" select max(name),creation,docstatus,hash_erp,hashcontrol_erp from `tabSales Invoice` where docstatus = 1  and hash_erp <> '' """,as_dict=True)
+	ultimodoc = frappe.db.sql(""" select max(name),creation,docstatus,hash_erp,hashcontrol_erp from `tabSales Invoice` where (docstatus = 1 or docstatus = 2)  and hash_erp <> '' """,as_dict=True)
 	print 'VALIDARrrrrrrrrrrrrrrrrrr'
 	print ultimodoc
 	global ultimoreghash
@@ -320,7 +320,10 @@ def before_submit(doc,method):
 	if ultimoreghash:
 		ultimodoc = ultimoreghash
 	else:
-		ultimodoc = frappe.db.sql(""" select max(name),creation,modified,posting_date,hash_erp,hashcontrol_erp from `tabSales Invoice` """,as_dict=True)
+		#ultimodoc = frappe.db.sql(""" select max(name),creation,modified,posting_date,hash_erp,hashcontrol_erp from `tabSales Invoice` """,as_dict=True)
+		ultimodoc = frappe.db.sql(""" select name,creation,modified,posting_date,hash_erp,hashcontrol_erp from `tabSales Invoice` where creation = (select max(creation) from `tabSales Invoice`) """,as_dict=True)
+		
+
 
 	criado = datetime.strptime(doc.creation,'%Y-%m-%d %H:%M:%S.%f').strftime("%Y-%m-%dT%H:%M:%S") 
 	

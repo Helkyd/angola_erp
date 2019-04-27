@@ -186,7 +186,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print datafim
 		#datainicio = datetime.strptime(datainicio,"%Y-%m-%d").year
 		primeirodiames = angola.get_first_day(datetime.strptime(datainicio,"%Y-%m-%d")) #datetime.datetime.strptime(datainicio,("%Y-%m-%d"))
-		ultimodiames = angola.get_last_day(datetime.strptime(datafim,"%Y-%m-%d")) #datetime.datetime.strptime(datafim,("%Y-%m-%d"))
+		ultimodiames = angola.get_last_day(datetime.strptime(datainicio,"%Y-%m-%d")) #datetime.datetime.strptime(datafim,("%Y-%m-%d"))
 
 		print 'Processar ', processar
 		#case Semanal changes datafim
@@ -886,7 +886,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	#END OF TaxTable
 
-
+	'''
 
 	#GeneralLEdgerEntries
 	generalledgerentries = ET.SubElement(data,'GeneralLedgerEntries')
@@ -1044,10 +1044,330 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					elif jvaccount.party_type == "Supplier":
 						supplierid.text = str(jvaccount.party)	
-
-
+	
+	'''
 	#END OF GeneralLEdgerEntries
 
+
+	# ===================================== GeneralLedgerEntries GL ENTRY
+	
+	#GeneralLEdgerEntries
+	generalledgerentries = ET.SubElement(data,'GeneralLedgerEntries')
+	#generalledgerentries = ET.Element('GeneralLedgerEntries')
+
+	#primeirodiames = '2019-02-18'
+	#ultimodiames = '2019-02-18'
+
+
+	jvs = frappe.db.sql(""" select count(name), sum(debit), sum(credit) from `tabGL Entry` where company = %s and docstatus = 1 and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+	numberofentries = ET.SubElement(generalledgerentries,'NumberOfEntries')
+	totaldebit = ET.SubElement(generalledgerentries,'TotalDebit')
+	totalcredit = ET.SubElement(generalledgerentries,'TotalCredit')
+
+	if int(jvs[0]['count(name)']) !=0:
+		numberofentries.text = str(jvs[0]['count(name)'])
+		totaldebit.text = str(jvs[0]['sum(debit)'])
+		totalcredit.text = str(jvs[0]['sum(credit)'])
+
+
+
+		print 'GL Entry'
+		print 'GL Entry'
+		print jvs
+
+
+		#JV	group by voucher_type ??????
+		jvs = frappe.db.sql(""" select * from `tabGL Entry` where company = %s and docstatus = 1 and posting_date >= %s and posting_date <= %s  """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+
+		#processa por SI, PI... assim busca todos os movimentos...mesmo sem JV
+		for jv in jvs:
+			print "asdfsadfsafsaddfsafdfasdfsadfas"
+			print jv.name
+			print primeirodiames
+			print ultimodiames
+			if jv.voucher_type == "Payment Entry":	# or jv.voucher_type == "Journal Entry":
+				print "Entrada ", jv.voucher_no
+
+
+				#pagamentos = frappe.db.sql(""" select * from `tabPayment Entry` where company = %s and docstatus = 1 and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+				#if "0045" in jv.voucher_no: # or jv.voucher_no == "JV-29779":
+
+				if jv.voucher_no == 'PE-19/0045': # or jv.voucher_no == "JV-29779":
+
+					journal = ET.SubElement(generalledgerentries,'Journal')
+					journalid = ET.SubElement(journal,'JournalID')
+					journalid.text = str(jv.name)
+							
+					description = ET.SubElement(journal,'Description')
+					if jv.remarks != None:
+						description.text = str(jv.voucher_type.strip())
+
+					#transaction
+
+					transaction = ET.SubElement(journal,'Transaction')
+					transactionid = ET.SubElement(transaction,'TransactionID')
+					transactionid.text = str(jv.posting_date.strftime("%Y-%m-%d")) + "  " + str(jv.voucher_no)
+
+					period = ET.SubElement(transaction,'Period')
+					period.text = str(jv.modified.year)		#check date YEAR
+
+					transactiondate = ET.SubElement(transaction,'TransactionDate')
+					transactiondate.text = str(jv.posting_date)
+
+					sourceid = ET.SubElement(transaction,'SourceID')
+					if jv.owner.find("@"):
+						sourceid.text = str(jv.owner[0:jv.owner.find("@")])	#Retirar o Email only names...
+					else:
+						sourceid.text = str(jv.owner)	#Retirar o Email only names...
+
+					description = ET.SubElement(transaction,'Description')
+					if jv.remarks != None:
+						description.text = str(jv.remarks.strip())	
+
+					docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
+					#Sera o GL ou pode ser o jv.name !!!!
+					#Pode ser o REFERENCE NUMBER
+
+					transactiontype = ET.SubElement(transaction,'TransactionType')
+					#jv.voucher_type
+					transactiontype.text = "N"	# default para APP
+
+					glpostingdate = ET.SubElement(transaction,'GLPostingDate')
+					#glpostingdate.text = str(jv.posting_date.strftime("%Y-%m-%d")) + "T" + str(jv.posting_date.strftime("%H:%M:%S"))	#Posting date to JV
+					glpostingdate.text = str(jv.posting_date.strftime("%Y-%m-%d"))
+
+
+					if jv.party_type == "Sales Invoice":
+						customerid = ET.SubElement(transaction,'CustomerID')
+						customerid.text = jv.party
+
+					elif jv.party_type == "Purchase Invoice":
+						supplierid = ET.SubElement(transaction,'SupplierID')
+						customerid.text = jv.party
+
+
+
+					jvs1 = frappe.db.sql(""" select * from `tabGL Entry` where company = %s and docstatus = 1 and posting_date >= %s and posting_date <= %s and name = %s """,(empresa.name,primeirodiames,ultimodiames, jv.name), as_dict=True)
+					for jv1 in jvs1:
+
+						#return	
+
+						#lines
+						lines = ET.SubElement(transaction,'Lines')
+						jvaccounts = frappe.db.sql(""" select * from `tabJournal Entry Account` where parent = %s order by idx """,(jv.name), as_dict=True)
+			
+						#DEBIT GL
+						if jv1.debit != 0:
+							debitline = ET.SubElement(lines,'DebitLine')
+							recordid = ET.SubElement(debitline,'RecordID')
+							recordid.text = str(jv1.idx)
+
+							accountid = ET.SubElement(debitline,'AccountID')
+							accountid.text = str(jv1.account.strip())
+							#accountid.text = conta[0].account_number
+
+							#Is this SI/DN or the JV ID
+							sourcedocumentid = ET.SubElement(debitline,'SourceDocumentID')
+							sourcedocumentid.text = str(jv1.voucher_no) #str(jv.name) #str(jvaccount.account)
+
+							systementrydate = ET.SubElement(debitline,'SystemEntryDate')
+							systementrydate.text = str(jv1.creation.strftime("%Y-%m-%dT%H:%M:%S"))	#Creation
+
+
+							description = ET.SubElement(debitline,'Description')
+							if jv.voucher_type == "Payment Entry":
+								pagamentos = frappe.db.sql(""" select * from `tabPayment Entry` where company = %s and name = %s """,(empresa.name,jv1.voucher_no), as_dict=True)
+								description.text = str(pagamentos[0].reference_no.strip())									
+
+
+							debitamount = ET.SubElement(debitline,'DebitAmount')
+							debitamount.text = str("{0:.2f}".format(jv1.debit)) #str(jvaccount.debit)	
+
+							#para cliente ou supplier
+							#if jvaccount.party_type == "Customer":
+							#	customerid.text = str(jvaccount.party)	
+
+							#elif jvaccount.party_type == "Supplier":
+							#	supplierid.text = str(jvaccount.party)	
+
+						elif jv1.credit != 0:
+							#CREDIT
+							creditline = ET.SubElement(lines,'CreditLine')
+							recordid = ET.SubElement(creditline,'RecordID')
+							recordid.text = str(jv1.idx)
+
+							accountid = ET.SubElement(creditline,'AccountID')
+							accountid.text = str(jv1.account.strip())
+							#accountid.text = conta[0].account_number
+
+							sourcedocumentid = ET.SubElement(creditline,'SourceDocumentID')
+							#JV NAME or SI/ASSETS .... needs to check first ...
+							sourcedocumentid.text = str(jv1.voucher_no)
+							#sourcedocumentid.text = str(jv.name) # Now as DEFAULT
+							#str(jvaccount.account)
+
+							systementrydate = ET.SubElement(creditline,'SystemEntryDate')
+							systementrydate.text = str(jv1.creation.strftime("%Y-%m-%dT%H:%M:%S"))	#Creation
+
+							description = ET.SubElement(creditline,'Description')
+							if jv.voucher_type == "Payment Entry":
+								pagamentos = frappe.db.sql(""" select * from `tabPayment Entry` where company = %s and name = %s """,(empresa.name,jv1.voucher_no), as_dict=True)
+								description.text = str(pagamentos[0].reference_no.strip())									
+
+
+							creditamount = ET.SubElement(creditline,'CreditAmount')
+							creditamount.text = str("{0:.2f}".format(jv1.credit)) #str(jvaccount.credit)	
+
+							#para cliente ou supplier
+							#if jvaccount.party_type == "Customer":
+							#	customerid.text = str(jvaccount.party)	
+
+							#elif jvaccount.party_type == "Supplier":
+							#	supplierid.text = str(jvaccount.party)	
+
+		'''
+		for jv in jvs:
+			print jv.name
+			print jv.cheque_date	
+			journal = ET.SubElement(generalledgerentries,'Journal')
+			journalid = ET.SubElement(journal,'JournalID')
+			journalid.text = str(jv.name)
+		
+			description = ET.SubElement(journal,'Description')
+			if jv.remarks != None:
+				description.text = str(jv.remarks.strip())
+			#elif jv.cheque_no != None:
+			#	description.text = str(jv.cheque_no.strip())
+			#elif jv.remark != None:
+			#	description.text = str(jv.remark.strip())
+
+
+			#transaction
+
+			transaction = ET.SubElement(journal,'Transaction')
+			transactionid = ET.SubElement(transaction,'TransactionID')
+			transactionid.text = str(jv.posting_date.strftime("%Y-%m-%d")) + "  " + str(jv.voucher_no)
+
+			period = ET.SubElement(transaction,'Period')
+			period.text = str(jv.modified.year)		#check date YEAR
+
+			transactiondate = ET.SubElement(transaction,'TransactionDate')
+			transactiondate.text = str(jv.posting_date)
+			#if jv.cheque_date:
+			#	transactiondate.text = str(jv.cheque_date)
+			#else:
+			#	transactiondate.text = str(jv.posting_date.strftime("%Y-%m-%d"))
+
+			sourceid = ET.SubElement(transaction,'SourceID')
+			if jv.owner.find("@"):
+				sourceid.text = str(jv.owner[0:jv.owner.find("@")])	#Retirar o Email only names...
+			else:
+				sourceid.text = str(jv.owner)	#Retirar o Email only names...
+
+			description = ET.SubElement(transaction,'Description')
+			if jv.remarks != None:
+				description.text = str(jv.remarks.strip())	
+
+			docarchivalnumber = ET.SubElement(transaction,'DocArchivalNumber')
+			#Sera o GL ou pode ser o jv.name !!!!
+			#Pode ser o REFERENCE NUMBER
+
+			transactiontype = ET.SubElement(transaction,'TransactionType')
+			#jv.voucher_type
+			transactiontype.text = "N"	# default para APP
+
+			glpostingdate = ET.SubElement(transaction,'GLPostingDate')
+			#glpostingdate.text = str(jv.posting_date.strftime("%Y-%m-%d")) + "T" + str(jv.posting_date.strftime("%H:%M:%S"))	#Posting date to JV
+			glpostingdate.text = str(jv.posting_date.strftime("%Y-%m-%d"))
+
+
+			if jv.party_type == "Sales Invoice":
+				customerid = ET.SubElement(transaction,'CustomerID')
+				customerid.text = jv.party
+
+			elif jv.party_type == "Purchase Invoice":
+				supplierid = ET.SubElement(transaction,'SupplierID')
+				customerid.text = jv.party
+
+			#lines
+			lines = ET.SubElement(transaction,'Lines')
+			jvaccounts = frappe.db.sql(""" select * from `tabJournal Entry Account` where parent = %s order by idx """,(jv.name), as_dict=True)
+
+			for jvaccount in jvaccounts:
+				#In case we need to get account_number instead
+				#conta = frappe.db.sql(""" select * from `tabAccount` where name = %s and company = %s """,(jvaccount.account,empresa.name), as_dict=True)
+				#accountid.text = conta[0].account_number
+
+				#DEBIT
+				if jvaccount.debit != 0:
+					debitline = ET.SubElement(lines,'DebitLine')
+					recordid = ET.SubElement(debitline,'RecordID')
+					recordid.text = str(jvaccount.idx)
+
+					accountid = ET.SubElement(debitline,'AccountID')
+					accountid.text = str(jvaccount.account.strip())
+					#accountid.text = conta[0].account_number
+
+					#Is this SI/DN or the JV ID
+					sourcedocumentid = ET.SubElement(debitline,'SourceDocumentID')
+					sourcedocumentid.text = str(jv.name) #str(jvaccount.account)
+
+					systementrydate = ET.SubElement(debitline,'SystemEntryDate')
+					systementrydate.text = str(jvaccount.creation.strftime("%Y-%m-%dT%H:%M:%S"))	#Creation
+
+
+					description = ET.SubElement(debitline,'Description')
+					description.text = str(jvaccount.account.strip())	
+
+					debitamount = ET.SubElement(debitline,'DebitAmount')
+					debitamount.text = str("{0:.2f}".format(jvaccount.debit)) #str(jvaccount.debit)	
+
+					#para cliente ou supplier
+					if jvaccount.party_type == "Customer":
+						customerid.text = str(jvaccount.party)	
+
+					elif jvaccount.party_type == "Supplier":
+						supplierid.text = str(jvaccount.party)	
+
+				elif jvaccount.credit != 0:
+					#CREDIT
+					creditline = ET.SubElement(lines,'CreditLine')
+					recordid = ET.SubElement(creditline,'RecordID')
+					recordid.text = str(jvaccount.idx)
+
+					accountid = ET.SubElement(creditline,'AccountID')
+					accountid.text = str(jvaccount.account.strip())
+					#accountid.text = conta[0].account_number
+
+					sourcedocumentid = ET.SubElement(creditline,'SourceDocumentID')
+					#JV NAME or SI/ASSETS .... needs to check first ...
+
+					sourcedocumentid.text = str(jv.name) # Now as DEFAULT
+					#str(jvaccount.account)
+
+					systementrydate = ET.SubElement(creditline,'SystemEntryDate')
+					systementrydate.text = str(jvaccount.creation.strftime("%Y-%m-%dT%H:%M:%S"))	#Creation
+
+					description = ET.SubElement(creditline,'Description')
+					description.text = str(jvaccount.account.strip())	
+
+					creditamount = ET.SubElement(creditline,'CreditAmount')
+					creditamount.text = str("{0:.2f}".format(jvaccount.credit)) #str(jvaccount.credit)	
+
+					#para cliente ou supplier
+					if jvaccount.party_type == "Customer":
+						customerid.text = str(jvaccount.party)	
+
+					elif jvaccount.party_type == "Supplier":
+						supplierid.text = str(jvaccount.party)	
+
+		'''	
+	#END OF GeneralLEdgerEntries
+
+
+
+	# ======================================
 
 
 
@@ -1741,6 +2061,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				elif "TPA" in recibo.mode_of_payment:					
 					paymentmechanism.text = "CD"
+
+				elif "Cheque Bancário".upper() in recibo.mode_of_payment:
+					paymentmechanism.text = "CH"
 
 				paymentamount = ET.SubElement(payment,'PaymentAmount')
 				paymentamount.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)
@@ -2995,7 +3318,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 	#Debitos ou pagamentos
-	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and (status != 'Draft' and status != 'Cancelled') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 
 	print facturas
@@ -3012,7 +3335,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
 
 	#Creditos ou devolucoes
-	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and (status != 'Draft' and status != 'Cancelled') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	if int(facturas[0]['count(name)']) !=0:
 		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 
@@ -3028,7 +3351,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	'''
 	#invoice para HASH
-	facturas = frappe.db.sql(""" select * from `tabQuotation` where company = %s and (status != 'Draft' and status != 'Cancelled') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	facturas = frappe.db.sql(""" select * from `tabQuotation` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 	for factura in facturas:
 		if chaveanterior == "":
@@ -3067,7 +3390,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 	#invoice
-	facturas = frappe.db.sql(""" select * from `tabQuotation` where company = %s and (status != 'Draft' and status != 'Cancelled') and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	facturas = frappe.db.sql(""" select * from `tabQuotation` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 	for factura in facturas:
 		print factura.name
@@ -3580,7 +3903,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	'''
 	#invoice para HASH
-	facturas = frappe.db.sql(""" select * from `tabPurchase Order` where company = %s and status != 'Draft' and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	facturas = frappe.db.sql(""" select * from `tabPurchase Order` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 	for factura in facturas:
 		if chaveanterior == "":
@@ -3620,7 +3943,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 	#invoice
-	facturas = frappe.db.sql(""" select * from `tabPurchase Order` where company = %s and status != 'Draft' and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
+	facturas = frappe.db.sql(""" select * from `tabPurchase Order` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 
 	print 'purchase orders'
 
@@ -4192,10 +4515,15 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			paymentmethod = ET.SubElement(payment,'PaymentMethod')
 			paymentmechanism = ET.SubElement(paymentmethod,'PaymentMechanism')
 			modopagamento = frappe.get_doc("Mode of Payment",recibo.mode_of_payment)
-			if modopagamento.type == "Bank":
-				paymentmechanism.text = "TB"
-			elif modopagamento.type == "Cash" and ("TPA".upper() in modopagamento.mode_of_payment.upper() or "MULTICAIXA".upper() in modopagamento.mode_of_payment.upper()):
+			if modopagamento.type == "Cash" and ("TPA".upper() in modopagamento.mode_of_payment.upper() or "MULTICAIXA".upper() in modopagamento.mode_of_payment.upper()):
 				paymentmechanism.text = "NU"
+
+			elif modopagamento.type == "Bank" and "Cheque Bancário".upper() in modopagamento.mode_of_payment.upper():
+				paymentmechanism.text = "CH"
+
+			elif modopagamento.type == "Bank":
+				paymentmechanism.text = "TB"
+
 			elif modopagamento.type == "Cash":
 				paymentmechanism.text = "NU"
 

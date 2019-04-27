@@ -150,7 +150,7 @@ doc_events = {
 	},
 	"Purchase Order": {
 		"validate": "angola_erp.angola_erpnext.validations.purchase_order.validate",
-
+		"before_submit": "angola_erp.angola_erpnext.validations.purchase_order.before_submit",
 	},
 	"Fees": {
 		"validate": "angola_erp.angola_erpnext.validations.fees.validate",
@@ -176,6 +176,12 @@ doc_events = {
 		"validate": "angola_erp.angola_erpnext.validations.student.validate",
 
 	},
+	"Delivery Note": {
+		"validate": "angola_erp.angola_erpnext.validations.delivery_note.validate",
+		"before_submit": "angola_erp.angola_erpnext.validations.delivery_note.before_submit",
+
+	},
+
 
 
 #	"System Settings": {
