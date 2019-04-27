@@ -1797,7 +1797,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxamount.text = "0.00"
 
 
-
+								'''
 								elif "3422" in entradagl.account:	#34220000
 									tax = ET.SubElement(taxes,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
@@ -1829,6 +1829,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									#else:
 									taxamount.text = "0.00"
 			
+								'''
 								'''
 								elif "34140000" in entradagl.account:
 									tax = ET.SubElement(taxes,'Tax')
@@ -1862,10 +1863,12 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
 					print 'factura ', factura.name
 					#print entradasgliva
+					#return
 					for entradaglinva in entradasgliva:
 						print entradaglinva.account
 
 						if "3422" in entradaglinva.account:	#34220000
+							print 'IVA'
 							tax = ET.SubElement(taxes,'Tax')
 							taxtype = ET.SubElement(tax,'TaxType')
 
@@ -1896,7 +1899,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							#else:
 							taxamount.text = "0.00"
 
-					#if factura.name == 'FT19/0072':
+					#if factura.name == 'FAU-19/01539':
 					#	return
 
 			else:
@@ -1914,8 +1917,6 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 						print entradagl.account
 						print entradagl.credit_in_account_currency
-						#if factura.name == 'FT19/0061':
-						#	return
 
 
 						if "34710000" in entradagl.account:
@@ -1970,7 +1971,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 
-
+						'''
 						elif "3422" in entradagl.account:	#34220000
 							tax = ET.SubElement(taxes,'Tax')
 							taxtype = ET.SubElement(tax,'TaxType')
@@ -2001,7 +2002,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							#else:
 							taxamount.text = "0.00"
 						'''
-
+						'''
 						elif "34140000" in entradagl.account:
 							tax = ET.SubElement(taxes,'Tax')
 							taxtype = ET.SubElement(tax,'TaxType')
@@ -2027,6 +2028,50 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							#else:
 							taxamount.text = "0.00"
 						'''
+
+					#IVA
+					entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+					print 'factura ', factura.name
+					#print entradasgliva
+					print 'PARAAAAAAAA '
+					return	
+					for entradaglinva in entradasgliva:
+						print entradaglinva.account
+
+						if "3422" in entradaglinva.account:	#34220000
+							tax = ET.SubElement(taxes,'Tax')
+							taxtype = ET.SubElement(tax,'TaxType')
+
+							taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+							taxcountryregion.text = "AO"
+
+							#IVA	ainda por rever
+							#Aqui verifica se na ficha do ITEM diz que esta isento....
+							taxtype.text = "IVA"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NOR"
+
+						#else:
+						#	taxtype.text = "NS"
+						#	taxcode = ET.SubElement(tax,'TaxCode')
+						#	taxcode.text = "NS"
+
+							retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+							print retn
+
+
+							taxpercentage = ET.SubElement(tax,'TaxPercentage')
+							taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+							taxamount = ET.SubElement(tax,'TaxAmount')
+							#if entradagl.credit:
+							#	taxamount.text = str(entradagl.credit)
+							#else:
+							taxamount.text = "0.00"
+
+					#if factura.name == 'FT19/0072':
+					#	return
+
 
 			taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
 			taxexemptionreason.text = "Regime Transitório"	#
@@ -5004,8 +5049,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print pagamentotaxas
 			#Ainda falta pegar o valor do IVA caso o mesmo tenha....
 			if pagamentotaxas: 
-				print pagamentotaxas[0].amount
-				taxpayable.text = str("{0:.2f}".format(entradagl.credit)) #str(entradagl.credit)	 
+				#print pagamentotaxas[0].amount
+				taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit)) #str(entradagl.credit)	 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 
