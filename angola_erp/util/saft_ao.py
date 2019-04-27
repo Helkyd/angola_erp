@@ -1711,9 +1711,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'recibos refenrecias'
 			print factura.name
 			print recibosreferencias
-#			if factura.name == 'FT19/0061':
+#			if factura.name == 'FT19/0072':
 #				print 'TEM IPC'
-#				print facturaitem.imposto_de_consumo
+#				print factura.is_pos
+#				return
 				
 			
 			#if facturaitem.imposto_de_consumo or factura.is_pos == 1 :	#Caso tem IPC or IVA or IS_POS
@@ -1735,7 +1736,6 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						print 'entradasgl+++++'
 
 						#print entradasgl
-						#return
 
 
 						if entradasgl:
@@ -1745,13 +1745,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								print entradagl.credit_in_account_currency
 
 								if "34710000" in entradagl.account:
+									#imposto de selo
 									tax = ET.SubElement(taxes,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
 									taxcountryregion.text = "AO"
 
-									#imposto de selo
+
 									taxtype.text = "IS"
 									taxcode = ET.SubElement(tax,'TaxCode')
 									taxcode.text = "NS"
@@ -1770,13 +1771,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxamount.text = "0.00"
 
 								elif "34210000" in entradagl.account:
+									#imposto de producao e consumo IPC
 									tax = ET.SubElement(taxes,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
 									taxcountryregion.text = "AO"
 
-									#imposto de producao e consumo IPC
+
 									taxtype.text = "NS"
 									taxcode = ET.SubElement(tax,'TaxCode')
 									taxcode.text = "NS"
@@ -1796,7 +1798,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 
-								elif "IVA" in entradagl.account:
+								elif "3422" in entradagl.account:	#34220000
 									tax = ET.SubElement(taxes,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
@@ -1804,6 +1806,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxcountryregion.text = "AO"
 
 									#IVA	ainda por rever
+									#Aqui verifica se na ficha do ITEM diz que esta isento....
 									taxtype.text = "IVA"
 									taxcode = ET.SubElement(tax,'TaxCode')
 									taxcode.text = "NOR"
@@ -1812,6 +1815,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								#	taxtype.text = "NS"
 								#	taxcode = ET.SubElement(tax,'TaxCode')
 								#	taxcode.text = "NS"
+
+									retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  like '%acrescentado' """,as_dict=True)
+									print retn
 
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
@@ -1852,6 +1858,47 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								'''
 
 							#return			
+					#IVA
+					entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+					print 'factura ', factura.name
+					#print entradasgliva
+					for entradaglinva in entradasgliva:
+						print entradaglinva.account
+
+						if "3422" in entradaglinva.account:	#34220000
+							tax = ET.SubElement(taxes,'Tax')
+							taxtype = ET.SubElement(tax,'TaxType')
+
+							taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+							taxcountryregion.text = "AO"
+
+							#IVA	ainda por rever
+							#Aqui verifica se na ficha do ITEM diz que esta isento....
+							taxtype.text = "IVA"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NOR"
+
+						#else:
+						#	taxtype.text = "NS"
+						#	taxcode = ET.SubElement(tax,'TaxCode')
+						#	taxcode.text = "NS"
+
+							retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+							print retn
+
+
+							taxpercentage = ET.SubElement(tax,'TaxPercentage')
+							taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+							taxamount = ET.SubElement(tax,'TaxAmount')
+							#if entradagl.credit:
+							#	taxamount.text = str(entradagl.credit)
+							#else:
+							taxamount.text = "0.00"
+
+					#if factura.name == 'FT19/0072':
+					#	return
+
 			else:
 					#caso POS or even bcs previous found nothing... 
 			
@@ -1924,7 +1971,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 
-						elif "IVA" in entradagl.account:
+						elif "3422" in entradagl.account:	#34220000
 							tax = ET.SubElement(taxes,'Tax')
 							taxtype = ET.SubElement(tax,'TaxType')
 
@@ -1940,6 +1987,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						#	taxtype.text = "NS"
 						#	taxcode = ET.SubElement(tax,'TaxCode')
 						#	taxcode.text = "NS"
+
+							retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+							print retn
 
 
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
@@ -1979,7 +2029,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						'''
 
 			taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
-			taxexemptionreason.text = "Regime Transitório"
+			taxexemptionreason.text = "Regime Transitório"	#
 
 			taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
 			taxexemptioncode.text = "M00"
@@ -2138,6 +2188,44 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							withholdingtaxamount.text = str("{0:.2f}".format(entradagl.credit_in_account_currency)) #str(entradagl.credit_in_account_currency)
 
 						variasentradas = True	#para garar varias entradas
+
+					#IVA
+					entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+					print 'factura ', factura.name
+					#print entradasgliva
+					for entradaglinva in entradasgliva:
+						print entradaglinva.account
+
+						if "3422" in entradaglinva.account:	#34220000
+							tax = ET.SubElement(taxes,'Tax')
+							taxtype = ET.SubElement(tax,'TaxType')
+
+							taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+							taxcountryregion.text = "AO"
+
+							#IVA	ainda por rever
+							#Aqui verifica se na ficha do ITEM diz que esta isento....
+							taxtype.text = "IVA"
+							taxcode = ET.SubElement(tax,'TaxCode')
+							taxcode.text = "NOR"
+
+						#else:
+						#	taxtype.text = "NS"
+						#	taxcode = ET.SubElement(tax,'TaxCode')
+						#	taxcode.text = "NS"
+
+							retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+							print retn
+
+
+							taxpercentage = ET.SubElement(tax,'TaxPercentage')
+							taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+							taxamount = ET.SubElement(tax,'TaxAmount')
+							#if entradagl.credit:
+							#	taxamount.text = str(entradagl.credit)
+							#else:
+							taxamount.text = "0.00"
 		#HASH key to generate	
 		#Invoicedate + Sytementrydate + InvoiceNo + Grosstotal
 		'''
@@ -3061,7 +3149,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			movementtype = ET.SubElement(stockmovement,'MovementType')
 			movementtype.text = "GR"	#default Delivery Note
-			movementofgoodshashcontrol.text = "1" + "GR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+			movementofgoodshashcontrol.text = "1" + "GR" + "D " + str(guiaremessa.name)  	#default ver 1 as per the certificate
 
 			systementrydate = ET.SubElement(stockmovement,'SystemEntryDate')
 			systementrydate.text = guiaremessa.creation.strftime("%Y-%m-%dT%H:%M:%S")
@@ -3233,14 +3321,63 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				#creditamount.text = "0.00"
 				creditamount.text = str("{0:.2f}".format(guiaremessaitem.amount)) #str(guiaremessaitem.amount)
 
-				tax = ET.SubElement(line,'Tax')
-				taxtype = ET.SubElement(tax,'TaxType')
-				taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-				taxcode = ET.SubElement(tax,'TaxCode')
-				taxpercentage = ET.SubElement(tax,'TaxPercentage')
+				#tax = ET.SubElement(line,'Tax')
+				#taxtype = ET.SubElement(tax,'TaxType')
+				#taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+				#taxcode = ET.SubElement(tax,'TaxCode')
+				#taxpercentage = ET.SubElement(tax,'TaxPercentage')
 
+				#IVA
+				taxascharges =  frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parenttype ='Delivery Note' and parent = %s """,(guiaremessa.name), as_dict=True)
+				
+				#entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='Delivery Note' and company = %s and voucher_no = %s """,(empresa.name,guiaremessa.name), as_dict=True)
+				#if guiaremessa.name == 'DN-00004':
+				#	print 'factura ', guiaremessa.name
+				#	print entradasgliva
+				#	return
+				
+				for taxacharge in taxascharges:
+					print taxacharge.account
+
+					if "3422" in taxacharge.account_head:	#34220000
+						tax = ET.SubElement(line,'Tax')
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
+
+						#IVA	ainda por rever
+						#Aqui verifica se na ficha do ITEM diz que esta isento....
+						taxtype.text = "IVA"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NOR"
+
+					#else:
+					#	taxtype.text = "NS"
+					#	taxcode = ET.SubElement(tax,'TaxCode')
+					#	taxcode.text = "NS"
+
+						retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+						print retn
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						#if entradagl.credit:
+						#	taxamount.text = str(entradagl.credit)
+						#else:
+						taxamount.text = "0.00"
+
+				
 				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+				taxexemptionreason.text = "Regime Transitório"	#
+
 				taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+				taxexemptioncode.text = "M00"
+
+
 				settlementamount = ET.SubElement(line,'SettlementAmount')
 
 				#customsinformation
@@ -3248,11 +3385,34 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				arcno = ET.SubElement(customsinformation,'ARCNo')
 				iecamount = ET.SubElement(customsinformation,'IECAmount')
 
+
 			#documenttotals
 			documenttotals = ET.SubElement(stockmovement,'DocumentTotals')
 			taxpayable = ET.SubElement(documenttotals,'TaxPayable')
+			
+			print 'factura Referencia'
+			if factura.docstatus != 2:
+				salestaxescharges = frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parent = %s """,(guiaremessa.name),as_dict=True)
+				print salestaxescharges
+
+				if salestaxescharges: 
+					print salestaxescharges[0].tax_amount
+					taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+				else:
+					taxpayable.text = "0.00" 		#por ir buscar 
+			#if retencao.credit_in_account_currency:
+			#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
+
 			nettotal = ET.SubElement(documenttotals,'NetTotal')
+			nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
+
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+			if factura.rounded_total:
+				grosstotal.text = str("{0:.2f}".format(guiaremessa.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+			else:
+				grosstotal.text = "0.00"
+
+
 			#currency if NOT AOA
 			currency = ET.SubElement(documenttotals,'Currency')
 			currencycode = ET.SubElement(currency,'CurrencyCode')
@@ -3629,9 +3789,6 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'recibos refenrecias'
 			print factura.name
 			print recibosreferencias
-			if factura.name == 'FT0029/18-1':
-				print 'TEM IPC'
-				print facturaitem.imposto_de_consumo
 				
 
 			if facturaitem.imposto_de_consumo:	#Caso tem IPC or IVA
@@ -3765,8 +3922,54 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			
 							#return			
 
+			#IVA
+			taxascharges =  frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parenttype ='quotation' and parent = %s """,(factura.name), as_dict=True)
+
+			#entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='quotation' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+			print 'factura ', factura.name
+			#print taxascharges
+			#return
+			for taxacharge in taxascharges:
+				print taxacharge.account_head
+
+				if "3422" in taxacharge.account_head:	#34220000
+					tax = ET.SubElement(taxes,'Tax')
+					taxtype = ET.SubElement(tax,'TaxType')
+
+					taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+					taxcountryregion.text = "AO"
+
+					#IVA	ainda por rever
+					#Aqui verifica se na ficha do ITEM diz que esta isento....
+					taxtype.text = "IVA"
+					taxcode = ET.SubElement(tax,'TaxCode')
+					taxcode.text = "NOR"
+
+				#else:
+				#	taxtype.text = "NS"
+				#	taxcode = ET.SubElement(tax,'TaxCode')
+				#	taxcode.text = "NS"
+
+					retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+					print retn
+
+
+					taxpercentage = ET.SubElement(tax,'TaxPercentage')
+					taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+					taxamount = ET.SubElement(tax,'TaxAmount')
+					#if entradagl.credit:
+					#	taxamount.text = str(entradagl.credit)
+					#else:
+					taxamount.text = "0.00"
+
 			taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+			taxexemptionreason.text = "Regime Transitório"	#
+
 			taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+			taxexemptioncode.text = "M00"
+
+
 			settlementamount = ET.SubElement(line,'SettlementAmount')
 
 			#customsinformation
@@ -4183,9 +4386,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'recibos refenrecias'
 			print factura.name
 			print recibosreferencias
-			if factura.name == 'FT0029/18-1':
-				print 'TEM IPC'
-				print facturaitem.imposto_de_consumo
+			#if factura.name == 'FT0029/18-1':
+			#	print 'TEM IPC'
+			#	print facturaitem.imposto_de_consumo
 				
 
 			if facturaitem.imposto_de_consumo:	#Caso tem IPC or IVA
@@ -4321,8 +4524,53 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			
 							#return			
 
+			#IVA
+			taxascharges =  frappe.db.sql(""" select * from `tabPurchase Taxes and Charges` where parenttype ='purchase order' and parent = %s """,(factura.name), as_dict=True)
+
+			#entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+
+
+			for taxacharge in taxascharges:
+				print taxacharge.account_head
+
+				if "3422" in taxacharge.account_head:	#34220000
+					tax = ET.SubElement(taxes,'Tax')
+					taxtype = ET.SubElement(tax,'TaxType')
+
+					taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+					taxcountryregion.text = "AO"
+
+					#IVA	ainda por rever
+					#Aqui verifica se na ficha do ITEM diz que esta isento....
+					taxtype.text = "IVA"
+					taxcode = ET.SubElement(tax,'TaxCode')
+					taxcode.text = "NOR"
+
+				#else:
+				#	taxtype.text = "NS"
+				#	taxcode = ET.SubElement(tax,'TaxCode')
+				#	taxcode.text = "NS"
+
+					retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+					print retn
+
+
+					taxpercentage = ET.SubElement(tax,'TaxPercentage')
+					taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+					taxamount = ET.SubElement(tax,'TaxAmount')
+					#if entradagl.credit:
+					#	taxamount.text = str(entradagl.credit)
+					#else:
+					taxamount.text = "0.00"
+
 			taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+			taxexemptionreason.text = "Regime Transitório"	#
+
 			taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+			taxexemptioncode.text = "M00"
+
+
 			settlementamount = ET.SubElement(line,'SettlementAmount')
 
 			#customsinformation
@@ -4338,7 +4586,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		taxpayable = ET.SubElement(documenttotals,'TaxPayable')
 		print 'factura Referencia'
 		if factura.docstatus != 2:
-			salestaxescharges = frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parent = %s """,(factura.name),as_dict=True)
+			salestaxescharges = frappe.db.sql(""" select * from `tabPurchase Taxes and Charges` where parent = %s """,(factura.name),as_dict=True)
 			print salestaxescharges
 
 			if salestaxescharges: 
@@ -4356,8 +4604,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-		if factura.rounded_total:
-			grosstotal.text = str("{0:.2f}".format(factura.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+		if factura.grand_total:
+			grosstotal.text = str("{0:.2f}".format(factura.grand_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 		else:
 			grosstotal.text = "0.00"
 
@@ -4708,7 +4956,43 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					#	taxcode = ET.SubElement(tax,'TaxCode')
 					#	taxcode.text = "NS"
 
+				#IVA
+				entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
+				print 'factura ', recibo.name
+				#print entradasgliva
+				for entradaglinva in entradasgliva:
+					print entradaglinva.account
 
+					if "3422" in entradaglinva.account:	#34220000
+						tax = ET.SubElement(taxes,'Tax')
+						taxtype = ET.SubElement(tax,'TaxType')
+
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
+
+						#IVA	ainda por rever
+						#Aqui verifica se na ficha do ITEM diz que esta isento....
+						taxtype.text = "IVA"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NOR"
+
+					#else:
+					#	taxtype.text = "NS"
+					#	taxcode = ET.SubElement(tax,'TaxCode')
+					#	taxcode.text = "NS"
+
+						retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+						print retn
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						#if entradagl.credit:
+						#	taxamount.text = str(entradagl.credit)
+						#else:
+						taxamount.text = "0.00"
 			
 
 			#documenttotals
@@ -4720,8 +5004,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print pagamentotaxas
 			#Ainda falta pegar o valor do IVA caso o mesmo tenha....
 			if pagamentotaxas: 
-				print pagamentotaxas[0].amount
-				taxpayable.text = str("{0:.2f}".format(entradagl.credit)) #str(entradagl.credit)	 
+				#print pagamentotaxas[0].amount
+				taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit)) #str(entradagl.credit)	 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 
