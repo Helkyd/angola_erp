@@ -8,7 +8,7 @@ from angola_erp.util.cambios import cambios
 from angola_erp.util.angola import get_lista_retencoes
 from angola_erp.util.angola import get_taxa_retencao
 from angola_erp.util.angola import get_taxa_ipc
-
+from angola_erp.util.angola import get_taxa_iva
 
 import erpnext
 
@@ -24,6 +24,8 @@ def validate(doc,method):
 	lista_retencoes = get_lista_retencoes()
 	lista_retencao = get_taxa_retencao()
 	lista_impostos = get_taxa_ipc()
+
+	lista_iva = get_taxa_iva()
 
 	temretencao = False 
 	temimpostoconsumo = False 
@@ -49,6 +51,9 @@ def validate(doc,method):
 			retencaopercentagem = x.percentagem
 		elif (x.descricao =='IPC') or (x.descricao =='Imposto de Consumo'):
 			print ('IPC % ', x.percentagem)
+			percentagem = x.percentagem
+		elif (x.descricao.upper() =='IVA'.upper()) or ("Imposto Valor Acrescentado".upper() == x.descricao.upper() or 'Acrescentado'.upper() in x.descricao.upper()):
+			print ('IVA % ', x.percentagem)
 			percentagem = x.percentagem
 
 
@@ -152,6 +157,12 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			elif "34220000" in ai.account_head: #IVA
+				print "TEM IVA......"
+				print "TEM IVA......"
+				print "TEM IVA......"
+				print "TEM IVA......"
+
 			else:
 				print "SEM DESPESAS MAS CALCULA IPC"
 				print "SEM DESPESAS MAS CALCULA IPC"

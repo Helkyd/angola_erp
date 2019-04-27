@@ -530,6 +530,16 @@ def get_versao_erp():
 	return frappe.get_attr("erpnext"+".__version__")
 
 @frappe.whitelist()
+def get_versao_aoerp():
+	""" Due to School renamed to Education ....
+	
+	"""
+
+	print frappe.get_attr("angola_erp"+".__version__")
+
+	return frappe.get_attr("angola_erp"+".__version__")
+
+@frappe.whitelist()
 def cancel_gl_entry_fee(fee_number):
 	"""Cancel the GL Entry made by FEE... ONLY if user makes SALES INVOICE LATER FOR ALL GROUP OF Fees...
 

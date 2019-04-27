@@ -100,9 +100,7 @@ def validate(doc,method):
 					#Mais que um batch
 					msg_item.append(i.item_code)
 
-	print "docStatus ", doc.docstatus
-	#if msg_item != {} and doc.docstatus == 1:
-	if msg_item != {}:
+	if msg_item != []:
 		frappe.throw(("Items {0} tem mais quem um Lote. Por favor selecionar").format(msg_item))
 
 
