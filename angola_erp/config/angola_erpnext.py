@@ -28,6 +28,12 @@ def get_data():
 				   "description": "Retencoes", 
 				   "name": "Retencoes", 
 				  },
+				{
+				   "type": "doctype", 
+				   "description": "IVA Isencoes", 
+				   "name": "Isencoes", 
+				  },
+
 
 			]
 		},

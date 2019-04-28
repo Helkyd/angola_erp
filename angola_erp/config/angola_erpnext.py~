@@ -162,6 +162,13 @@ def get_data():
 				   "is_query_report": True
 				  }, 
 
+				 {
+				   "description": "Imposto Industrial Detalhe", 
+				   "name": "Imposto Industrial Detalhe", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
 
 				 {
 				   "description": "Registo de Vendas", 
