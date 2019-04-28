@@ -185,6 +185,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 				#check if IPC or IVA
 				global valor_IPC
 				global valor_IVA
+				print doc.name
 				print tempIPC.taxes_and_charges
 				taxasencs = frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parent = %s""",(doc.name),as_dict=True)
 				print taxasencs
@@ -203,7 +204,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		add_party_gl_entries1(doc, gl_entries)
 		add_bank_gl_entries1(doc, gl_entries)
 
-	if doc.party_type != _("Supplier") and doc.party_type != _("Employee") and doc.party_type != "Supplier":
+	if doc.party_type != _("Supplier") and doc.party_type != _("Employee") and doc.party_type == "Customer":
 		print "II EMPLOYEE"
 		#Verify if isencao
 		if retencoes_is[0].isencao == 0:

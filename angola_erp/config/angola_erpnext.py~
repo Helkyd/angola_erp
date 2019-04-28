@@ -60,7 +60,7 @@ def get_data():
 				{
 				   "type": "doctype", 
 				   "description": "Planos das Seguradoras", 
-				   "name": "Seguradoras Planos", 
+				   "name": "Seguradora Planos", 
 				  },
 
 
@@ -154,6 +154,14 @@ def get_data():
 				   "type": "report",
 				   "is_query_report": True
 				  }, 
+				 {
+				   "description": "Imposto Industrial", 
+				   "name": "Imposto Industrial", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+
 
 				 {
 				   "description": "Registo de Vendas", 

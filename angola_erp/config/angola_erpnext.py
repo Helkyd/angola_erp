@@ -154,6 +154,21 @@ def get_data():
 				   "type": "report",
 				   "is_query_report": True
 				  }, 
+				 {
+				   "description": "Imposto Industrial", 
+				   "name": "Imposto Industrial", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+
+				 {
+				   "description": "Imposto Industrial Detalhe", 
+				   "name": "Imposto Industrial Detalhe", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
 
 				 {
 				   "description": "Registo de Vendas", 

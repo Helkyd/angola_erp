@@ -1079,22 +1079,43 @@ def get_firstlast_week_day(dt):
 	print 'last ', end.strftime("%Y-%m-%d")
 	return start,end
 
+@frappe.whitelist()
+def corrigir_II():
+	#Corrige os lancamentos feitos em IS para II
+	#Especifico para FOPLES...nao deve ser usado em outra a nao ser que tenham isencao do IS
 
+	facturaspagas = frappe.db.sql(""" select name,docstatus from `tabPayment Entry` """,as_dict=True)
+	for facturapaga in facturaspagas:
+		print 'factura ', facturapaga.name
+		glsentry = frappe.db.sql(""" select name,voucher_no,account,debit,credit from `tabGL Entry`  where voucher_no = %s order by account """,(facturapaga.name),as_dict=True)
+		if glsentry:
+			valorcredito = 0	
+			iivalordebito = 0
+			iivalorcredito = 0
+			
+			for glentry in glsentry:
+				print glentry.name
+				print glentry.account
+				if "31121000" in glentry.account:
+					print "CLIENTES"
+					valorcredito = glentry.credit
+					print valorcredito
+				elif "34710000" in glentry.account:
+					print "CLIENTES 3471"			
+					print valorcredito
+					iivalorcredito = (flt(valorcredito) * flt(0.02))
+					print iivalorcredito
+					frappe.db.set_value("GL Entry", glentry.name, "account", "34120000-I Industrial - Pagamentos Por Conta - F")					
+					frappe.db.set_value("GL Entry", glentry.name, "credit", iivalorcredito)
+					frappe.db.set_value("GL Entry", glentry.name, "credit_in_account_currency", iivalorcredito)										
+					frappe.db.set_value("GL Entry", glentry.name, "against", "34190000 - I Industrial - Pagamentos por Conta Temp. - F")										
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+				elif "75311000" in glentry.account:
+					print valorcredito
+					iivalordebito = (flt(valorcredito) * flt(0.02))	
+					print iivalordebito
+					frappe.db.set_value("GL Entry", glentry.name, "account", "34190000 - I Industrial - Pagamentos por Conta Temp. - F")					
+					frappe.db.set_value("GL Entry", glentry.name, "debit", iivalordebito)
+					frappe.db.set_value("GL Entry", glentry.name, "debit_in_account_currency", iivalorcredito)										
+					frappe.db.set_value("GL Entry", glentry.name, "against", "34120000-I Industrial - Pagamentos Por Conta - F")										
 

@@ -66,7 +66,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	
 		return columns, data
 	else:
-		frappe.throw(_("Please Select Company First"))
+		frappe.throw(_("Selecione a Empresa primeiro."))
 
 def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
