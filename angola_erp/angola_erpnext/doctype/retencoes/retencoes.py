@@ -12,3 +12,6 @@ class Retencoes(Document):
 	def autoname(self):
 		self.name = self.descricao
 
+	def validate(self):
+		if self.isencao == 0:
+			self.data_limite = ""

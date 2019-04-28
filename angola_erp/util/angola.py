@@ -552,6 +552,11 @@ def get_versao_aoerp():
 	return frappe.get_attr("angola_erp"+".__version__")
 
 @frappe.whitelist()
+def get_agt_lic():
+	# Licenca AGT
+	return frappe.get_hooks("agt_lic",app_name="angola_erp")
+
+@frappe.whitelist()
 def cancel_gl_entry_fee(fee_number):
 	"""Cancel the GL Entry made by FEE... ONLY if user makes SALES INVOICE LATER FOR ALL GROUP OF Fees...
 

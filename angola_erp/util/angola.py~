@@ -551,6 +551,10 @@ def get_versao_aoerp():
 
 	return frappe.get_attr("angola_erp"+".__version__")
 
+def get_agt_lic():
+	# Licenca AGT
+	return frappe.get_hooks("agt_lic",app_name="angola_erp")
+
 @frappe.whitelist()
 def cancel_gl_entry_fee(fee_number):
 	"""Cancel the GL Entry made by FEE... ONLY if user makes SALES INVOICE LATER FOR ALL GROUP OF Fees...
@@ -1130,6 +1134,6 @@ def verifica_imposto_expirado():
 			print retencao.data_limite
 			if retencao.data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
 				print "ESTA EXPIRADO..."
-
+				frappe.publish_realtime(event='msgprint', message='IMPOSTO ' + retencao.descricao  + ' Expirou ' + retencao.data_limite, user=frappe.session.user,doctype='Retencoes')
 
 

@@ -1067,10 +1067,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	if int(jvs[0]['count(name)']) !=0:
 		numberofentries.text = str(jvs[0]['count(name)'])
-		totaldebit.text = str(jvs[0]['sum(debit)'])
-		totalcredit.text = str(jvs[0]['sum(credit)'])
-
-
+		totaldebit.text = str("{0:.2f}".format(jvs[0]['sum(debit)']))
+		if jvs[0]['sum(credit)'] != 0:
+			totalcredit.text = str("{0:.2f}".format(jvs[0]['sum(credit)']))
+		else:
+			totalcredit.text = "0.00"
 
 		print 'GL Entry'
 		print 'GL Entry'
@@ -1117,7 +1118,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			sourceid = ET.SubElement(transaction,'SourceID')
 			if jv.owner.find("@"):
-				sourceid.text = str(jv.owner[0:jv.owner.find("@")])	#Retirar o Email only names...
+				#sourceid.text = str(jv.owner[0:jv.owner.find("@")])	#Retirar o Email only names... busca o username
+				print frappe.get_doc('User',jv.owner)
+				utilizador = frappe.get_doc('User',jv.owner)
+				sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
 			else:
 				sourceid.text = str(jv.owner)	#Retirar o Email only names...
 
@@ -1411,12 +1415,17 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #	if facturas[0].status != 'Paid' and facturas[0].status != 'Cancelled':
 	if int(facturas[0]['count(name)']) !=0:
 		numberofentries.text = str(int(facturas[0]['count(name)']))
-		totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
+		totaldebit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
 
 	#Creditos ou devolucoes
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabSales Invoice` where company = %s and status != 'Paid' and status != 'Cancelled' and status !='Draft' and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	if int(facturas[0]['count(name)']) !=0:
-		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		if facturas[0]['sum(rounded_total)'] != 0:
+			totalcredit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
+		else:
+			totalcredit.text = "0.00"
+
 
 
 	
@@ -1507,7 +1516,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.modified_by	#User
 
 		if factura.modified_by.find("@"):
-			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			#sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			print frappe.get_doc('User',factura.modified_by)
+			utilizador = frappe.get_doc('User',factura.modified_by)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.modified_by)
 
@@ -1561,7 +1574,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.owner	#created by
 
 		if factura.owner.find("@"):
-			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			print frappe.get_doc('User',factura.owner)
+			utilizador = frappe.get_doc('User',factura.owner)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.owner)
 
@@ -1657,7 +1674,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			unitprice = ET.SubElement(line,'UnitPrice')
 			if facturaitem.rate:
-				unitprice.text = str(facturaitem.rate)
+				unitprice.text = str("{0:.2f}".format(facturaitem.rate))
 			else:
 				unitprice.text = "0.00"
 
@@ -2447,15 +2464,27 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	if int(facturas[0]['count(name)']) !=0:
 		numberofentries.text = str(int(facturas[0]['count(name)']))
 		#Not need
-		#totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
+		#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		if facturas[0]['sum(rounded_total)'] != 0:
+			totalcredit.text = str("{0:.2f}".format(facturas[0]['sum(rounded_total)']))
+		else:
+			totalcredit.text = "0.00"
 
-	'''
-	#Creditos ou devolucoes
+
+	
+	#DEBITO devolucoes
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabPurchase Invoice` where company = %s and (status = 'Return') and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	if int(facturas[0]['count(name)']) !=0:
-		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		#totaldebit.text = str("{0:.2f}".format(jvs[0]['sum(debit)']))
+		if facturas[0]['sum(rounded_total)'] != 0:
+			totaldebit.text = str("{0:.2f}".format(facturas[0]['sum(rounded_total)']))
+		else:
+			totaldebit.text = "0.00"
+	else:
+		totaldebit.text = "0.00"
 
-	'''
+	
 
 
 	#Hash
@@ -2544,7 +2573,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		sourceid = ET.SubElement(documentstatus,'SourceID')
 		#sourceid.text = factura.modified_by	#User
 		if factura.modified_by.find("@"):
-			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			#sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			print frappe.get_doc('User',factura.modified_by)
+			utilizador = frappe.get_doc('User',factura.modified_by)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
 
@@ -2595,7 +2628,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.owner	#created by
 		#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
 		if factura.owner.find("@"):
-			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			print frappe.get_doc('User',factura.owner)
+			utilizador = frappe.get_doc('User',factura.owner)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
 
@@ -2883,7 +2920,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 		if factura.rounded_total:
-			grosstotal.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+			grosstotal.text = str("{0:.2f}".format(factura.rounded_total))		#Total Factura + impostos.... por ir buscar
 		else:
 			grosstotal.text = "0.00"
 
@@ -3172,7 +3209,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#sourceid.text = guiaremessa.modified_by
 			#sourceid.text = str(guiaremessa.modified_by[0:guiaremessa.modified_by.find("@")])
 			if guiaremessa.modified_by.find("@"):
-				sourceid.text = str(guiaremessa.modified_by[0:guiaremessa.modified_by.find("@")])
+				#sourceid.text = str(guiaremessa.modified_by[0:guiaremessa.modified_by.find("@")])
+				print frappe.get_doc('User',guiaremessa.modified_by)
+				utilizador = frappe.get_doc('User',guiaremessa.modified_by)
+				sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 			else:
 				sourceid.text = str(guiaremessa.modified_by[0:guiaremessa.modified_by.find("@")])
 
@@ -3230,7 +3271,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#sourceid.text = guiaremessa.owner
 			#sourceid.text = str(guiaremessa.owner[0:guiaremessa.owner.find("@")])
 			if guiaremessa.owner.find("@"):
-				sourceid.text = str(guiaremessa.owner[0:guiaremessa.owner.find("@")])
+				#sourceid.text = str(guiaremessa.owner[0:guiaremessa.owner.find("@")])
+				print frappe.get_doc('User',guiaremessa.owner)
+				utilizador = frappe.get_doc('User',guiaremessa.owner)
+				sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 			else:
 				sourceid.text = str(guiaremessa.owner[0:guiaremessa.owner.find("@")])
 
@@ -3350,7 +3395,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				unitprice = ET.SubElement(line,'UnitPrice')
 				if guiaremessaitem.rate:
-					unitprice.text = str(guiaremessaitem.rate)
+					unitprice.text = str("{0:.2f}".format(guiaremessaitem.rate))
 				else:
 					unitprice.text = "0.00"
 
@@ -3540,12 +3585,17 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	if int(facturas[0]['count(name)']) !=0:
 		numberofentries.text = str(int(facturas[0]['count(name)']))
-		totaldebit.text = str(int(facturas[0]['sum(rounded_total)']))
+		totaldebit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
 
 	#Creditos ou devolucoes
 	facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 	if int(facturas[0]['count(name)']) !=0:
-		totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
+		if facturas[0]['sum(rounded_total)'] != 0:
+			totalcredit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
+		else:
+			totalcredit.text = "0.00"
+
 
 
 
@@ -3637,7 +3687,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.modified_by	#User
 		#sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
 		if factura.modified_by.find("@"):
-			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			#sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			print frappe.get_doc('User',factura.modified_by)
+			utilizador = frappe.get_doc('User',factura.modified_by)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
 
@@ -3685,7 +3739,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.owner	#created by
 		#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
 		if factura.owner.find("@"):
-			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			print frappe.get_doc('User',factura.owner)
+			utilizador = frappe.get_doc('User',factura.owner)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
 
@@ -3783,7 +3841,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			unitprice = ET.SubElement(line,'UnitPrice')
 			if facturaitem.rate:
-				unitprice.text = str(facturaitem.rate)
+				unitprice.text = str("{0:.2f}".format(facturaitem.rate))
 			else:
 				unitprice.text = "0.00"
 
@@ -4233,7 +4291,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.modified_by	#User
 		#sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
 		if factura.modified_by.find("@"):
-			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			#sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
+			print frappe.get_doc('User',factura.modified_by)
+			utilizador = frappe.get_doc('User',factura.modified_by)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.modified_by[0:factura.modified_by.find("@")])
 
@@ -4280,7 +4342,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#sourceid.text = factura.owner	#created by
 		#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
 		if factura.owner.find("@"):
-			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			#sourceid.text = str(factura.owner[0:factura.owner.find("@")])
+			print frappe.get_doc('User',factura.owner)
+			utilizador = frappe.get_doc('User',factura.owner)
+			sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 		else:
 			sourceid.text = str(factura.owner[0:factura.owner.find("@")])
 
@@ -4380,7 +4446,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			unitprice = ET.SubElement(line,'UnitPrice')
 			if facturaitem.rate:
-				unitprice.text = str(facturaitem.rate)
+				unitprice.text = str("{0:.2f}".format(facturaitem.rate))
 			else:
 				unitprice.text = "0.00"
 
@@ -4743,7 +4809,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		numberofentries.text = str(pagamentos[0]['count(name)'])
 
 
-		totaldebit.text = str(pagamentos[0]['sum(paid_amount)']) 
+		totaldebit.text = str("{0:.2f}".format(pagamentos[0]['sum(paid_amount)'])) 
 
 
 
@@ -4800,7 +4866,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#sourceid.text = recibo.owner
 			#sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
 			if recibo.owner.find("@"):
-				sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
+				#sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
+				print frappe.get_doc('User',recibo.owner)
+				utilizador = frappe.get_doc('User',recibo.owner)
+				sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 			else:
 				sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
 
@@ -4841,7 +4911,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#sourceid.text = recibo.owner
 			#sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
 			if recibo.owner.find("@"):
-				sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
+				#sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
+				print frappe.get_doc('User',recibo.owner)
+				utilizador = frappe.get_doc('User',recibo.owner)
+				sourceid.text = str(utilizador.username)	#Retirar o Email only names... busca o username
+
 			else:
 				sourceid.text = str(recibo.owner[0:recibo.owner.find("@")])
 
