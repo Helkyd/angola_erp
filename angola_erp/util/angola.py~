@@ -1108,6 +1108,8 @@ def corrigir_II():
 					frappe.db.set_value("GL Entry", glentry.name, "account", "34120000-I Industrial - Pagamentos Por Conta - F")					
 					frappe.db.set_value("GL Entry", glentry.name, "credit", iivalorcredito)
 					frappe.db.set_value("GL Entry", glentry.name, "credit_in_account_currency", iivalorcredito)										
+					frappe.db.set_value("GL Entry", glentry.name, "against", "34190000 - I Industrial - Pagamentos por Conta Temp. - F")										
+
 				elif "75311000" in glentry.account:
 					print valorcredito
 					iivalordebito = (flt(valorcredito) * flt(0.02))	
@@ -1115,4 +1117,19 @@ def corrigir_II():
 					frappe.db.set_value("GL Entry", glentry.name, "account", "34190000 - I Industrial - Pagamentos por Conta Temp. - F")					
 					frappe.db.set_value("GL Entry", glentry.name, "debit", iivalordebito)
 					frappe.db.set_value("GL Entry", glentry.name, "debit_in_account_currency", iivalorcredito)										
+					frappe.db.set_value("GL Entry", glentry.name, "against", "34120000-I Industrial - Pagamentos Por Conta - F")										
+
+
+@frappe.whitelist()
+def verifica_imposto_expirado():
+	#list all Retencoes with expiring date and warn user..
+	retencoes = frappe.db.sql(""" select name,descricao,isencao,data_limite from `tabRetencoes` """,as_dict=True)
+	for retencao in retencoes:
+		if retencao.isencao:
+			print frappe.utils.nowdate()
+			print retencao.data_limite
+			if retencao.data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
+				print "ESTA EXPIRADO..."
+
+
 

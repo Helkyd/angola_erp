@@ -1119,3 +1119,17 @@ def corrigir_II():
 					frappe.db.set_value("GL Entry", glentry.name, "debit_in_account_currency", iivalorcredito)										
 					frappe.db.set_value("GL Entry", glentry.name, "against", "34120000-I Industrial - Pagamentos Por Conta - F")										
 
+
+@frappe.whitelist()
+def verifica_imposto_expirado():
+	#list all Retencoes with expiring date and warn user..
+	retencoes = frappe.db.sql(""" select name,descricao,isencao,data_limite from `tabRetencoes` """,as_dict=True)
+	for retencao in retencoes:
+		if retencao.isencao:
+			print frappe.utils.nowdate()
+			print retencao.data_limite
+			if retencao.data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
+				print "ESTA EXPIRADO..."
+				frappe.publish_realtime(event='msgprint', message='IMPOSTO ' + retencao.descricao  + ' Expirou ' + retencao.data_limite, user=frappe.session.user,doctype='Retencoes')
+
+

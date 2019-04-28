@@ -204,7 +204,8 @@ scheduler_events = {
 # 	"daily": [
 	"hourly": [
 # 		"angola_erp.tasks.daily"
-		"angola_erp.util.cambios.atualizar_cambios"	#Exchange rates updates for AOA
+		"angola_erp.util.cambios.atualizar_cambios",	#Exchange rates updates for AOA
+		"angola_erp.util.angola.verifica_imposto_expirado"
 # 	],
 # 	"hourly": [
 # 		"angola_erp.tasks.hourly"

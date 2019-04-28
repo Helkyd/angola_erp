@@ -115,20 +115,20 @@ def on_submit(doc,method):
 
 	global retencoes_ipc
 
-	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'ipc' """,as_dict=True)
+	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'ipc' """,as_dict=True)
 
 	global retencoes_is
 
-	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
 
 
 	global retencoes_iv
 
-	retencoes_iv = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'imposto valor acrescentado' """,as_dict=True)
+	retencoes_iv = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'imposto valor acrescentado' """,as_dict=True)
 
 	#Busca percentagem Imposto Industrial
 
-	#Ainda por fazer
+	#NAO PRECISA DE TEMPORARIO......
 	global ii_temp
 
 	ii_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3419%%'  """,(doc.company), as_dict=True)
@@ -141,7 +141,7 @@ def on_submit(doc,method):
 
 	global retencoes_ii
 
-	retencoes_ii = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like '%industrial%' """,as_dict=True)
+	retencoes_ii = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like '%industrial%' """,as_dict=True)
 
 
 	global valor_IPC
@@ -207,17 +207,31 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	if doc.party_type != _("Supplier") and doc.party_type != _("Employee") and doc.party_type != "Supplier":
 		print "II EMPLOYEE"
 		#Verify if isencao
+		print retencoes_is[0].isencao
+		print retencoes_is[0].descricao
+		print retencoes_is[0].data_limite
+		print retencoes_is[0].data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate()
+
 		if retencoes_is[0].isencao == 0:
 			# 3471 (C) IPC to 7531 (D)
 			#IS always
 			add_party_gl_entries2(doc, gl_entries)
 			add_bank_gl_entries2(doc, gl_entries)
+		elif retencoes_is[0].isencao == 1  and retencoes_is[0].data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
+			print "expirou pode processar"
+			print "expirou pode processar"
+			# 3471 (C) IPC to 7531 (D)
+			#IS always
+			add_party_gl_entries2(doc, gl_entries)
+			add_bank_gl_entries2(doc, gl_entries)
 
+
+		#return
 		#Imposto Industrial
 		# 3412 (C) to 3419 (D)
 		if retencoes_ii[0].isencao == 0:
 			#somente if retencoes_is[0].isencao == 1
-			if retencoes_is[0].isencao == 1:
+			if retencoes_is[0].isencao == 1 and retencoes_is[0].data_limite.strftime("%Y-%m-%d") > frappe.utils.nowdate():
 				print "IMPOSTO INDUSTRIAL"
 				print "IMPOSTO INDUSTRIAL"
 				print "IMPOSTO INDUSTRIAL"
