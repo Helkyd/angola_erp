@@ -210,14 +210,14 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		print retencoes_is[0].isencao
 		print retencoes_is[0].descricao
 		print retencoes_is[0].data_limite
-		print retencoes_is[0].data_limite < frappe.utils.nowdate()
+		print retencoes_is[0].data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate()
 
 		if retencoes_is[0].isencao == 0:
 			# 3471 (C) IPC to 7531 (D)
 			#IS always
 			add_party_gl_entries2(doc, gl_entries)
 			add_bank_gl_entries2(doc, gl_entries)
-		elif retencoes_is[0].isencao == 1  and retencoes_is[0].data_limite < frappe.utils.nowdate():
+		elif retencoes_is[0].isencao == 1  and retencoes_is[0].data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
 			print "expirou pode processar"
 			print "expirou pode processar"
 			# 3471 (C) IPC to 7531 (D)
@@ -231,7 +231,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		# 3412 (C) to 3419 (D)
 		if retencoes_ii[0].isencao == 0:
 			#somente if retencoes_is[0].isencao == 1
-			if retencoes_is[0].isencao == 1 and retencoes_is[0].data_limite > frappe.utils.nowdate():
+			if retencoes_is[0].isencao == 1 and retencoes_is[0].data_limite.strftime("%Y-%m-%d") > frappe.utils.nowdate():
 				print "IMPOSTO INDUSTRIAL"
 				print "IMPOSTO INDUSTRIAL"
 				print "IMPOSTO INDUSTRIAL"
