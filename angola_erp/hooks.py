@@ -143,6 +143,7 @@ doc_events = {
 	},
 	"Quotation": {
 		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",
+		"before_submit": "angola_erp.angola_erpnext.validations.quotation.before_submit",
 
 	},
 	"Purchase Invoice": {

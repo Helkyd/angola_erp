@@ -67,6 +67,8 @@ def validate(doc,method):
 
 	percentagem = 0
 	
+	percentagemiva = 0
+	totalgeraliva = 0
 	
 	ii=0
 
@@ -92,7 +94,7 @@ def validate(doc,method):
 
 		elif (x.descricao.upper() =='IVA'.upper()) or ("Imposto Valor Acrescentado".upper() == x.descricao.upper() or 'Acrescentado'.upper() in x.descricao.upper()):
 			print ('IVA % ', x.percentagem)
-			percentagem = x.percentagem
+			percentagemiva = x.percentagem
 
 
 
@@ -151,6 +153,10 @@ def validate(doc,method):
 					i.imposto_de_selo_trans = (i.amount * impostoselotranspercentagem) / 100
 				print totalimpostoselotrans
 
+			if prod[0].iva_isencao == 0:	#TEM IVA	
+				print "IVA IVA"
+				print "IVA IVA"
+				
 
 			totalgeralimpostoconsumo += i.imposto_de_consumo					
 			totalgeralretencaofonte +=  i.retencao_na_fonte
@@ -271,6 +277,55 @@ def validate(doc,method):
 				print "TEM IVA......"
 				print "TEM IVA......"
 				print "TEM IVA......"
+
+				for aii in doc.get("items"):
+					if aii.parent == doc.name:
+						prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte,iva_isencao FROM `tabItem` WHERE item_code = %s """, aii.item_code , as_dict=True)					
+
+						#if (iii==0){iii=0}
+						'''
+						if prod[0].iva_isencao == 0:	#Has IVA
+
+							if aii.imposto_de_consumo == 0:
+								print ""
+							'''
+						#	if aii.retencao_na_fonte == 1:
+									
+						#		totalgeralretencaofonte +=  (aii.amount * retencaopercentagem) / 100
+						#		totalbaseretencaofonte += aii.amount
+						#		totalservicos_retencaofonte += totalbaseretencaofonte
+						'''
+						totalgeralimpostoconsumo += aii.imposto_de_consumo					
+
+
+						despesas = (percentagem * totaldespesas_noretencaofonte)/100
+						print percentagem
+						print totaldespesas_noretencaofonte
+						print despesas
+						print totalgeralimpostoconsumo
+						print ai.account_head
+
+						ai.charge_type="Actual"
+						#ai.tax_amount=despesas
+						ai.tax_amount = despesas #totalgeralimpostoconsumo 
+						'''
+						if prod[0].iva_isencao == 1:	#NO NO IVA
+							print "sem iva ", prod[0].item_code
+							ai.charge_type="Actual"
+						elif prod[0].iva_isencao == 0:	#IVA
+							print "IVA"
+							print "IVA ", aii.item_code
+							print aii.amount
+							print percentagemiva
+							totalgeraliva += (aii.amount * percentagemiva)/100
+							if ai.charge_type == "Actual":
+								ai.tax_amount = totalgeraliva
+								ai.total = totalgeraliva + doc.net_total
+				
+						else:
+							ai.tax_amount = 0
+
+
 			else:
 				print "SEM DESPESAS MAS CALCULA IPC"
 				print "SEM DESPESAS MAS CALCULA IPC"
@@ -286,14 +341,27 @@ def validate(doc,method):
 	print totalgeralimpostoconsumo
 
 	#Save Total Taxes and Charges if IPC exists
-	doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
-	doc.total_taxes_and_charges = totalgeralimpostoconsumo
+	if totalgeralimpostoconsumo:
+		doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
+		doc.total_taxes_and_charges = totalgeralimpostoconsumo
 	
-	doc.grand_total = totalgeralimpostoconsumo + doc.net_total
-	doc.rounded_total = doc.grand_total
-	doc.base_grand_total = doc.grand_total
-	doc.base_rounded_total = doc.grand_total
-	doc.outstanding_amount = doc.grand_total
+		doc.grand_total = totalgeralimpostoconsumo + doc.net_total
+		doc.rounded_total = doc.grand_total
+		doc.base_grand_total = doc.grand_total
+		doc.base_rounded_total = doc.grand_total
+		doc.outstanding_amount = doc.grand_total
+	elif totalgeraliva:
+		#IVA
+		print "iva nos TOTAIS"
+		doc.base_total_taxes_and_charges = totalgeraliva
+		doc.total_taxes_and_charges = totalgeraliva
+	
+		doc.grand_total = totalgeraliva + doc.net_total
+		doc.rounded_total = doc.grand_total
+		doc.base_grand_total = doc.grand_total
+		doc.base_rounded_total = doc.grand_total
+		doc.outstanding_amount = doc.grand_total
+
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency

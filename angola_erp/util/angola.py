@@ -238,6 +238,14 @@ def get_lista_retencoes():
 	print j	
 	return j
 
+@frappe.whitelist()
+def get_lista_isencoes():
+	j= frappe.db.sql(""" SELECT codigo, motivo from `tabIsencoes` """,as_dict=True)
+
+	print " LISTA IVA ISENCOES"
+	print j	
+	return j
+
 
 
 @frappe.whitelist()

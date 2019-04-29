@@ -66,7 +66,7 @@ def get_xml(args):
 	return response
 
 @frappe.whitelist()
-def update_acc_codes():
+def update_accs_codes():
 	#Update account_number with the number of name
 
 #Check is eating the last digit.
@@ -85,7 +85,7 @@ def update_acc_codes():
 @frappe.whitelist()
 def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = False):
 
-	Versao = "0.1.5" 
+	Versao = "0.1.10" 
 
 
 	######## Inside MasterFiles
@@ -142,7 +142,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	else:
 		empresa = frappe.get_doc('Company', company)	#Should get as arg or based on default...
 		#nome do file sera a (Empresa + "_" + SAFT_AO + "_" + NIF + data today)
-		nomeficheiro = re.sub(r",|-|\s+","",empresa.name) + "_SAFT_AO_" + empresa.tax_id + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
+		print empresa.tax_id
+		if empresa.tax_id:
+			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_" + empresa.tax_id + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
+		else:
+			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_999999999" + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
 		#re.sub(r",|-|\s+","",s)
 
 		agtvalidationnumber = "111111111"	#AGT Validation Number
@@ -158,7 +162,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	#Updates Accounting number on TabAccount
 	if update_acc_codes == True:
 		#updates 
-		update_acc_codes()
+		print "updating accounts..."
+		update_accs_codes()
+
 
 	'''
 	DEFAULT processar = Mensal
@@ -328,12 +334,12 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	for planoconta in planocontas:
 		account = ET.SubElement(generalledgeraccounts,'Account')
 		accountid = ET.SubElement(account,'AccountID')
-		#accountid.text = str(planoconta.name.strip())			#Due to 30 chars limit we have to add 
-		accountid.text = str(planoconta.account_number)	#Make sure update_acc_codes was run before...
+		accountid.text = str(planoconta.name.strip())			#Due to 30 chars limit we have to add 
+		#accountid.text = str(planoconta.account_number)	#Make sure update_acc_codes was run before...
 
 		accountdescription = ET.SubElement(account,'AccountDescription')		
-		#accountdescription.text = str(planoconta.account_name.strip())
-		accountdescription.text = str(planoconta.account_name[planoconta.account_name.find('-')+1:len(planoconta.account_name)])
+		accountdescription.text = str(planoconta.account_name.strip())
+		#accountdescription.text = str(planoconta.account_name[planoconta.account_name.find('-')+1:len(planoconta.account_name)])
 		# str(planoconta.account_name[planoconta.account_name.find('-')+1:planoconta.account_name.rfind('-')])
 
 		openingdeditbalance = ET.SubElement(account,'OpeningDebitBalance')
@@ -1680,7 +1686,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			taxbase = ET.SubElement(line,'TaxBase')
 			if facturaitem.net_rate:
-				taxbase.text = str(facturaitem.net_rate)
+				taxbase.text = str("{0:.2f}".format(facturaitem.net_rate))
 			else:
 				taxbase.text = "0.00"
 
@@ -2050,8 +2056,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
 					print 'factura ', factura.name
 					#print entradasgliva
-					print 'PARAAAAAAAA '
-					return	
+					#print 'PARAAAAAAAA '
+					#return	
 					for entradaglinva in entradasgliva:
 						print entradaglinva.account
 
@@ -3847,7 +3853,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			taxbase = ET.SubElement(line,'TaxBase')
 			if facturaitem.net_rate:
-				taxbase.text = str(facturaitem.net_rate)
+				taxbase.text = str("{0:.2f}".format(facturaitem.net_rate))
 			else:
 				taxbase.text = "0.00"
 
@@ -4452,7 +4458,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			taxbase = ET.SubElement(line,'TaxBase')
 			if facturaitem.net_rate:
-				taxbase.text = str(facturaitem.net_rate)
+				taxbase.text = str("{0:.2f}".format(facturaitem.net_rate))
 			else:
 				taxbase.text = "0.00"
 
