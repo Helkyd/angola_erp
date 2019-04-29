@@ -1734,6 +1734,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'recibos refenrecias'
 			print factura.name
 			print recibosreferencias
+			temiva = False
 #			if factura.name == 'FT19/0072':
 #				print 'TEM IPC'
 #				print factura.is_pos
@@ -1882,48 +1883,49 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								'''
 
 							#return			
-					#IVA
-					entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
-					print 'factura ', factura.name
-					#print entradasgliva
-					#return
-					for entradaglinva in entradasgliva:
-						print entradaglinva.account
+				#IVA
+				entradasgliva =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='sales invoice' and company = %s and voucher_no = %s """,(empresa.name,factura.name), as_dict=True)
+				print 'factura ', factura.name
+				#print entradasgliva
+				#return
+				for entradaglinva in entradasgliva:
+					print entradaglinva.account
 
-						if "3422" in entradaglinva.account:	#34220000
-							print 'IVA'
-							tax = ET.SubElement(taxes,'Tax')
-							taxtype = ET.SubElement(tax,'TaxType')
+					if "3422" in entradaglinva.account:	#34220000
+						temiva = True
+						print 'IVA'
+						tax = ET.SubElement(taxes,'Tax')
+						taxtype = ET.SubElement(tax,'TaxType')
 
-							taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
-							taxcountryregion.text = "AO"
+						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
+						taxcountryregion.text = "AO"
 
-							#IVA	ainda por rever
-							#Aqui verifica se na ficha do ITEM diz que esta isento....
-							taxtype.text = "IVA"
-							taxcode = ET.SubElement(tax,'TaxCode')
-							taxcode.text = "NOR"
+						#IVA	ainda por rever
+						#Aqui verifica se na ficha do ITEM diz que esta isento....
+						taxtype.text = "IVA"
+						taxcode = ET.SubElement(tax,'TaxCode')
+						taxcode.text = "NOR"
 
+					#else:
+					#	taxtype.text = "NS"
+					#	taxcode = ET.SubElement(tax,'TaxCode')
+					#	taxcode.text = "NS"
+
+						retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
+						print retn
+
+
+						taxpercentage = ET.SubElement(tax,'TaxPercentage')
+						taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
+
+						taxamount = ET.SubElement(tax,'TaxAmount')
+						#if entradagl.credit:
+						#	taxamount.text = str(entradagl.credit)
 						#else:
-						#	taxtype.text = "NS"
-						#	taxcode = ET.SubElement(tax,'TaxCode')
-						#	taxcode.text = "NS"
+						taxamount.text = "0.00"
 
-							retn = frappe.db.sql(""" select * from `tabRetencoes` where docstatus = 0 and name  = 'iva' """,as_dict=True)
-							print retn
-
-
-							taxpercentage = ET.SubElement(tax,'TaxPercentage')
-							taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-							taxamount = ET.SubElement(tax,'TaxAmount')
-							#if entradagl.credit:
-							#	taxamount.text = str(entradagl.credit)
-							#else:
-							taxamount.text = "0.00"
-
-					#if factura.name == 'FAU-19/01539':
-					#	return
+				#if factura.name == 'FAU-19/01539':
+				#	return
 
 			else:
 					#caso POS or even bcs previous found nothing... 
@@ -2094,13 +2096,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					#if factura.name == 'FT19/0072':
 					#	return
+			if temiva == True:
+				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+				taxexemptionreason.text = "0"	#
 
+				taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+				taxexemptioncode.text = "0"
 
-			taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
-			taxexemptionreason.text = "Regime Transitório"	#
+			else:
+				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+				taxexemptionreason.text = "Regime Transitório"	#
 
-			taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
-			taxexemptioncode.text = "M00"
+				taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+				taxexemptioncode.text = "M00"
 
 
 			settlementamount = ET.SubElement(line,'SettlementAmount')
