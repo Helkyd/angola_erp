@@ -124,7 +124,7 @@ def on_submit(doc,method):
 
 	global retencoes_iv
 
-	retencoes_iv = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'imposto valor acrescentado' """,as_dict=True)
+	retencoes_iv = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'imposto valor acrescentado' or name like 'iva' """,as_dict=True)
 
 	#Busca percentagem Imposto Industrial
 

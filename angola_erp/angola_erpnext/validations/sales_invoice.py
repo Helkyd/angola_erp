@@ -345,26 +345,35 @@ def validate(doc,method):
 
 	#Save Total Taxes and Charges if IPC exists
 	if totalgeralimpostoconsumo:
-		doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
-		doc.total_taxes_and_charges = totalgeralimpostoconsumo
+		if doc.currency == "KZ":
+			doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
+			doc.total_taxes_and_charges = totalgeralimpostoconsumo
 	
-		doc.grand_total = totalgeralimpostoconsumo + doc.net_total
-		doc.rounded_total = doc.grand_total
-		doc.base_grand_total = doc.grand_total
-		doc.base_rounded_total = doc.grand_total
-		doc.outstanding_amount = doc.grand_total
+			doc.grand_total = totalgeralimpostoconsumo + doc.net_total
+			doc.rounded_total = doc.grand_total
+			doc.base_grand_total = doc.grand_total
+			doc.base_rounded_total = doc.grand_total
+			doc.outstanding_amount = doc.grand_total
 	elif totalgeraliva:
 		#IVA
 		print "iva nos TOTAIS"
-		doc.base_total_taxes_and_charges = totalgeraliva
-		doc.total_taxes_and_charges = totalgeraliva
+		if doc.currency == "KZ":
+			doc.base_total_taxes_and_charges = totalgeraliva
+			doc.total_taxes_and_charges = totalgeraliva
 	
-		doc.grand_total = totalgeraliva + doc.net_total
-		doc.rounded_total = doc.grand_total
-		doc.base_grand_total = doc.grand_total
-		doc.base_rounded_total = doc.grand_total
-		doc.outstanding_amount = doc.grand_total
+			doc.grand_total = totalgeraliva + doc.net_total
+			doc.rounded_total = doc.grand_total
+			doc.base_grand_total = doc.grand_total
+			doc.base_rounded_total = doc.grand_total
+			doc.outstanding_amount = doc.grand_total
+		
 
+		print "Rouding ....."
+		print "Rouding ....."
+		print doc.base_rounding_adjustment
+		#print 'tem centimos ',str(doc.base_rounding_adjustment).find('.')
+		#if str(doc.base_rounding_adjustment).find('.'):
+		#	doc.base_rounding_adjustment = round(doc.base_rounding_adjustment)
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
