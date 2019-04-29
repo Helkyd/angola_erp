@@ -2290,29 +2290,33 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#currency
 		currency = ET.SubElement(documenttotals,'Currency')
 		currencycode = ET.SubElement(currency,'CurrencyCode')
+		if factura.currency != "KZ":
+			currencycode.text = str(factura.currency)
 
-		currencyamount = ET.SubElement(currency,'CurrencyAmount')
-		#currencyamount.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+			currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			currencyamount.text = str("{0:.2f}".format(factura.rounded_total))
 
-		exchangerate = ET.SubElement(currency,'ExchangeRate')
+			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			exchangerate.text = str("{0:.2f}".format(factura.conversion_rate))
 
 		#settlement
 		pagschedls = frappe.db.sql(""" select name, parent, payment_term, description, due_date, invoice_portion, payment_amount from `tabPayment Schedule` where parent = %s and docstatus = 1 """,(factura.name),as_dict=True)
 
 		if pagschedls:
 			for pagschedl in pagschedls:
-				settlement = ET.SubElement(documenttotals,'Settlement')
-				settlementdiscount = ET.SubElement(settlement,'SettlementDiscount')
-				settlementdiscount.text = str(pagschedl.description)
+				if pagschedl.payment_term:
+					settlement = ET.SubElement(documenttotals,'Settlement')
+					settlementdiscount = ET.SubElement(settlement,'SettlementDiscount')
+					settlementdiscount.text = str(pagschedl.description)
 
-				settlementamount = ET.SubElement(settlement,'SettlementAmount')
-				settlementamount.text = str("{0:.2f}".format(pagschedl.payment_amount))
+					settlementamount = ET.SubElement(settlement,'SettlementAmount')
+					settlementamount.text = str("{0:.2f}".format(pagschedl.payment_amount))
 
-				settlementdate = ET.SubElement(settlement,'SettlementDate')
-				settlementdate.text = str(pagschedl.due_date)
+					settlementdate = ET.SubElement(settlement,'SettlementDate')
+					settlementdate.text = str(pagschedl.due_date)
 
-				paymentterms = ET.SubElement(settlement,'PaymentTerms')
-				settlementdate.text = str(pagschedl.payment_term)
+					paymentterms = ET.SubElement(settlement,'PaymentTerms')
+					paymentterms.text = str(pagschedl.payment_term)
 
 		#payment
 		payment = ET.SubElement(documenttotals,'Payment')
@@ -3087,8 +3091,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		deductibletax = ET.SubElement(documenttotals,'DeductibleTax')
 		deductiblepercentage = ET.SubElement(documenttotals,'DeductiblePercentage')
-		currencycode = ET.SubElement(documenttotals,'CurrencyCode')
-		currencyamount = ET.SubElement(documenttotals,'CurrencyAmount')
+		currency = ET.SubElement(documenttotals,'Currency')
+		currencycode = ET.SubElement(currency,'CurrencyCode')
+		if factura.currency != "KZ":
+			currencycode.text = str(factura.currency)
+
+			currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			currencyamount.text = str("{0:.2f}".format(factura.rounded_total))
+
+			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			exchangerate.text = str("{0:.2f}".format(factura.conversion_rate))
+
+
+		#currencyamount = ET.SubElement(documenttotals,'CurrencyAmount')
 
 		operationtype = ET.SubElement(documenttotals,'OperationType')
 		#How to know if is CMN-compras nacional PSN-prestacao nacional PSN-prestacao estrangeiro OBN-outros bens ICN-investimento
@@ -3669,9 +3684,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			#currency if NOT AOA
 			currency = ET.SubElement(documenttotals,'Currency')
+
 			currencycode = ET.SubElement(currency,'CurrencyCode')
-			currencyamount = ET.SubElement(currency,'CurrencyAmount')
-			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			if guiaremessa.currency != "KZ":
+				currencycode.text = str(guiaremessa.currency)
+
+				currencyamount = ET.SubElement(currency,'CurrencyAmount')
+				currencyamount.text = str("{0:.2f}".format(guiaremessa.rounded_total))
+
+				exchangerate = ET.SubElement(currency,'ExchangeRate')
+				exchangerate.text = str("{0:.2f}".format(guiaremessa.conversion_rate))
+
+			#currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			#exchangerate = ET.SubElement(currency,'ExchangeRate')
 
 
 			#HASH key to generate	
@@ -4279,11 +4304,20 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#currency
 		currency = ET.SubElement(documenttotals,'Currency')
 		currencycode = ET.SubElement(currency,'CurrencyCode')
+		if factura.currency != "KZ":
+			currencycode.text = str(factura.currency)
 
-		currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			currencyamount.text = str("{0:.2f}".format(factura.rounded_total))
+
+			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			exchangerate.text = str("{0:.2f}".format(factura.conversion_rate))
+
+
+		#currencyamount = ET.SubElement(currency,'CurrencyAmount')
 		#currencyamount.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 
-		exchangerate = ET.SubElement(currency,'ExchangeRate')
+		#exchangerate = ET.SubElement(currency,'ExchangeRate')
 
 
 		#HASH key to generate	
@@ -4888,11 +4922,20 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#currency
 		currency = ET.SubElement(documenttotals,'Currency')
 		currencycode = ET.SubElement(currency,'CurrencyCode')
+		if factura.currency != "KZ":
+			currencycode.text = str(factura.currency)
 
-		currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			currencyamount.text = str("{0:.2f}".format(factura.rounded_total))
+
+			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			exchangerate.text = str("{0:.2f}".format(factura.conversion_rate))
+
+
+		#currencyamount = ET.SubElement(currency,'CurrencyAmount')
 		#currencyamount.text = str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 
-		exchangerate = ET.SubElement(currency,'ExchangeRate')
+		#exchangerate = ET.SubElement(currency,'ExchangeRate')
 
 
 
@@ -5283,12 +5326,16 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	
 			taxpayable = ET.SubElement(documenttotals,'TaxPayable')
 			print 'Tax payable'
-			pagamentotaxas = frappe.db.sql(""" select account,debit,credit from `tabGL Entry` where company = %s and voucher_no = %s and account like %s """,(empresa.name,recibo.name,"34710000%"),as_dict=True)
+			pagamentotaxas = frappe.db.sql(""" select account,account_currency,debit,debit_in_account_currency,credit,credit_in_account_currency from `tabGL Entry` where company = %s and voucher_no = %s and account like %s """,(empresa.name,recibo.name,"34710000%"),as_dict=True)
 			print pagamentotaxas
 			#Ainda falta pegar o valor do IVA caso o mesmo tenha....
 			if pagamentotaxas: 
 				#print pagamentotaxas[0].amount
-				taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit)) #str(entradagl.credit)	 
+				if pagamentotaxas[0].account_currency !="KZ":
+					#Eur, USD ....
+					taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit_in_account_currency)) #str(entradagl.credit)
+				else:
+					taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit)) #str(entradagl.credit)	 	 
 			else:
 				taxpayable.text = "0.00" 		#por ir buscar 
 
@@ -5297,10 +5344,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			nettotal = ET.SubElement(documenttotals,'NetTotal')
 			nettotal.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)	#Paid amount...
 
-			pagamentofinal = frappe.db.sql(""" select sum(debit) from `tabGL Entry` where company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
+			pagamentofinal = frappe.db.sql(""" select sum(debit), sum(debit_in_account_currency) from `tabGL Entry` where company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
 
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-			grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
+			if recibo.paid_to_account_currency != "KZ":
+				grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit_in_account_currency)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
+			else:
+				grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
 
 			#settlement
 			settlement = ET.SubElement(documenttotals,'Settlement')
@@ -5308,8 +5358,17 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#currency
 			currency = ET.SubElement(documenttotals,'Currency')
 			currencycode = ET.SubElement(currency,'CurrencyCode')
-			currencyamount = ET.SubElement(currency,'CurrencyAmount')
-			exchangerate = ET.SubElement(currency,'ExchangeRate')
+			if recibo.paid_to_account_currency != "KZ":
+				currencycode.text = str(recibo.paid_to_account_currency)
+
+				currencyamount = ET.SubElement(currency,'CurrencyAmount')
+				currencyamount.text = str("{0:.2f}".format(recibo.paid_amount))
+
+				exchangerate = ET.SubElement(currency,'ExchangeRate')
+				exchangerate.text = str("{0:.2f}".format(recibo.source_exchange_rate))
+
+			#currencyamount = ET.SubElement(currency,'CurrencyAmount')
+			#exchangerate = ET.SubElement(currency,'ExchangeRate')
 
 			#witholdingtax
 			#withholdingtax = ET.SubElement(payment,'WithholdingTax')

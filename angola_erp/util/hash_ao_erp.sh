@@ -43,12 +43,13 @@ while true; do
 			openssl dgst -sha1 -verify "$HOME/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem" -signature $ficheirosha $ficheirotxt
 		else
 			echo CONTADOR $contador
-                       	openssl dgst -sha1 -sign "$HOME/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem" -out $ficheirosha $ficheirotxta
+                      	openssl dgst -sha1 -sign "$HOME/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem" -out $ficheirosha $ficheirotxta
 
                         openssl enc -base64 -in $ficheirosha -out $ficheirob64 -A
 
                         echo Verifying....
                         openssl dgst -sha1 -verify "$HOME/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem" -signature $ficheirosha $ficheirotxta
+
 
 		fi
 		echo FICHEIROS
