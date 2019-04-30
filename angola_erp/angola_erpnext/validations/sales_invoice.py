@@ -348,7 +348,7 @@ def validate(doc,method):
 		if doc.currency == "KZ":
 			doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
 			doc.total_taxes_and_charges = totalgeralimpostoconsumo
-	
+		if not doc.additional_discount_percentage:	
 			doc.grand_total = totalgeralimpostoconsumo + doc.net_total
 			doc.rounded_total = doc.grand_total
 			doc.base_grand_total = doc.grand_total
@@ -360,9 +360,12 @@ def validate(doc,method):
 		if doc.currency == "KZ":
 			doc.base_total_taxes_and_charges = totalgeraliva
 			doc.total_taxes_and_charges = totalgeraliva
-	
+			print 'totalgeraliva ', totalgeraliva
+		if not doc.additional_discount_percentage:
 			doc.grand_total = totalgeraliva + doc.net_total
+			print 'totalgeraliva + net total ', totalgeraliva + doc.net_total
 			doc.rounded_total = doc.grand_total
+			print 'Grand total ', doc.grand_total
 			doc.base_grand_total = doc.grand_total
 			doc.base_rounded_total = doc.grand_total
 			doc.outstanding_amount = doc.grand_total

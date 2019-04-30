@@ -2248,8 +2248,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			'''
 
 			settlementamount = ET.SubElement(line,'SettlementAmount')
-			if facturaitem.discount_amount:
-				settlementamount.text = facturaitem.margin_rate_or_amount	#we can if % is added instead do the calcs...
+			if factura.discount_amount:
+				settlementamount.text = str("{0:.2f}".format(factura.discount_amount))
+				#if facturaitem.discount_amount:
+				#	settlementamount.text = facturaitem.margin_rate_or_amount	#we can if % is added instead do the calcs...
 			else:
 				settlementamount.text = "0.00"
 
@@ -2341,6 +2343,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				elif "Cheque Bancário".upper() in recibo.mode_of_payment:
 					paymentmechanism.text = "CH"
+				else:
+					#did not found... search the Mode of payment TYPE
+					modopagamento = frappe.get_doc("Mode of Payment",recibo.mode_of_payment)
+					if modopagamento.type == 'Bank':
+						paymentmechanism.text = "TB"
+					elif modopagamento.type == 'Cash':
+						paymentmechanism.text = "NU"
 
 				paymentamount = ET.SubElement(payment,'PaymentAmount')
 				paymentamount.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)
@@ -5096,6 +5105,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			elif modopagamento.type == "Cash":
 				paymentmechanism.text = "NU"
+			else:
+				#did not found... search the Mode of payment TYPE
+				modopagamento = frappe.get_doc("Mode of Payment",modopagamento.mode_of_payment)
+				if modopagamento.type == 'Bank':
+					paymentmechanism.text = "TB"
+				elif modopagamento.type == 'Cash':
+					paymentmechanism.text = "NU"
+
 
 			#if "Transferência Bancária".upper() in recibo.mode_of_payment.upper():
 			#	paymentmechanism.text = "TB"
