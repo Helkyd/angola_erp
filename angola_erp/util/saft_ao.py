@@ -47,6 +47,9 @@ from OpenSSL import crypto
 import base64
 from oauth2client._helpers import _to_bytes
 
+import requests
+from M2Crypto import BIO, RSA, EVP, X509
+
 
 @frappe.whitelist()
 def gerar_hash_erp():
@@ -5660,9 +5663,7 @@ def validar_xml_xsd(xml_path, xsd_path):
 
 
 
-import requests
-from M2Crypto import BIO, RSA, EVP, X509
-
+'''
 @frappe.whitelist()
 def verify_message(pem, msg, sig):
     f = open(pem,"r")
@@ -5690,6 +5691,8 @@ def verify_message(pem, msg, sig):
     pubkey.verify_update(msg)
     return pubkey.verify_final(sig)
 
+'''
+
 @frappe.whitelist()
 def assinar_ssl():
 
@@ -5697,7 +5700,9 @@ def assinar_ssl():
 	datas = open("/tmp/registo1.txt","rb")
 	data = datas.read()
 	datas.close()
-	key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	key_file = open("~/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
+
 	key = key_file.read()
 #	key = key.encode('ascii')
 	key_file.close()
@@ -5722,18 +5727,21 @@ def assinar_ssl1(hashinfo):
 
 
 
-	key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
+	#key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
+	key_file0 = open("~/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-cert.pem","rb")
 	key0 = key_file0.read()
 #	key = key.encode('ascii')
 	key_file0.close()
 
 
-	key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	key_file = open("~/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
 	key = key_file.read()
 #	key = key.encode('ascii')
 	key_file.close()
 
-	key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
+	#key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
+	key_file1 = open("~/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem","rb")
 	key1 = key_file1.read()
 
 	key_file1.close()

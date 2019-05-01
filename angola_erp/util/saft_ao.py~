@@ -47,6 +47,9 @@ from OpenSSL import crypto
 import base64
 from oauth2client._helpers import _to_bytes
 
+import requests
+from M2Crypto import BIO, RSA, EVP, X509
+
 
 @frappe.whitelist()
 def gerar_hash_erp():
@@ -5529,7 +5532,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	myfile.close()
 
 	print 'file created'
-	print download_file
+	print myfile.name
 	if int(download_file) == 1:
 
 		return myfile.name
@@ -5660,9 +5663,7 @@ def validar_xml_xsd(xml_path, xsd_path):
 
 
 
-import requests
-from M2Crypto import BIO, RSA, EVP, X509
-
+'''
 @frappe.whitelist()
 def verify_message(pem, msg, sig):
     f = open(pem,"r")
@@ -5689,6 +5690,8 @@ def verify_message(pem, msg, sig):
     pubkey.verify_init()
     pubkey.verify_update(msg)
     return pubkey.verify_final(sig)
+
+'''
 
 @frappe.whitelist()
 def assinar_ssl():
