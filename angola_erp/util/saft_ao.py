@@ -1488,7 +1488,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 	
 
@@ -2713,7 +2713,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -3347,7 +3347,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -3846,7 +3846,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -4458,7 +4458,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 #			return
 
 #	return
-	os.system("~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
+	os.system("/home/frappe/frappe/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh") # /tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem " + str(ficheirosha1) + " " + str(ficheirotxt) + " " + str(ficheirob64)) 
 #	return	
 
 
@@ -5701,7 +5701,7 @@ def assinar_ssl():
 	data = datas.read()
 	datas.close()
 	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
-	key_file = open("~/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
+	key_file = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
 
 	key = key_file.read()
 #	key = key.encode('ascii')
@@ -5728,20 +5728,20 @@ def assinar_ssl1(hashinfo):
 
 
 	#key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
-	key_file0 = open("~/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-cert.pem","rb")
+	key_file0 = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-cert.pem","rb")
 	key0 = key_file0.read()
 #	key = key.encode('ascii')
 	key_file0.close()
 
 
 	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
-	key_file = open("~/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
+	key_file = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
 	key = key_file.read()
 #	key = key.encode('ascii')
 	key_file.close()
 
 	#key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
-	key_file1 = open("~/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem","rb")
+	key_file1 = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem","rb")
 	key1 = key_file1.read()
 
 	key_file1.close()
