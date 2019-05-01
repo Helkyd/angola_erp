@@ -5700,7 +5700,9 @@ def assinar_ssl():
 	datas = open("/tmp/registo1.txt","rb")
 	data = datas.read()
 	datas.close()
-	key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	key_file = open("/home/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
+
 	key = key_file.read()
 #	key = key.encode('ascii')
 	key_file.close()
@@ -5725,18 +5727,21 @@ def assinar_ssl1(hashinfo):
 
 
 
-	key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
+	#key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
+	key_file0 = open("/home/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-cert.pem","rb")
 	key0 = key_file0.read()
 #	key = key.encode('ascii')
 	key_file0.close()
 
 
-	key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
+	key_file = open("/home/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
 	key = key_file.read()
 #	key = key.encode('ascii')
 	key_file.close()
 
-	key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
+	#key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
+	key_file1 = open("/home/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem","rb")
 	key1 = key_file1.read()
 
 	key_file1.close()
