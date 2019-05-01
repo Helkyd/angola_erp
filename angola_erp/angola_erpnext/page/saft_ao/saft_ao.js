@@ -22,12 +22,6 @@ frappe.Saft_ao = Class.extend({
 		this.timespans = ["Diario", "Semana", "Mensal", "Ano"];
 		this.filters = {
 			"SAFT-AO": ["0"],
-		//	"Customer": ["total_sales_amount", "total_qty_sold", "outstanding_amount", ],
-		//	"Item": ["total_sales_amount", "total_qty_sold", "total_purchase_amount",
-		//		"total_qty_purchased", "available_stock_qty", "available_stock_value"],
-		//	"Supplier": ["total_purchase_amount", "total_qty_purchased", "outstanding_amount"],
-		//	"Sales Partner": ["total_sales_amount", "total_commission"],
-		//	"Sales Person": ["total_sales_amount"],
 		};
 
 		// for saving current selected filters
@@ -38,8 +32,6 @@ frappe.Saft_ao = Class.extend({
 
 		this.options = {
 			selected_doctype: _initial_doctype,
-			//selected_filter: _initial_filter,
-			//selected_filter_item: _initial_filter[0],
 			selected_timespan: _initial_timespan,
 		};
 
@@ -101,6 +93,7 @@ frappe.Saft_ao = Class.extend({
 		$(this.download_file_select.$input).click( function() {
 			frappe.call({
 				method: "angola_erp.util.saft_ao.gerar_saft_ao",
+				freeze: true,
 				args: {
 					"company": me.options.selected_company,
 					"processar": me.options.selected_timespan,
@@ -113,7 +106,6 @@ frappe.Saft_ao = Class.extend({
 
 					let results = r.message || [];
 					console.log('RESUTADOS.....')
-					console.log(results)
 					console.log(results.substring(results.search('/files/')))
 					//console.log(frappe.utils.get_url(frappe.utils.cstr(frappe.local.site)))
 

@@ -7,7 +7,7 @@ frappe.Saft_ao = Class.extend({
 	init: function (parent) {
 		frappe.ui.make_app_page({
 			parent: parent,
-			title: "Gerador de SAFT-AO",
+			title: "Gerar e Descarregar o SAFT-AO",
 			single_column: false
 		});
 
