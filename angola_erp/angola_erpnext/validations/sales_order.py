@@ -8,6 +8,7 @@ from angola_erp.util.cambios import cambios
 from angola_erp.util.angola import get_lista_retencoes
 from angola_erp.util.angola import get_taxa_retencao
 from angola_erp.util.angola import get_taxa_ipc
+from angola_erp.util.angola import get_taxa_iva
 
 import erpnext
 
@@ -34,6 +35,8 @@ def validate(doc,method):
 	lista_retencoes = get_lista_retencoes()
 	lista_retencao = get_taxa_retencao()
 	lista_impostos = get_taxa_ipc()
+
+	lista_iva = get_taxa_iva()
 
 	temretencao = False 
 	temimpostoconsumo = False 
@@ -77,6 +80,9 @@ def validate(doc,method):
 			#impostoselotranspercentagem = x.percentagem
 			#if (x.metade_do_valor):
 			#	metadedovalor = True	
+		elif (x.descricao.upper() =='IVA'.upper()) or ("Imposto Valor Acrescentado".upper() == x.descricao.upper() or 'Acrescentado'.upper() in x.descricao.upper()):
+			print ('IVA % ', x.percentagem)
+			percentagem = x.percentagem
 
 
 
@@ -229,6 +235,12 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			elif "34220000" in ai.account_head: #IVA
+				print "TEM IVA......"
+				print "TEM IVA......"
+				print "TEM IVA......"
+				print "TEM IVA......"
+
 			else:
 				print "SEM DESPESAS MAS CALCULA IPC"
 				print "SEM DESPESAS MAS CALCULA IPC"
@@ -244,14 +256,15 @@ def validate(doc,method):
 	print totalgeralimpostoconsumo
 
 	#Save Total Taxes and Charges if IPC exists
-	doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
-	doc.total_taxes_and_charges = totalgeralimpostoconsumo
+	if totalgeralimpostoconsumo:
+		doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
+		doc.total_taxes_and_charges = totalgeralimpostoconsumo
 	
-	doc.grand_total = totalgeralimpostoconsumo + doc.net_total
-	doc.rounded_total = doc.grand_total
-	doc.base_grand_total = doc.grand_total
-	doc.base_rounded_total = doc.grand_total
-	doc.outstanding_amount = doc.grand_total
+		doc.grand_total = totalgeralimpostoconsumo + doc.net_total
+		doc.rounded_total = doc.grand_total
+		doc.base_grand_total = doc.grand_total
+		doc.base_rounded_total = doc.grand_total
+		doc.outstanding_amount = doc.grand_total
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency

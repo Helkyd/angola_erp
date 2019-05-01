@@ -102,22 +102,33 @@ def on_submit(doc,method):
 	is_ = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3471%%'  """,(doc.company), as_dict=True)
 
 
+	#global iv_temp
+	#iv_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3422%%'  """,(doc.company), as_dict=True)
+
+	global iv_
+
+	iv_ = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3422%%'  """,(doc.company), as_dict=True)
+
 
 
 	#Busca percentagem IPC e Imposto de Selo
 
 	global retencoes_ipc
 
-	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'ipc' """,as_dict=True)
+	retencoes_ipc = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'ipc' """,as_dict=True)
 
 	global retencoes_is
 
-	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
+	retencoes_is = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'imposto de selo' """,as_dict=True)
 
+
+	global retencoes_iv
+
+	retencoes_iv = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like 'imposto valor acrescentado' or name like 'iva' """,as_dict=True)
 
 	#Busca percentagem Imposto Industrial
 
-	#Ainda por fazer
+	#NAO PRECISA DE TEMPORARIO......
 	global ii_temp
 
 	ii_temp = frappe.db.sql(""" select name, account_name, account_currency, company  from `tabAccount` where company = %s and name like '3419%%'  """,(doc.company), as_dict=True)
@@ -130,12 +141,14 @@ def on_submit(doc,method):
 
 	global retencoes_ii
 
-	retencoes_ii = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao from `tabRetencoes` where name like '%industrial%' """,as_dict=True)
+	retencoes_ii = frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor, isencao, data_limite from `tabRetencoes` where name like '%industrial%' """,as_dict=True)
 
 
 	global valor_IPC
+	global valor_IVA
 
 	valor_IPC = 0
+	valor_IVA = 0
 
 	doc.setup_party_account_field()
 	if doc.difference_amount:
@@ -161,6 +174,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	# 3771 (D) IPC to 3421 (C)
 	#Tem que verificar Fact se tem IPC por pagar .... e qual o valor
 	calculaIPC = False
+	calculaIVA = False
 	for d in doc.get("references"):
 		if d.reference_doctype in ("Sales Invoice"):
 			tempIPC = frappe.get_doc(d.reference_doctype, d.reference_name)
@@ -168,9 +182,22 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 			print tempIPC.name
 			print tempIPC.taxes_and_charges
 			if tempIPC.taxes_and_charges:
+				#check if IPC or IVA
 				global valor_IPC
-				valor_IPC += tempIPC.total_taxes_and_charges
-				calculaIPC = True
+				global valor_IVA
+				print doc.name
+				print tempIPC.taxes_and_charges
+				taxasencs = frappe.db.sql(""" select * from `tabSales Taxes and Charges` where parent = %s""",(doc.name),as_dict=True)
+				print taxasencs
+				for taxaenc in taxasencs:
+					if "3422" in taxaenc.account_head:
+						#IVA
+						valor_IVA += tempIPC.total_taxes_and_charges
+						calculaIVA = False
+						calculaIPC = False
+					else:
+						valor_IPC += tempIPC.total_taxes_and_charges
+						calculaIPC = True
 
 	if calculaIPC and doc.party_type != _("Employee"):
 		print "IPC EMPLOYEE"
@@ -180,17 +207,31 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 	if doc.party_type != _("Supplier") and doc.party_type != _("Employee") and doc.party_type != "Supplier":
 		print "II EMPLOYEE"
 		#Verify if isencao
+		print retencoes_is[0].isencao
+		print retencoes_is[0].descricao
+		print retencoes_is[0].data_limite
+		
+
 		if retencoes_is[0].isencao == 0:
 			# 3471 (C) IPC to 7531 (D)
 			#IS always
 			add_party_gl_entries2(doc, gl_entries)
 			add_bank_gl_entries2(doc, gl_entries)
+		elif retencoes_is[0].isencao == 1  and retencoes_is[0].data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
+			print "expirou pode processar"
+			print "expirou pode processar"
+			# 3471 (C) IPC to 7531 (D)
+			#IS always
+			add_party_gl_entries2(doc, gl_entries)
+			add_bank_gl_entries2(doc, gl_entries)
 
+
+		#return
 		#Imposto Industrial
 		# 3412 (C) to 3419 (D)
 		if retencoes_ii[0].isencao == 0:
 			#somente if retencoes_is[0].isencao == 1
-			if retencoes_is[0].isencao == 1:
+			if retencoes_is[0].isencao == 1 and retencoes_is[0].data_limite.strftime("%Y-%m-%d") > frappe.utils.nowdate():
 				print "IMPOSTO INDUSTRIAL"
 				print "IMPOSTO INDUSTRIAL"
 				print "IMPOSTO INDUSTRIAL"

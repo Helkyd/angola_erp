@@ -142,6 +142,18 @@ def get_taxa_ipc_1():
 
 	return j
 
+@frappe.whitelist()
+def get_taxa_iva():
+	#IPC to temp account 37710000
+
+	#locate account 37710000 instead of 34210000
+	j= frappe.db.sql(""" select name, description, account_head, parent  from `tabSales Taxes and Charges` where account_head like '3422%' and parenttype ='Sales Taxes and Charges Template' """,as_dict=True)
+
+	print " LISTA TAX IVA 3422"
+	print j	
+
+	return j
+
 
 @frappe.whitelist()
 def get_contab_taxa_retencao(empresa,fornclien = 'Supplier'):
@@ -223,6 +235,14 @@ def get_lista_retencoes():
 	j= frappe.db.sql(""" SELECT name, descricao, percentagem, metade_do_valor from `tabRetencoes` """,as_dict=True)
 
 	print " LISTA RETENCOES"
+	print j	
+	return j
+
+@frappe.whitelist()
+def get_lista_isencoes():
+	j= frappe.db.sql(""" SELECT * from `tabIsencoes` """,as_dict=True)
+
+	print " LISTA IVA ISENCOES"
 	print j	
 	return j
 
@@ -528,6 +548,21 @@ def get_versao_erp():
 	print frappe.get_attr("erpnext"+".__version__")
 
 	return frappe.get_attr("erpnext"+".__version__")
+
+@frappe.whitelist()
+def get_versao_aoerp():
+	""" Due to School renamed to Education ....
+	
+	"""
+
+	print frappe.get_attr("angola_erp"+".__version__")
+
+	return frappe.get_attr("angola_erp"+".__version__")
+
+@frappe.whitelist()
+def get_agt_lic():
+	# Licenca AGT
+	return frappe.get_hooks("agt_lic",app_name="angola_erp")
 
 @frappe.whitelist()
 def cancel_gl_entry_fee(fee_number):
@@ -1057,22 +1092,57 @@ def get_firstlast_week_day(dt):
 	print 'last ', end.strftime("%Y-%m-%d")
 	return start,end
 
+@frappe.whitelist()
+def corrigir_II():
+	#Corrige os lancamentos feitos em IS para II
+	#Especifico para FOPLES...nao deve ser usado em outra a nao ser que tenham isencao do IS
+
+	facturaspagas = frappe.db.sql(""" select name,docstatus from `tabPayment Entry` """,as_dict=True)
+	for facturapaga in facturaspagas:
+		print 'factura ', facturapaga.name
+		glsentry = frappe.db.sql(""" select name,voucher_no,account,debit,credit from `tabGL Entry`  where voucher_no = %s order by account """,(facturapaga.name),as_dict=True)
+		if glsentry:
+			valorcredito = 0	
+			iivalordebito = 0
+			iivalorcredito = 0
+			
+			for glentry in glsentry:
+				print glentry.name
+				print glentry.account
+				if "31121000" in glentry.account:
+					print "CLIENTES"
+					valorcredito = glentry.credit
+					print valorcredito
+				elif "34710000" in glentry.account:
+					print "CLIENTES 3471"			
+					print valorcredito
+					iivalorcredito = (flt(valorcredito) * flt(0.02))
+					print iivalorcredito
+					frappe.db.set_value("GL Entry", glentry.name, "account", "34120000-I Industrial - Pagamentos Por Conta - F")					
+					frappe.db.set_value("GL Entry", glentry.name, "credit", iivalorcredito)
+					frappe.db.set_value("GL Entry", glentry.name, "credit_in_account_currency", iivalorcredito)										
+					frappe.db.set_value("GL Entry", glentry.name, "against", "34190000 - I Industrial - Pagamentos por Conta Temp. - F")										
+
+				elif "75311000" in glentry.account:
+					print valorcredito
+					iivalordebito = (flt(valorcredito) * flt(0.02))	
+					print iivalordebito
+					frappe.db.set_value("GL Entry", glentry.name, "account", "34190000 - I Industrial - Pagamentos por Conta Temp. - F")					
+					frappe.db.set_value("GL Entry", glentry.name, "debit", iivalordebito)
+					frappe.db.set_value("GL Entry", glentry.name, "debit_in_account_currency", iivalorcredito)										
+					frappe.db.set_value("GL Entry", glentry.name, "against", "34120000-I Industrial - Pagamentos Por Conta - F")										
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@frappe.whitelist()
+def verifica_imposto_expirado():
+	#list all Retencoes with expiring date and warn user..
+	retencoes = frappe.db.sql(""" select name,descricao,isencao,data_limite from `tabRetencoes` """,as_dict=True)
+	for retencao in retencoes:
+		if retencao.isencao:
+			print frappe.utils.nowdate()
+			print retencao.data_limite
+			if retencao.data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
+				print "ESTA EXPIRADO..."
+				frappe.publish_realtime(event='msgprint', message='IMPOSTO ' + retencao.descricao  + ' Expirou ' + retencao.data_limite, user=frappe.session.user,doctype='Retencoes')
 
 

@@ -8,6 +8,7 @@ from angola_erp.util.cambios import cambios
 from angola_erp.util.angola import get_lista_retencoes
 from angola_erp.util.angola import get_taxa_retencao
 from angola_erp.util.angola import get_taxa_ipc
+from angola_erp.util.angola import get_taxa_iva
 
 import erpnext
 
@@ -18,9 +19,18 @@ from num2words import num2words
 
 from erpnext.stock.get_item_details import get_batch_qty
 
+import os 
+from datetime import datetime
+
+from subprocess import Popen, PIPE
+
+import angola_erp.util.saft_ao
+
 ####
-# Helkyd modified 09-01-2019
+# Helkyd modified 24-04-2019
 ####
+
+ultimoreghash = None
 
 def validate(doc,method):
 	
@@ -34,6 +44,8 @@ def validate(doc,method):
 	lista_retencoes = get_lista_retencoes()
 	lista_retencao = get_taxa_retencao()
 	lista_impostos = get_taxa_ipc()
+
+	lista_iva = get_taxa_iva()
 
 	temretencao = False 
 	temimpostoconsumo = False 
@@ -55,19 +67,21 @@ def validate(doc,method):
 
 	percentagem = 0
 	
+	percentagemiva = 0
+	totalgeraliva = 0
 	
 	ii=0
 
 	numISelo = 0	#contador Imposto de Selo
 
 	for x in lista_retencoes:
-		if x.descricao =='Retencao na Fonte':
+		if x.descricao.upper() =='Retencao na Fonte'.upper():
 			print ('pertagem ', x.percentagem)
 			retencaopercentagem = x.percentagem
-		elif (x.descricao =='IPC') or (x.descricao =='Imposto de Consumo'):
+		elif (x.descricao.upper() =='IPC'.upper()) or (x.descricao.upper() =='Imposto de Consumo'.upper()):
 			print ('IPC % ', x.percentagem)
 			percentagem = x.percentagem
-		elif ('Imposto de Selo' in x.descricao):
+		elif ('Imposto de Selo'.upper() in x.descricao.upper()):
 
 			print ('Imposto de Selo % ', x.percentagem)
 			print (x.descricao)
@@ -78,6 +92,9 @@ def validate(doc,method):
 			#if (x.metade_do_valor):
 			#	metadedovalor = True	
 
+		elif (x.descricao.upper() =='IVA'.upper()) or ("Imposto Valor Acrescentado".upper() == x.descricao.upper() or 'Acrescentado'.upper() in x.descricao.upper()):
+			print ('IVA % ', x.percentagem)
+			percentagemiva = x.percentagem
 
 
 
@@ -136,6 +153,10 @@ def validate(doc,method):
 					i.imposto_de_selo_trans = (i.amount * impostoselotranspercentagem) / 100
 				print totalimpostoselotrans
 
+			if prod[0].iva_isencao == 0:	#TEM IVA	
+				print "IVA IVA"
+				print "IVA IVA"
+				
 
 			totalgeralimpostoconsumo += i.imposto_de_consumo					
 			totalgeralretencaofonte +=  i.retencao_na_fonte
@@ -184,6 +205,8 @@ def validate(doc,method):
 				if totaldespesas_noretencaofonte ==0:
 					#recalcula
 					print ("RECALCULA")
+					print ("RECALCULA")
+					print ("RECALCULA")
 					if (ai.rate == 0) and (percentagem == 0) :
 						percentagem = 5
 					else:
@@ -227,6 +250,8 @@ def validate(doc,method):
 
 				else:
 					print ("CALCULA DESPESAS")
+					print ("CALCULA DESPESAS")
+					print ("CALCULA DESPESAS")
 					if (ai.rate == 0) and (percentagem == 0) :
 						percentagem = 5
 					else:
@@ -247,6 +272,63 @@ def validate(doc,method):
 					else:
 						ai.charge_type = "Actual"
 						ai.tax_amount = despesas
+			elif "34220000" in ai.account_head: #IVA
+				print "TEM IVA......"
+				print "TEM IVA......"
+				print "TEM IVA......"
+				print "TEM IVA......"
+
+				for aii in doc.get("items"):
+					if aii.parent == doc.name:
+						prod = frappe.db.sql("""SELECT item_code,imposto_de_consumo,retencao_na_fonte,iva_isencao FROM `tabItem` WHERE item_code = %s """, aii.item_code , as_dict=True)					
+
+						#if (iii==0){iii=0}
+						'''
+						if prod[0].iva_isencao == 0:	#Has IVA
+
+							if aii.imposto_de_consumo == 0:
+								print ""
+							'''
+						#	if aii.retencao_na_fonte == 1:
+									
+						#		totalgeralretencaofonte +=  (aii.amount * retencaopercentagem) / 100
+						#		totalbaseretencaofonte += aii.amount
+						#		totalservicos_retencaofonte += totalbaseretencaofonte
+						'''
+						totalgeralimpostoconsumo += aii.imposto_de_consumo					
+
+
+						despesas = (percentagem * totaldespesas_noretencaofonte)/100
+						print percentagem
+						print totaldespesas_noretencaofonte
+						print despesas
+						print totalgeralimpostoconsumo
+						print ai.account_head
+
+						ai.charge_type="Actual"
+						#ai.tax_amount=despesas
+						ai.tax_amount = despesas #totalgeralimpostoconsumo 
+						'''
+						if prod[0].iva_isencao == 1:	#NO NO IVA
+							print "sem iva ", prod[0].item_code
+							ai.charge_type="Actual"
+							ai.tax_amount = totalgeraliva
+							ai.total = totalgeraliva + doc.net_total
+
+						elif prod[0].iva_isencao == 0:	#IVA
+							print "IVA"
+							print "IVA ", aii.item_code
+							print aii.amount
+							print percentagemiva
+							totalgeraliva += (aii.amount * percentagemiva)/100
+							if ai.charge_type == "Actual":
+								ai.tax_amount = totalgeraliva
+								ai.total = totalgeraliva + doc.net_total
+				
+						else:
+							ai.tax_amount = 0
+
+
 			else:
 				print "SEM DESPESAS MAS CALCULA IPC"
 				print "SEM DESPESAS MAS CALCULA IPC"
@@ -262,14 +344,39 @@ def validate(doc,method):
 	print totalgeralimpostoconsumo
 
 	#Save Total Taxes and Charges if IPC exists
-	doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
-	doc.total_taxes_and_charges = totalgeralimpostoconsumo
+	if totalgeralimpostoconsumo:
+		if doc.currency == "KZ":
+			doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
+			doc.total_taxes_and_charges = totalgeralimpostoconsumo
 	
-	doc.grand_total = totalgeralimpostoconsumo + doc.net_total
-	doc.rounded_total = doc.grand_total
-	doc.base_grand_total = doc.grand_total
-	doc.base_rounded_total = doc.grand_total
-	doc.outstanding_amount = doc.grand_total
+			doc.grand_total = totalgeralimpostoconsumo + doc.net_total
+			doc.rounded_total = doc.grand_total
+			doc.base_grand_total = doc.grand_total
+			doc.base_rounded_total = doc.grand_total
+			doc.outstanding_amount = doc.grand_total
+	elif totalgeraliva:
+		#IVA
+		print "iva nos TOTAIS"
+		if doc.currency == "KZ":
+			doc.base_total_taxes_and_charges = totalgeraliva
+			doc.total_taxes_and_charges = totalgeraliva
+			print 'totalgeraliva ', totalgeraliva
+		if not doc.additional_discount_percentage:
+			doc.grand_total = totalgeraliva + doc.net_total
+			print 'totalgeraliva + net total ', totalgeraliva + doc.net_total
+			doc.rounded_total = doc.grand_total
+			print 'Grand total ', doc.grand_total
+			doc.base_grand_total = doc.grand_total
+			doc.base_rounded_total = doc.grand_total
+			doc.outstanding_amount = doc.grand_total
+		
+
+		print "Rouding ....."
+		print "Rouding ....."
+		print doc.base_rounding_adjustment
+		#print 'tem centimos ',str(doc.base_rounding_adjustment).find('.')
+		#if str(doc.base_rounding_adjustment).find('.'):
+		#	doc.base_rounding_adjustment = round(doc.base_rounding_adjustment)
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
@@ -278,6 +385,12 @@ def validate(doc,method):
 	else:
 		doc.in_words = money_in_words(doc.rounded_total, company_currency)
 
+	
+	ultimodoc = frappe.db.sql(""" select max(name),creation,docstatus,hash_erp,hashcontrol_erp from `tabSales Invoice` where (docstatus = 1 or docstatus = 2)  and hash_erp <> '' """,as_dict=True)
+	print 'VALIDARrrrrrrrrrrrrrrrrrr'
+	print ultimodoc
+	global ultimoreghash
+	ultimoreghash = ultimodoc
 
 def before_submit(doc,method):
 
@@ -292,6 +405,76 @@ def before_submit(doc,method):
 			print("RETIRA As PO aqui ....")
 			doc.po_no = ""
 
+
+	#HASH and HASH CONTROL...
+	fileregisto = "registo"
+	fileregistocontador = 1	#sera sempre aqui 
+
+	#get the last doc generated 
+	print 'verifica se ja tem o registo'
+	print 'verifica se ja tem o registo' 
+	print ultimoreghash
+
+	if ultimoreghash:
+		ultimodoc = ultimoreghash
+	else:
+		#ultimodoc = frappe.db.sql(""" select max(name),creation,modified,posting_date,hash_erp,hashcontrol_erp from `tabSales Invoice` """,as_dict=True)
+		ultimodoc = frappe.db.sql(""" select name,creation,modified,posting_date,hash_erp,hashcontrol_erp from `tabSales Invoice` where creation = (select max(creation) from `tabSales Invoice`) """,as_dict=True)
+		
+
+
+	criado = datetime.strptime(doc.creation,'%Y-%m-%d %H:%M:%S.%f').strftime("%Y-%m-%dT%H:%M:%S") 
+	
+	print 'ULTIMO HASH.....'
+	print ultimodoc
+#	print ultimodoc[0].hash_erp
+	if ultimodoc[0].hash_erp == "" or ultimodoc[0].hash_erp == None:
+		#1st record
+		print 'primeiro registo HASH'
+		#print doc.posting_date.strftime("%Y-%m-%d")
+
+		print doc.creation	
+		print criado
+		hashinfo = str(doc.posting_date) + ";" + str(criado) + ";" + str(doc.name) + ";" + str(doc.rounded_total) + ";"
+	else:
+		print 'segundo registo'
+		#print chaveanterior
+		hashinfo = str(doc.posting_date)  + ";" + str(criado) + ";" + str(doc.name) + ";" + str(doc.rounded_total) + ";" + str(ultimodoc[0].hash_erp)
+
+
+#	hashfile = open("/tmp/" + str(fileregisto) + str(fileregistocontador) + ".txt","wb")
+#	hashfile.write(hashinfo)
+
+	#to generate the HASH
+#	angola_erp.util.saft_ao.assinar_ssl()
+	print "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+#	os.system("/usr/bin/python /tmp/angolaerp.cert2/assinar_ssl.py")	
+	print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	print angola_erp.util.saft_ao.assinar_ssl1(hashinfo)
+	 
+
+#	p = Popen(["/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh"],shell=True, stdout=PIPE, stderr=PIPE)
+#	p = Popen(["exec ~/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh"],shell=True, stdout=PIPE, stderr=PIPE)
+#	output, errors = p.communicate()
+#	p.wait()
+	print 'Openssl Signing...'
+#	print output
+#	print errors
+
+#	hashfile.close()
+
+	#Reads the file to save the HASH....
+#	hashcriado = open('/tmp/registo1.b64','rb')	#open the file created to HASH
+#	print 'Hash criado'
+#	chaveanterior = str(hashcriado.read())	#para usar no next record...
+
+	doc.hash_erp = str(angola_erp.util.saft_ao.assinar_ssl1(hashinfo))	#Hash created
+	
+#	hashcriado.close()
+	
+	#Deve no fim apagar todos os regis* criados ....
+#	os.system("rm /tmp/registo* ")	#execute
 	
 def before_save(doc,method):
 	#check if PO_NO lenght more than 140 chars
@@ -300,7 +483,16 @@ def before_save(doc,method):
 			print("RETIRA As PO aqui ....")
 			doc.po_no = ""
 
+
+
 def on_submit(doc,method):
+	#check if PO_NO lenght more than 140 chars
+	if doc.po_no:
+		if len(doc.po_no) > 140:
+			print("RETIRA As PO aqui ....")
+			doc.po_no = ""
+
+
 	#Imposto de Selo
 	if doc.is_pos:
 		print "Pagamento do IS no POS"
@@ -385,5 +577,8 @@ def on_submit(doc,method):
 				update_outstanding=update_outstanding, merge_entries=False)
 
 			#make_gl_entries(gl_entries, cancel=cancel, adv_adj=0)
+
+
+	
 
 

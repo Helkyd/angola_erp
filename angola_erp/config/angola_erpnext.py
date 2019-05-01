@@ -28,6 +28,12 @@ def get_data():
 				   "description": "Retencoes", 
 				   "name": "Retencoes", 
 				  },
+				{
+				   "type": "doctype", 
+				   "description": "IVA Isencoes", 
+				   "name": "Isencoes", 
+				  },
+
 
 			]
 		},
@@ -154,6 +160,21 @@ def get_data():
 				   "type": "report",
 				   "is_query_report": True
 				  }, 
+				 {
+				   "description": "Imposto Industrial", 
+				   "name": "Imposto Industrial", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+
+				 {
+				   "description": "Imposto Industrial Detalhe", 
+				   "name": "Imposto Industrial Detalhe", 
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
 
 				 {
 				   "description": "Registo de Vendas", 
@@ -194,6 +215,21 @@ def get_data():
 				   "doctype": "Stock Ledger Entry",
 				   "type": "report",
 				   "is_query_report": True
+				  }, 
+
+
+			]
+		},
+
+		{
+			"label": _("Ficheiro SAFT-AO"),
+			"items": [
+
+				 {
+				   "description": "Download do Ficheiro SAFT-AO", 
+				   "name": "saft-ao", 
+				   "label": "SAFT-AO", 					
+				   "type": "page"
 				  }, 
 
 

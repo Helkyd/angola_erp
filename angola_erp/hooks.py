@@ -11,6 +11,7 @@ app_color = "grey"
 app_email = "hcesar@gmail.com"
 app_license = "MIT"
 fixtures = ["Custom Field","Custom Script"]
+agt_lic = "123456789"
 
 error_report_email = "angolaerp@angolaerp.co.ao"
 
@@ -142,6 +143,7 @@ doc_events = {
 	},
 	"Quotation": {
 		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",
+		"before_submit": "angola_erp.angola_erpnext.validations.quotation.before_submit",
 
 	},
 	"Purchase Invoice": {
@@ -150,7 +152,7 @@ doc_events = {
 	},
 	"Purchase Order": {
 		"validate": "angola_erp.angola_erpnext.validations.purchase_order.validate",
-
+		"before_submit": "angola_erp.angola_erpnext.validations.purchase_order.before_submit",
 	},
 	"Fees": {
 		"validate": "angola_erp.angola_erpnext.validations.fees.validate",
@@ -176,6 +178,12 @@ doc_events = {
 		"validate": "angola_erp.angola_erpnext.validations.student.validate",
 
 	},
+	"Delivery Note": {
+		"validate": "angola_erp.angola_erpnext.validations.delivery_note.validate",
+		"before_submit": "angola_erp.angola_erpnext.validations.delivery_note.before_submit",
+
+	},
+
 
 
 #	"System Settings": {
@@ -198,7 +206,8 @@ scheduler_events = {
 # 	"daily": [
 	"hourly": [
 # 		"angola_erp.tasks.daily"
-		"angola_erp.util.cambios.atualizar_cambios"	#Exchange rates updates for AOA
+		"angola_erp.util.cambios.atualizar_cambios",	#Exchange rates updates for AOA
+		"angola_erp.util.angola.verifica_imposto_expirado"
 # 	],
 # 	"hourly": [
 # 		"angola_erp.tasks.hourly"

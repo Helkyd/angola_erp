@@ -1,0 +1,26 @@
+{
+ "content": null, 
+ "creation": "2019-05-01 12:57:00.386071", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2019-05-01 18:10:45.549145", 
+ "modified_by": "Administrator", 
+ "module": "Angola ERPNext", 
+ "name": "saft-ao", 
+ "owner": "Administrator", 
+ "page_name": "SAFT-AO", 
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Accounts User"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "system_page": 0, 
+ "title": "SAFT-AO"
+}
