@@ -34,6 +34,8 @@ import json
 
 import xml.etree.ElementTree as ET
 from xml.dom import minidom 
+from lxml import etree
+
 from datetime import datetime, date, timedelta
 
 import angola
@@ -83,9 +85,18 @@ def update_accs_codes():
 	
 
 @frappe.whitelist()
-def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = False):
+def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = 0, download_file = 0):
 
 	Versao = "0.1.10" 
+
+	print company
+	print processar
+	print datainicio
+	print datafim
+	print update_acc_codes
+	print int(update_acc_codes) == 1
+	print download_file
+	print int(download_file) == 1
 
 
 	######## Inside MasterFiles
@@ -160,7 +171,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	print emp_enderecos
 
 	#Updates Accounting number on TabAccount
-	if update_acc_codes == True:
+	if int(update_acc_codes) == 1 :
 		#updates 
 		print "updating accounts..."
 		update_accs_codes()
@@ -197,18 +208,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print 'Processar ', processar
 		#case Semanal changes datafim
 		#case Diario changes datafim to datainicio
-		if processar.upper() == 'SEMANA':
-			primeirodiames, ultimodiames = angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
-			print angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
-			print primeirodiames.strftime("%Y-%m-%d")
-			print ultimodiames.strftime("%Y-%m-%d")
+		if processar:
+			if processar.upper() == 'SEMANA':
+				primeirodiames, ultimodiames = angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
+				print angola.get_firstlast_week_day(datetime.strptime(datainicio,"%Y-%m-%d"))
+				print primeirodiames.strftime("%Y-%m-%d")
+				print ultimodiames.strftime("%Y-%m-%d")
 
 
-		if processar.upper() == 'DIARIO':
+			if processar.upper() == 'DIARIO':
 	
-			ultimodiames = primeirodiames = datetime.strptime(datainicio,"%Y-%m-%d")
-			print primeirodiames.strftime("%Y-%m-%d")
-			print ultimodiames.strftime("%Y-%m-%d")
+				ultimodiames = primeirodiames = datetime.strptime(datainicio,"%Y-%m-%d")
+				print primeirodiames.strftime("%Y-%m-%d")
+				print ultimodiames.strftime("%Y-%m-%d")
 
 
 
@@ -246,21 +258,21 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	#START CompanyAddress
 	companyaddress = ET.SubElement(head,'CompanyAddress')
 	buildingnumber = ET.SubElement(companyaddress,'BuildingNumber')
+	if emp_enderecos:
+		streetname = ET.SubElement(companyaddress,'StreetName')
+		streetname.text = str(emp_enderecos.address_line1).strip()
 
-	streetname = ET.SubElement(companyaddress,'StreetName')
-	streetname.text = str(emp_enderecos.address_line1).strip()
+		addressdetail = ET.SubElement(companyaddress,'AddressDetail')
+		addressdetail.text = str(emp_enderecos.address_line1).strip()
 
-	addressdetail = ET.SubElement(companyaddress,'AddressDetail')
-	addressdetail.text = str(emp_enderecos.address_line1).strip()
-
-	city = ET.SubElement(companyaddress,'City')
-	city.text = emp_enderecos.city
+		city = ET.SubElement(companyaddress,'City')
+		city.text = emp_enderecos.city
 	
-	postalcode = ET.SubElement(companyaddress,'PostalCode')
-	postalcode.text = emp_enderecos.pincode
+		postalcode = ET.SubElement(companyaddress,'PostalCode')
+		postalcode.text = emp_enderecos.pincode
 
-	province = ET.SubElement(companyaddress,'Province')
-	province.text = emp_enderecos.city
+		province = ET.SubElement(companyaddress,'Province')
+		province.text = emp_enderecos.city
 
 	country = ET.SubElement(companyaddress,'Country')
 	country.text = "AO"	#default
@@ -303,15 +315,15 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	headercomment = ET.SubElement(head,'HeaderComment')
 	headercomment.text = "Ficheiro Financeiro."	
+	if emp_enderecos:
+		telephone = ET.SubElement(head,'Telephone')
+		telephone.text = emp_enderecos.phone
 
-	telephone = ET.SubElement(head,'Telephone')
-	telephone.text = emp_enderecos.phone
+		fax = ET.SubElement(head,'Fax')
+		fax.text = emp_enderecos.fax
 
-	fax = ET.SubElement(head,'Fax')
-	fax.text = emp_enderecos.fax
-
-	email = ET.SubElement(head,'Email')
-	email.text = emp_enderecos.email_id
+		email = ET.SubElement(head,'Email')
+		email.text = emp_enderecos.email_id
 
 	website = ET.SubElement(head,'Website')
 	website.text = empresa.website
@@ -5362,12 +5374,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			nettotal.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)	#Paid amount...
 
 			pagamentofinal = frappe.db.sql(""" select sum(debit), sum(debit_in_account_currency) from `tabGL Entry` where company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
-
-			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
-			if recibo.paid_to_account_currency != "KZ":
-				grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit_in_account_currency)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
-			else:
-				grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
+			if pagamentofinal[0]['sum(debit_in_account_currency)'] != None:
+				print pagamentofinal[0]['sum(debit_in_account_currency)'] == None
+				grosstotal = ET.SubElement(documenttotals,'GrossTotal')
+			
+				if recibo.paid_to_account_currency != "KZ":
+					grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit_in_account_currency)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
+				else:
+					grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
 
 			#settlement
 			settlement = ET.SubElement(documenttotals,'Settlement')
@@ -5508,13 +5522,21 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	reparsed = minidom.parseString(mydata)
 	
 
-	myfile = open("/tmp/" + nomeficheiro + ".xml","w")
-
-
+	#myfile = open("/tmp/" + nomeficheiro + ".xml","w")
+	myfile = open(frappe.get_site_path('public','files') + "/" + nomeficheiro + ".xml","w")
 	myfile.write(reparsed.toprettyxml(indent=" "))
 
+	myfile.close()
 
 	print 'file created'
+	print myfile.name
+	if int(download_file) == 1:
+
+		return myfile.name
+		# write out response as a xlsx type
+		#frappe.response['filename'] = myfile.name
+		#frappe.response['filecontent'] = etree.parse(myfile) #minidom.parse(myfile)
+		#frappe.response['type'] = 'binary'
 
 	#END OF SAFT_AO
 

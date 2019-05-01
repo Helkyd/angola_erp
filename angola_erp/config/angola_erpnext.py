@@ -220,4 +220,19 @@ def get_data():
 
 			]
 		},
+
+		{
+			"label": _("Ficheiro SAFT-AO"),
+			"items": [
+
+				 {
+				   "description": "Download do Ficheiro SAFT-AO", 
+				   "name": "saft-ao", 
+				   "label": "SAFT-AO", 					
+				   "type": "page"
+				  }, 
+
+
+			]
+		},
 	]

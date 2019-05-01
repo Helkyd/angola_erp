@@ -28,6 +28,12 @@ def get_data():
 				   "description": "Retencoes", 
 				   "name": "Retencoes", 
 				  },
+				{
+				   "type": "doctype", 
+				   "description": "IVA Isencoes", 
+				   "name": "Isencoes", 
+				  },
+
 
 			]
 		},
@@ -209,6 +215,21 @@ def get_data():
 				   "doctype": "Stock Ledger Entry",
 				   "type": "report",
 				   "is_query_report": True
+				  }, 
+
+
+			]
+		},
+
+		{
+			"label": _("Ficheiro SAFT-AO"),
+			"items": [
+
+				 {
+				   "description": "Download do Ficheiro SAFT-AO", 
+				   "name": "SAFT-AO", 
+				   "label": "SAFT-AO", 					
+				   "type": "page"
 				  }, 
 
 
