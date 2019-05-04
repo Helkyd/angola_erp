@@ -23,16 +23,19 @@ frappe.Saft_ao = Class.extend({
 		this.filters = {
 			"SAFT-AO": ["0"],
 		};
+		this.tipoficheiro = ["I - Contabilidade Integrada","C - Contabilidade","F - Facturação","R - Recibos","S - Autofacturação","A - Aquisição de Bens e Serviços","Q - Aquisição de Bens e Serviços Integrada"];
 
 		// for saving current selected filters
 		// TODO: revert to 0 index for doctype and timespan, and remove preset down
 		const _initial_doctype = this.doctypes[0];
 		const _initial_timespan = this.timespans[0];
 		const _initial_filter = this.filters[_initial_doctype];
+		const _initial_tipoficheiro = this.tipoficheiro[0];
 
 		this.options = {
 			selected_doctype: _initial_doctype,
 			selected_timespan: _initial_timespan,
+			selected_tipoficheiro: _initial_tipoficheiro,
 		};
 
 		this.message = null;
@@ -78,6 +81,12 @@ frappe.Saft_ao = Class.extend({
 			default: frappe.datetime.get_today()
 			//width: '80'
 		});
+		this.tipoficheiro_select = this.page.add_select(__("Tipo de Ficheiro"),
+			this.tipoficheiro.map(d => {
+				return {"label": __(d), value: d }
+			})
+		);
+
 
 		this.download_file_select = this.page.add_field({
 			fieldname:"download_file",
@@ -91,8 +100,12 @@ frappe.Saft_ao = Class.extend({
 		console.log('botao')
 
 		$(this.download_file_select.$input).click( function() {
+			//frappe.show_alert('msgprint', 'Iniciando processamento SAFT-AO...',3)
+			msgprint("SAF-T(AO)","Iniciando processamento SAFT-AO...")
+			console.log("Chama gerar saft...")
 			frappe.call({
-				method: "angola_erp.util.saft_ao.gerar_saft_ao",
+				method: "angola_erp.util.saft_ao.set_saft_ao",
+				//method: "angola_erp.util.cambios.set_saft_ao",
 				freeze: true,
 				args: {
 					"company": me.options.selected_company,
@@ -101,18 +114,29 @@ frappe.Saft_ao = Class.extend({
 					"datafim": me.dateinit_select.value,
 					"update_acc_codes": 1,
 					"download_file": 1,
+					"ficheiro_tipo": me.options.selected_tipoficheiro,
 				},
+				async: false,
+				/*
 				callback: function (r) {
 
 					let results = r.message || [];
 					console.log('RESUTADOS.....')
 					console.log(results.substring(results.search('/files/')))
+					file = results.substring(results.search('/files/'))
 					//console.log(frappe.utils.get_url(frappe.utils.cstr(frappe.local.site)))
 
 					if (results) {
 						//frm.add_custom_button("Link", function(){
 						//	my_button.onclick=window.open('https://erpnext.com')
 						//});
+
+
+						//var client = new XMLHttpRequest();
+						//client.onload = handler;
+						//client.open("GET", results.substring(results.search('/files/')));
+						//client.send();
+						
 						return window.open(results.substring(results.search('/files/')) ); 
 
 						//return window.open(results.substring(results.search('/files/')) ); 
@@ -125,6 +149,7 @@ frappe.Saft_ao = Class.extend({
 
 					}
 				}
+				*/
 			});
 			
 
@@ -159,6 +184,11 @@ frappe.Saft_ao = Class.extend({
 
 		this.timespan_select.on("change", function() {
 			me.options.selected_timespan = this.value;
+			//me.make_request($container);
+		});
+
+		this.tipoficheiro_select.on("change", function() {
+			me.options.selected_tipoficheiro = this.value;
 			//me.make_request($container);
 		});
 

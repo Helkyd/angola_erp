@@ -451,7 +451,7 @@ def before_submit(doc,method):
 #	os.system("/usr/bin/python /tmp/angolaerp.cert2/assinar_ssl.py")	
 	print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	print angola_erp.util.saft_ao.assinar_ssl1(hashinfo)
+	#print angola_erp.util.saft_ao.assinar_ssl1(hashinfo)
 	 
 
 #	p = Popen(["/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh"],shell=True, stdout=PIPE, stderr=PIPE)
