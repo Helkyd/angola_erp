@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-# -*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 
 
@@ -9,18 +10,19 @@ import frappe
 from frappe import utils 
 import datetime
 from datetime import timedelta
-from frappe.utils import get_datetime_str, formatdate, nowdate, getdate, cint
+from frappe.utils import get_datetime_str, formatdate, nowdate, getdate, cint, encode
 from frappe.model.naming import make_autoname
 import frappe.async
 from frappe.utils import cstr
 from frappe import _
-from frappe.model.naming import make_autoname
-import frappe.async
+#from frappe.model.naming import make_autoname
+#import frappe.async
 
 from frappe.model.document import Document
 
 from lxml import html
 import requests
+import json
 
 global actualizarqnd	#Should be everyday or Once per month
 global actualizardia	#Select the day to update
@@ -162,7 +164,6 @@ def cambios(fonte):
 			print moedavenda
 
 			return moedacompraUSD, moedavendaUSD
-
 
 
 

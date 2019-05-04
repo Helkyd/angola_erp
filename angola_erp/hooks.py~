@@ -143,6 +143,7 @@ doc_events = {
 	},
 	"Quotation": {
 		"validate": "angola_erp.angola_erpnext.validations.quotation.validate",
+		"before_submit": "angola_erp.angola_erpnext.validations.quotation.before_submit",
 
 	},
 	"Purchase Invoice": {
@@ -200,7 +201,8 @@ scheduler_events = {
 # 		"angola_erp.tasks.all"
 
 		"angola_erp.gestao_residencial.doctype.api.verifica_check_in",
-		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida" #Saida dos Quartos
+		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida", #Saida dos Quartos
+		"angola_erp.util.saft_ao.set_saft_ao"	#TESTE
  	],
 # 	"daily": [
 	"hourly": [
