@@ -104,6 +104,8 @@ def set_saft_ao(** kwargs):
 		update_acc_codes = kwargs['update_acc_codes']
 		download_file = kwargs['download_file']
 		ficheiro_tipo = kwargs['ficheiro_tipo']
+		usuario = kwargs['usuario']
+
 		#company = json.dumps(company1)
 		
 		#ff = open('/tmp/saft_ao.txt','wb')
@@ -120,7 +122,7 @@ def set_saft_ao(** kwargs):
 		#enqueue(gerar_saft_ao, queue='default', timeout=6000, event = 'saft_ao', args = company)
 		#company,processar,datainicio,datafim,update_acc_codes,download_file,ficheiro_tipo
 
-		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue='default', timeout=6000, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo)
+		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue = 'long', timeout = 6000, async = True, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
 	
 @frappe.whitelist()
 def correr_saft_ao():
@@ -173,7 +175,7 @@ def correr_saft_ao():
 	
 
 @frappe.whitelist()
-def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = 0, download_file = 0, ficheiro_tipo = "I"):
+def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, datafim = None, update_acc_codes = 0, download_file = 0, ficheiro_tipo = "I", usuario = None):
 
 	Versao = "0.1.10" 
 	#frappe.publish_realtime('msgprint', 'Iniciando processamento SAFT-AO...', user=frappe.session.user)
@@ -289,7 +291,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#nome do file sera a (Empresa + "_" + SAFT_AO + "_" + NIF + data today)
 		print empresa.tax_id
 		if empresa.tax_id:
-			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_" + empresa.tax_id + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
+			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_" + empresa.tax_id.replace(" ","").strip() + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
 		else:
 			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_999999999" + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
 		#re.sub(r",|-|\s+","",s)
@@ -378,7 +380,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	companyid.text = empresa.name
 
 	taxregistrationnumber = ET.SubElement(head,'TaxRegistrationNumber')
-	taxregistrationnumber.text = empresa.tax_id
+	taxregistrationnumber.text = empresa.tax_id.replace(" ","").strip()
 
 	taxaccountingbasis = ET.SubElement(head,'TaxAccountingBasis')
 	if ficheiro_tipo == "I":
@@ -440,7 +442,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	if ficheiro_tipo[0:1] == "I":
 		taxentity.text = "sede"	#default por ser INTEGRADO
 	elif ficheiro_tipo[0:1] == "F":
-		taxentity.text = empresa.tax_id
+		taxentity.text = empresa.tax_id.replace(" ","").strip()
 	else:
 		taxentity.text = "global"
 
@@ -5911,7 +5913,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	myfile.write(reparsed.toprettyxml(indent=" "))
 
 	myfile.close()
-	frappe.publish_realtime('msgprint', 'Terminou de processar SAFT-AO... <a href =' + myfile.name[myfile.name.find('/files/'):len(myfile.name)] + ">" + myfile.name[myfile.name.find('/files/'):len(myfile.name)] +"</a>")
+	if usuario:
+		print usuario
+		print myfile.name[myfile.name.find('/files/'):len(myfile.name)]
+		frappe.publish_realtime('msgprint', 'Terminou de processar SAFT-AO... <a href =' + myfile.name[myfile.name.find('/files/'):len(myfile.name)] + ">" + myfile.name[myfile.name.find('/files/'):len(myfile.name)] +"</a>", user=usuario)
+	else:
+		print "NAO TEM"
+		print usuario
 
 	print 'file created'
 	print myfile.name
