@@ -122,7 +122,7 @@ def set_saft_ao(** kwargs):
 		#enqueue(gerar_saft_ao, queue='default', timeout=6000, event = 'saft_ao', args = company)
 		#company,processar,datainicio,datafim,update_acc_codes,download_file,ficheiro_tipo
 
-		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue='default', timeout=6000, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
+		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue = 'long', timeout = 6000, async = True, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
 	
 @frappe.whitelist()
 def correr_saft_ao():

@@ -122,7 +122,7 @@ def set_saft_ao(** kwargs):
 		#enqueue(gerar_saft_ao, queue='default', timeout=6000, event = 'saft_ao', args = company)
 		#company,processar,datainicio,datafim,update_acc_codes,download_file,ficheiro_tipo
 
-		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue='default', timeout=6000, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
+		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue = 'long', timeout = 6000, asycn = True, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
 	
 @frappe.whitelist()
 def correr_saft_ao():
@@ -291,7 +291,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		#nome do file sera a (Empresa + "_" + SAFT_AO + "_" + NIF + data today)
 		print empresa.tax_id
 		if empresa.tax_id:
-			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_" + empresa.tax_id + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
+			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_" + empresa.tax_id.replace(" ","").strip() + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
 		else:
 			nomeficheiro = re.sub(r",|-|\s+","",empresa.name.replace(" ","_")) + "_SAFT_AO_999999999" + "_" + datetime.today().strftime("%Y%m%d%H%M%S")
 		#re.sub(r",|-|\s+","",s)
@@ -442,7 +442,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	if ficheiro_tipo[0:1] == "I":
 		taxentity.text = "sede"	#default por ser INTEGRADO
 	elif ficheiro_tipo[0:1] == "F":
-		taxentity.text = empresa.tax_id
+		taxentity.text = empresa.tax_id.replace(" ","").strip()
 	else:
 		taxentity.text = "global"
 
