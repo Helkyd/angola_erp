@@ -101,7 +101,7 @@ frappe.Saft_ao = Class.extend({
 
 		$(this.download_file_select.$input).click( function() {
 			//frappe.show_alert('msgprint', 'Iniciando processamento SAFT-AO...',3)
-			msgprint("SAF-T(AO)","Iniciando processamento SAFT-AO...")
+			frappe.msgprint("SAF-T(AO)","Iniciando processamento SAFT-AO...")
 			console.log("Chama gerar saft...")
 			frappe.call({
 				method: "angola_erp.util.saft_ao.set_saft_ao",
@@ -115,6 +115,7 @@ frappe.Saft_ao = Class.extend({
 					"update_acc_codes": 1,
 					"download_file": 1,
 					"ficheiro_tipo": me.options.selected_tipoficheiro,
+					"usuario": frappe.session.user,
 				},
 				async: false,
 				/*
