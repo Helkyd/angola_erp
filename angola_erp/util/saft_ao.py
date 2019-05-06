@@ -74,20 +74,21 @@ def get_xml(args):
 	return response
 
 @frappe.whitelist()
-def update_accs_codes():
+def update_accs_codes(company = None):
 	#Update account_number with the number of name
 
 #Check is eating the last digit.
-
-	accs = frappe.db.sql(""" select name,account_number from `tabAccount` """,as_dict=True)
-	for acc in accs:
-		if acc.name[0:1].isnumeric() == True:
-			#starts with Numbers
-			conta = acc.name[0:acc.name.find("-")]
-			#print acc.name[0:acc.name.find("-")-1]
-			#acc.account_number = conta
-			frappe.db.set_value('Account',acc.name,'account_number',conta)
-			frappe.db.commit()
+	if company != None:
+		accs = frappe.db.sql(""" select name,account_number from `tabAccount` where company = %s """,(company), as_dict=True)
+		print "updatin ACCs..."
+		for acc in accs:
+			if acc.name[0:1].isnumeric() == True:
+				#starts with Numbers
+				conta = acc.name[0:acc.name.find("-")]
+				#print acc.name[0:acc.name.find("-")-1]
+				#acc.account_number = conta
+				frappe.db.set_value('Account',acc.name,'account_number',conta)
+				frappe.db.commit()
 @frappe.whitelist()
 def set_saft_ao(** kwargs):
 	#Prepara o file /tmp/saft_ao.txt
@@ -310,7 +311,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	if int(update_acc_codes) == 1 :
 		#updates 
 		print "updating accounts..."
-		update_accs_codes()
+		update_accs_codes(empresa.name)
 
 
 	'''
