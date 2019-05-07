@@ -74,20 +74,21 @@ def get_xml(args):
 	return response
 
 @frappe.whitelist()
-def update_accs_codes():
+def update_accs_codes(company = None):
 	#Update account_number with the number of name
 
 #Check is eating the last digit.
-
-	accs = frappe.db.sql(""" select name,account_number from `tabAccount` """,as_dict=True)
-	for acc in accs:
-		if acc.name[0:1].isnumeric() == True:
-			#starts with Numbers
-			conta = acc.name[0:acc.name.find("-")]
-			#print acc.name[0:acc.name.find("-")-1]
-			#acc.account_number = conta
-			frappe.db.set_value('Account',acc.name,'account_number',conta)
-			frappe.db.commit()
+	if company != None:
+		accs = frappe.db.sql(""" select name,account_number from `tabAccount` where company = %s """,(company), as_dict=True)
+		print "updatin ACCs..."
+		for acc in accs:
+			if acc.name[0:1].isnumeric() == True:
+				#starts with Numbers
+				conta = acc.name[0:acc.name.find("-")]
+				#print acc.name[0:acc.name.find("-")-1]
+				#acc.account_number = conta
+				frappe.db.set_value('Account',acc.name,'account_number',conta)
+				frappe.db.commit()
 @frappe.whitelist()
 def set_saft_ao(** kwargs):
 	#Prepara o file /tmp/saft_ao.txt
@@ -122,7 +123,7 @@ def set_saft_ao(** kwargs):
 		#enqueue(gerar_saft_ao, queue='default', timeout=6000, event = 'saft_ao', args = company)
 		#company,processar,datainicio,datafim,update_acc_codes,download_file,ficheiro_tipo
 
-		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue = 'long', timeout = 6000, async = True, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
+		enqueue('angola_erp.util.saft_ao.gerar_saft_ao', queue = 'short', timeout = 6000, async = True, event = 'saft_ao',company = company, processar = processar, datainicio = datainicio, datafim = datafim, update_acc_codes = update_acc_codes, download_file = download_file, ficheiro_tipo = ficheiro_tipo, usuario = usuario)
 	
 @frappe.whitelist()
 def correr_saft_ao():
@@ -310,7 +311,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	if int(update_acc_codes) == 1 :
 		#updates 
 		print "updating accounts..."
-		update_accs_codes()
+		update_accs_codes(empresa.name)
 
 
 	'''
@@ -380,7 +381,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	companyid.text = empresa.name
 
 	taxregistrationnumber = ET.SubElement(head,'TaxRegistrationNumber')
-	taxregistrationnumber.text = empresa.tax_id.replace(" ","").strip()
+	if empresa.tax_id:
+		taxregistrationnumber.text = empresa.tax_id.replace(" ","").strip()
+	else:
+		taxregistrationnumber.text = "9999999999"
 
 	taxaccountingbasis = ET.SubElement(head,'TaxAccountingBasis')
 	if ficheiro_tipo == "I":
@@ -442,7 +446,12 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	if ficheiro_tipo[0:1] == "I":
 		taxentity.text = "sede"	#default por ser INTEGRADO
 	elif ficheiro_tipo[0:1] == "F":
-		taxentity.text = empresa.tax_id.replace(" ","").strip()
+		if empresa.tax_id:
+			taxentity.text = empresa.tax_id.replace(" ","").strip()
+		else:
+			taxentity.text = "9999999999"
+
+
 	else:
 		taxentity.text = "global"
 
@@ -5920,6 +5929,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	else:
 		print "NAO TEM"
 		print usuario
+		frappe.publish_realtime('msgprint', 'Terminou de processar SAFT-AO... <a href =' + myfile.name[myfile.name.find('/files/'):len(myfile.name)] + ">" + myfile.name[myfile.name.find('/files/'):len(myfile.name)] +"</a>")
+
 
 	print 'file created'
 	print myfile.name
