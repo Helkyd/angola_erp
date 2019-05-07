@@ -210,7 +210,7 @@ def make_gl_entries1(doc, cancel=0, adv_adj=0):
 		print retencoes_is[0].isencao
 		print retencoes_is[0].descricao
 		print retencoes_is[0].data_limite
-		print retencoes_is[0].data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate()
+		
 
 		if retencoes_is[0].isencao == 0:
 			# 3471 (C) IPC to 7531 (D)

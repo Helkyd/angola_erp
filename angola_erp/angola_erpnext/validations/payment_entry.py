@@ -71,16 +71,17 @@ def on_submit(doc,method):
 		print "TEM DOMINIO EDUCACAO SELECT"
 		for refs in doc.get("references"):
 			print refs.reference_name
-			factura = frappe.get_doc("Sales Invoice", refs.reference_name)
-			print factura
-			for prop in factura.get("propina"):
-				print prop.propina
-				cancel_gl_entry_fee(prop.propina)
+			if refs.parenttype == "Sales Invoice":
+				factura = frappe.get_doc("Sales Invoice", refs.reference_name)
+				print factura
+				for prop in factura.get("propina"):
+					print prop.propina
+					cancel_gl_entry_fee(prop.propina)
 
-				#Agora clear outstanding from Fees	
-				frappe.db.set_value("Fees",prop.propina, "paid_amount", prop.valor)
-				frappe.db.set_value("Fees",prop.propina, "outstanding_amount", 0)
-				frappe.db.commit()
+					#Agora clear outstanding from Fees	
+					frappe.db.set_value("Fees",prop.propina, "paid_amount", prop.valor)
+					frappe.db.set_value("Fees",prop.propina, "outstanding_amount", 0)
+					frappe.db.commit()
 	
 			
 	#++++++++++ FEES
