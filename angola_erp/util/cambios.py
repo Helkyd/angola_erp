@@ -12,7 +12,7 @@ import datetime
 from datetime import timedelta
 from frappe.utils import get_datetime_str, formatdate, nowdate, getdate, cint, encode
 from frappe.model.naming import make_autoname
-import frappe.async
+#import frappe.async
 from frappe.utils import cstr
 from frappe import _
 #from frappe.model.naming import make_autoname
