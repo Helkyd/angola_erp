@@ -606,7 +606,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 	#Customers
 	if ficheiro_tipo[0:1].upper() == "I" or ficheiro_tipo[0:1].upper() == "C" or ficheiro_tipo[0:1].upper() == "F" or ficheiro_tipo[0:1].upper() == "R" or ficheiro_tipo[0:1].upper() == "S" or ficheiro_tipo[0:1].upper() == "Q": 
 
-		customers = ET.SubElement(masterfiles,'Customers')
+		#De momento nao podemos usar...a espera da AGT
+		#customers = ET.SubElement(masterfiles,'Customers')
 
 		#masterfiles = ET.Element('MasterFiles')
 
@@ -641,7 +642,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				print 'Add cliente'
 				#Customers
 				#customers = ET.SubElement(masterfiles,'Customers')
-				customer = ET.SubElement(customers,'Customer')
+
+				#De momento NOT; quando AGT fizer update
+				#customer = ET.SubElement(customers,'Customer')	
+				customer = ET.SubElement(masterfiles, 'Customer')
+
 				customerid = ET.SubElement(customer,'CustomerID')
 				customerid.text = cliente.name
 
@@ -751,7 +756,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
 						country = ET.SubElement(billingaddress,'Country')
-						country.text = "Desconhecido"	#default
+						country.text = "AO"	#default
 					elif cliente_endereco:				
 						country = ET.SubElement(billingaddress,'Country')
 						if cliente_endereco.country == 'Angola':
@@ -762,7 +767,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					else:
 						country = ET.SubElement(billingaddress,'Country')
-						country.text = "Desconhecido"	#default
+						country.text = "AO"	#default
 				else:
 					addressdetail = ET.SubElement(billingaddress,'AddressDetail')
 					addressdetail.text = "Desconhecido"	#default
@@ -773,7 +778,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					#postalcode.text = cliente_endereco.pincode
 
 					country = ET.SubElement(billingaddress,'Country')
-					country.text = "Desconhecido"	#default
+					country.text = "AO"	#default
 
 				#END BILLING address
 
@@ -822,7 +827,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					country = ET.SubElement(shiptoaddress,'Country')
 					if cliente.customer_name == 'Diversos' or cliente.customer_name == 'General':
-						country.text = "Desconhecido"	#default
+						country.text = "AO"	#default
 					#elif cliente_endereco:				
 					if cliente_endereco.country == 'Angola':
 						country.text = "AO"
@@ -831,7 +836,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 					else:
-						country.text = "Desconhecido"	#default
+						country.text = "AO"	#default
 
 
 
@@ -863,10 +868,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	#create Suppliers
 
-	if ficheiro_tipo[0:1].upper() == "I" or ficheiro_tipo[0:1].upper() == "C" or ficheiro_tipo[0:1].upper() == "F" or ficheiro_tipo[0:1].upper() == "A" or ficheiro_tipo[0:1].upper() == "Q":
+	if ficheiro_tipo[0:1].upper() == "I" or ficheiro_tipo[0:1].upper() == "C" or ficheiro_tipo[0:1].upper() == "A" or ficheiro_tipo[0:1].upper() == "Q":
 
 		#Suppliers
-		suppliers = ET.SubElement(masterfiles,'Suppliers')
+		#suppliers = ET.SubElement(masterfiles,'Suppliers')
 		fornecedores = frappe.db.sql(""" select * from `tabSupplier` where docstatus = 0 """,as_dict=True)
 
 		adicionafornecedor = True
@@ -897,7 +902,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 
-				supplier = ET.SubElement(suppliers,'Supplier')
+				supplier = ET.SubElement(masterfiles,'Supplier')
 				supplierid = ET.SubElement(supplier,'SupplierID')
 				supplierid.text = fornecedor.name
 
@@ -1051,13 +1056,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	if ficheiro_tipo[0:1].upper() == "I" or ficheiro_tipo[0:1].upper() == "F" or ficheiro_tipo[0:1].upper() == "S" or ficheiro_tipo[0:1].upper() == "Q":
 
-		products = ET.SubElement(masterfiles,'Products')
+		#products = ET.SubElement(masterfiles,'Products')
 
 		produtos = frappe.db.sql(""" select * from `tabItem` where docstatus = 0 """,as_dict=True)
 
 		for produto in produtos:
 	
-			product = ET.SubElement(products,'Product')
+			product = ET.SubElement(masterfiles,'Product')
 			producttype = ET.SubElement(product,'ProductType')
 			if produto.is_stock_item:
 				producttype.text = "P" #Produto
@@ -1133,15 +1138,16 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				taxexpirationdate.text = str(retencao.data_limite.strftime("%Y-%m-%d"))
 
 			taxpercentage = ET.SubElement(taxtableentry,'TaxPercentage')
-			taxamount = ET.SubElement(taxtableentry,'TaxAmount')
+			
+			#taxamount = ET.SubElement(taxtableentry,'TaxAmount')
 			if retencao.percentagem:
 				taxpercentage.text = str("{0:.0f}".format(retencao.percentagem)) #str(retencao.percentagem)
-				taxamount.text = "0.00"	#default POR VERIFICAR
+				#taxamount.text = "0.00"	#default POR VERIFICAR
 			else:
 				taxpercentage.text = "0"
-				taxamount.text = "0.00"	#default 
+				#taxamount.text = "0.00"	#default 
 	
-
+		
 
 
 		#END OF TaxTable
@@ -1329,9 +1335,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 		if int(jvs[0]['count(name)']) !=0:
 			numberofentries.text = str(jvs[0]['count(name)'])
-			totaldebit.text = str("{0:.2f}".format(jvs[0]['sum(debit)']))
+			totaldebit.text = str("{0:.2f}".format(abs(flt(jvs[0]['sum(debit)']))))
 			if jvs[0]['sum(credit)'] != 0:
-				totalcredit.text = str("{0:.2f}".format(jvs[0]['sum(credit)']))
+				totalcredit.text = str("{0:.2f}".format(abs(flt(jvs[0]['sum(credit)']))))
 			else:
 				totalcredit.text = "0.00"
 
@@ -1697,7 +1703,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			if facturas[0]['sum(rounded_total)'] != 0:
 				numberofentries.text = str(int(facturas[0]['count(name)']))
 				numerodeentradas = int(facturas[0]['count(name)'])
-				totaldebit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
+				totaldebit.text = str("{0:.2f}".format(abs(flt(facturas[0]['sum(rounded_total)']))))
 			else:
 				totaldebit.text = "0.00"
 		else:
@@ -1709,7 +1715,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 			numberofentries.text = str(int(facturas[0]['count(name)']) + int(numerodeentradas))
 			if facturas[0]['sum(rounded_total)'] != 0:
-				totalcredit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
+				totalcredit.text = str("{0:.2f}".format(abs(flt(facturas[0]['sum(rounded_total)']))))
 			else:
 				totalcredit.text = "0.00"
 
@@ -1785,7 +1791,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			documentstatus = ET.SubElement(invoice,'DocumentStatus')
 			invoicestatus = ET.SubElement(documentstatus,'InvoiceStatus')
 			if factura.status =="Paid" and factura.docstatus == 1:
-				invoicestatus.text = "F"	#Facturado
+				invoicestatus.text = "N" #"F"	#Facturado
 			elif factura.status =="Cancelled" and factura.docstatus == 2:
 				invoicestatus.text = "A"	#Anulado
 
@@ -1840,17 +1846,17 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'NC ', factura.return_against
 			if factura.is_pos == 1 and factura.status == 'Credit Note Issued':
 				invoicetype.text = "NC"	#POS NC usually mistaken...
-				salesinvoicehashcontrol.text = "1" + "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 			if factura.is_pos == 1 :
 				invoicetype.text = "FR"	#POS deve ser FR ou TV
-				salesinvoicehashcontrol.text = "1" + "FR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "FR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			elif factura.return_against != None:
 				invoicetype.text = "NC"	#Retorno / Credit Note
-				salesinvoicehashcontrol.text = "1" + "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 			else:
 				invoicetype.text = "FT"	#default sales invoice
-				salesinvoicehashcontrol.text = "1" + "FT" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "FT" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 
 	
@@ -1890,8 +1896,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				for entradagl in entradasgl:
 					print 'transactions ids'
 					print entradagl
-					transactionid = ET.SubElement(invoice,'TransactionID')
-					transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
+					#For NOW REMOVE REQUESTED BY AGT
+					#transactionid = ET.SubElement(invoice,'TransactionID')
+					#transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
 
 			customerid = ET.SubElement(invoice,'CustomerID')
 			customerid.text = factura.customer	#cliente
@@ -2027,7 +2034,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					#POR VER SE TEM....
 
 				#tax
-				taxes = ET.SubElement(line,'Taxes')
+				#taxes = ET.SubElement(line,'Taxes')
 			
 				### TAX por PRODUTO OU SERVICO
 
@@ -2073,7 +2080,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									if "34710000" in entradagl.account:
 										#imposto de selo
-										tax = ET.SubElement(taxes,'Tax')
+										tax = ET.SubElement(line,'Tax')
 										taxtype = ET.SubElement(tax,'TaxType')
 
 										taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2090,16 +2097,17 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 										taxpercentage = ET.SubElement(tax,'TaxPercentage')
 										taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) # str(retn[0].percentagem)		#por ir buscar
-
-										taxamount = ET.SubElement(tax,'TaxAmount')
+									
+										#taxamount = ET.SubElement(tax,'TaxAmount')
 										#if entradagl.credit:
 										#	taxamount.text = str(entradagl.credit)
 										#else:
-										taxamount.text = "0.00"
+										#taxamount.text = "0.00"
+										
 
 									elif "34210000" in entradagl.account:
 										#imposto de producao e consumo IPC
-										tax = ET.SubElement(taxes,'Tax')
+										tax = ET.SubElement(line,'Tax')
 										taxtype = ET.SubElement(tax,'TaxType')
 
 										taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2116,13 +2124,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 										taxpercentage = ET.SubElement(tax,'TaxPercentage')
 										taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-										taxamount = ET.SubElement(tax,'TaxAmount')
+										
+										#taxamount = ET.SubElement(tax,'TaxAmount')
 										#if entradagl.credit:
 										#	taxamount.text = str(entradagl.credit)
 										#else:
-										taxamount.text = "0.00"
-
+										#taxamount.text = "0.00"
+										
 
 									'''
 									elif "3422" in entradagl.account:	#34220000
@@ -2150,14 +2158,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 										taxpercentage = ET.SubElement(tax,'TaxPercentage')
 										taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 
-										taxamount = ET.SubElement(tax,'TaxAmount')
+										#taxamount = ET.SubElement(tax,'TaxAmount')
 										#if entradagl.credit:
 										#	taxamount.text = str(entradagl.credit)
 										#else:
-										taxamount.text = "0.00"
+										#taxamount.text = "0.00"
 			
-									'''
-									'''
+			
 									elif "34140000" in entradagl.account:
 										tax = ET.SubElement(taxes,'Tax')
 										taxtype = ET.SubElement(tax,'TaxType')
@@ -2177,11 +2184,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 										taxpercentage = ET.SubElement(tax,'TaxPercentage')
 										taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 
-										taxamount = ET.SubElement(tax,'TaxAmount')
+										#taxamount = ET.SubElement(tax,'TaxAmount')
 										#if entradagl.debit:
 										#	taxamount.text = str(entradagl.debit)
 										#else:
-										taxamount.text = "0.00"
+										#taxamount.text = "0.00"
 
 									'''
 
@@ -2207,7 +2214,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				
 								temiva = False
 								print 'IVA'
-								tax = ET.SubElement(taxes,'Tax')
+								tax = ET.SubElement(line,'Tax')
 								taxtype = ET.SubElement(tax,'TaxType')
 
 								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2226,13 +2233,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								#taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 								taxpercentage.text = "0.00"
-
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
-
+								#taxamount.text = "0.00"
+								
 								print facturaitem.item_code
 								print facturaitem.isento_iva
 								print facturaitem.motivo_isencao
@@ -2252,7 +2259,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							else:
 								temiva = True
 								print 'IVA'
-								tax = ET.SubElement(taxes,'Tax')
+								tax = ET.SubElement(line,'Tax')
 								taxtype = ET.SubElement(tax,'TaxType')
 
 								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2270,18 +2277,18 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
+								#taxamount.text = "0.00"
+								
+								#taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+								#taxexemptionreason.text = "0"	#
 
-								taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
-								taxexemptionreason.text = "0"	#
-
-								taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
-								taxexemptioncode.text = "0"
+								#taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+								#taxexemptioncode.text = "0"
 
 
 					#if factura.name == 'FAU-19/01539':
@@ -2305,7 +2312,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 							if "34710000" in entradagl.account:
-								tax = ET.SubElement(taxes,'Tax')
+								tax = ET.SubElement(line,'Tax')
 								taxtype = ET.SubElement(tax,'TaxType')
 
 								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2322,15 +2329,16 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
+								#taxamount.text = "0.00"
+								
 
 							elif "34210000" in entradagl.account:
-								tax = ET.SubElement(taxes,'Tax')
+								tax = ET.SubElement(line,'Tax')
 								taxtype = ET.SubElement(tax,'TaxType')
 
 								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2347,13 +2355,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
-
+								#taxamount.text = "0.00"
+								
 
 
 
@@ -2383,11 +2391,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
+								#taxamount.text = "0.00"
 							'''
 							'''
 							elif "34140000" in entradagl.account:
@@ -2409,11 +2417,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.debit:
 								#	taxamount.text = str(entradagl.debit)
 								#else:
-								taxamount.text = "0.00"
+								#taxamount.text = "0.00"
 							'''
 
 					#IVA
@@ -2439,7 +2447,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				
 								temiva = False
 								print 'IVA'
-								tax = ET.SubElement(taxes,'Tax')
+								tax = ET.SubElement(line,'Tax')
 								taxtype = ET.SubElement(tax,'TaxType')
 
 								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2458,13 +2466,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								#taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 								taxpercentage.text = "0.00"
-
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
-
+								#taxamount.text = "0.00"
+								
 								print facturaitem.item_code
 								print facturaitem.isento_iva
 								print facturaitem.motivo_isencao
@@ -2486,7 +2494,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								print 'IVA'
 
 
-								tax = ET.SubElement(taxes,'Tax')
+								tax = ET.SubElement(line,'Tax')
 								taxtype = ET.SubElement(tax,'TaxType')
 
 								taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -2509,18 +2517,18 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
+								#taxamount.text = "0.00"
+									
+								#taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
+								#taxexemptionreason.text = "0"	#
 
-								taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
-								taxexemptionreason.text = "0"	#
-
-								taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
-								taxexemptioncode.text = "0"
+								#taxexemptioncode = ET.SubElement(line,'TaxExemptionCode')
+								#taxexemptioncode.text = "0"
 
 
 
@@ -2579,18 +2587,18 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				if salestaxescharges: 
 					print salestaxescharges[0].tax_amount
-					taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+					taxpayable.text = str("{0:.2f}".format(abs(flt(salestaxescharges[0].tax_amount)))) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 				else:
 					taxpayable.text = "0.00" 		#por ir buscar 
 			#if retencao.credit_in_account_currency:
 			#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 			nettotal = ET.SubElement(documenttotals,'NetTotal')
-			nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
+			nettotal.text = str("{0:.2f}".format(abs(flt(factura.net_total)))) #str(factura.net_total)		#Sem Impostos Total Factura
 
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 			if factura.rounded_total:
-				grosstotal.text = str("{0:.2f}".format(factura.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+				grosstotal.text = str("{0:.2f}".format(abs(flt(factura.rounded_total)))) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 			else:
 				grosstotal.text = "0.00"
 
@@ -2781,11 +2789,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								taxpercentage = ET.SubElement(tax,'TaxPercentage')
 								taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
 
-								taxamount = ET.SubElement(tax,'TaxAmount')
+								#taxamount = ET.SubElement(tax,'TaxAmount')
 								#if entradagl.credit:
 								#	taxamount.text = str(entradagl.credit)
 								#else:
-								taxamount.text = "0.00"
+								#taxamount.text = "0.00"
 						'''
 
 			#HASH key to generate	
@@ -2937,14 +2945,6 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 	if ficheiro_tipo[0:1].upper() == "I" or ficheiro_tipo[0:1].upper() == "A" or ficheiro_tipo[0:1].upper() == "Q":
 
-		#create Purchase Invoices
-		if sourcedocuments == None:
-			sourcedocuments = ET.SubElement(data,'SourceDocuments')
-
-		#BuyingInvoices
-		purchaseinvoices = ET.SubElement(sourcedocuments,'PurchaseInvoices')
-		#still need to filter per user request by MONTH or dates filter...
-		#Default CURRENT MONTH
 
 		#Debitos ou pagamentos
 		facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabPurchase Invoice` where company = %s and (status = 'Paid' or status = 'Cancelled' ) and posting_date >= %s and posting_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
@@ -2954,27 +2954,39 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print int(facturas[0]['count(name)'])
 
 	
-		numberofentries = ET.SubElement(purchaseinvoices,'NumberOfEntries')
-		numberofentries.text = "0"
-		numerodeentradas = 0
-		totaldebit = ET.SubElement(purchaseinvoices,'TotalDebit')
-		##### POR FAZER
-		totalcredit = ET.SubElement(purchaseinvoices,'TotalCredit')
-
-		####### POR FAZER
 
 		if int(facturas[0]['count(name)']) !=0:
+		#create Purchase Invoices
+			if sourcedocuments == None:
+				sourcedocuments = ET.SubElement(data,'SourceDocuments')
+
+			#BuyingInvoices
+			purchaseinvoices = ET.SubElement(sourcedocuments,'PurchaseInvoices')
+			#still need to filter per user request by MONTH or dates filter...
+			#Default CURRENT MONTH
+
+			numberofentries = ET.SubElement(purchaseinvoices,'NumberOfEntries')
+			numberofentries.text = "0"
+			numerodeentradas = 0
+			totaldebit = ET.SubElement(purchaseinvoices,'TotalDebit')
+			##### POR FAZER
+			totalcredit = ET.SubElement(purchaseinvoices,'TotalCredit')
+
+			####### POR FAZER
+
+
+
 			numberofentries.text = str(int(facturas[0]['count(name)']))
 			numerodeentradas = int(facturas[0]['count(name)'])
 			#Not need
 			#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 			if facturas[0]['sum(rounded_total)'] != 0:
-				totalcredit.text = str("{0:.2f}".format(facturas[0]['sum(rounded_total)']))
+				totalcredit.text = str("{0:.2f}".format(abs(flt(facturas[0]['sum(rounded_total)']))))
 			else:
 				totalcredit.text = "0.00"
 
-		else:
-			totalcredit.text = "0.00"
+		#else:
+		#	totalcredit.text = "0.00"
 
 	
 		#DEBITO devolucoes
@@ -2984,7 +2996,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#totaldebit.text = str("{0:.2f}".format(jvs[0]['sum(debit)']))
 			numberofentries.text = str(int(facturas[0]['count(name)']) + int(numerodeentradas))
 			if facturas[0]['sum(rounded_total)'] != 0:
-				totaldebit.text = str("{0:.2f}".format(facturas[0]['sum(rounded_total)']))
+				totaldebit.text = str("{0:.2f}".format(abs(flt(facturas[0]['sum(rounded_total)']))))
 			else:
 				totaldebit.text = "0.00"
 		else:
@@ -3059,7 +3071,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			documentstatus = ET.SubElement(invoice,'DocumentStatus')
 			invoicestatus = ET.SubElement(documentstatus,'InvoiceStatus')
 			if factura.status =="Paid" and factura.docstatus == 1:
-				invoicestatus.text = "F"	#Facturado
+				invoicestatus.text = "N" #"F"	#Facturado
 			elif factura.status =="Cancelled" and factura.docstatus == 2:
 				invoicestatus.text = "A"	#Anulado
 
@@ -3113,14 +3125,14 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			print 'NC ', factura.return_against
 			if factura.is_pos == 1:
 				invoicetype.text = "FR"	#POS deve ser FR ou TV
-				salesinvoicehashcontrol.text = "1" + "FR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "FR" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 			elif factura.return_against != None:
 				invoicetype.text = "NC"	#Retorno / Credit Note
-				salesinvoicehashcontrol.text = "1" + "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "NC" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			else:
 				invoicetype.text = "FT"	#default sales invoice
-				salesinvoicehashcontrol.text = "1" + "FT" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+				salesinvoicehashcontrol.text = "1" #+ "FT" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			'''
 			#specialRegimes
@@ -3332,8 +3344,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
-									taxamount.text = str(entradagl.credit) 		
+									#taxamount = ET.SubElement(tax,'TaxAmount')
+									#taxamount.text = str(entradagl.credit) 		
 
 
 								elif "34710000" in entradagl.account:
@@ -3355,8 +3367,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
-									taxamount.text = str(entradagl.credit) 		
+									#taxamount = ET.SubElement(tax,'TaxAmount')
+									#taxamount.text = str(entradagl.credit) 		
 
 
 								elif "34140000" in entradagl.account:
@@ -3378,8 +3390,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
-									taxamount.text = str(entradagl.debit) 		
+									#taxamount = ET.SubElement(tax,'TaxAmount')
+									#taxamount.text = str(entradagl.debit) 		
 
 
 
@@ -3404,8 +3416,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
-									taxamount.text = str(entradagl.credit) 		
+									#taxamount = ET.SubElement(tax,'TaxAmount')
+									#taxamount.text = str(entradagl.credit) 		
 			
 								#return			
 
@@ -3430,7 +3442,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 			if factura.rounded_total:
-				grosstotal.text = str("{0:.2f}".format(factura.rounded_total))		#Total Factura + impostos.... por ir buscar
+				grosstotal.text = str("{0:.2f}".format(abs(flt(factura.rounded_total))))		#Total Factura + impostos.... por ir buscar
 			else:
 				grosstotal.text = "0.00"
 
@@ -3768,7 +3780,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				movementtype = ET.SubElement(stockmovement,'MovementType')
 				movementtype.text = "GR"	#default Delivery Note
-				movementofgoodshashcontrol.text = "1" + "GR" + "D " + str(guiaremessa.name)  	#default ver 1 as per the certificate
+				movementofgoodshashcontrol.text = "1" #+ "GR" + "D " + str(guiaremessa.name)  	#default ver 1 as per the certificate
 
 				systementrydate = ET.SubElement(stockmovement,'SystemEntryDate')
 				systementrydate.text = guiaremessa.creation.strftime("%Y-%m-%dT%H:%M:%S")
@@ -3784,8 +3796,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					for entradagl in entradasgl:
 						print 'transactions ids'
 						print entradagl
-						transactionid = ET.SubElement(stockmovement,'TransactionID')
-						transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
+						#AGT REMOVE FOR NOW
+						#transactionid = ET.SubElement(stockmovement,'TransactionID')
+						#transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
 
 
 
@@ -3997,13 +4010,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
 							taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-							taxamount = ET.SubElement(tax,'TaxAmount')
+							
+							#taxamount = ET.SubElement(tax,'TaxAmount')
 							#if entradagl.credit:
 							#	taxamount.text = str(entradagl.credit)
 							#else:
-							taxamount.text = "0.00"
-
+							#taxamount.text = "0.00"
+							
 				
 					taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
 					taxexemptionreason.text = "Regime Transitório"	#
@@ -4031,18 +4044,18 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 					if salestaxescharges: 
 						print salestaxescharges[0].tax_amount
-						taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+						taxpayable.text = str("{0:.2f}".format(abs(flt(salestaxescharges[0].tax_amount)))) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 					else:
 						taxpayable.text = "0.00" 		#por ir buscar 
 				#if retencao.credit_in_account_currency:
 				#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 				nettotal = ET.SubElement(documenttotals,'NetTotal')
-				nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
+				nettotal.text = str("{0:.2f}".format(abs(flt(factura.net_total)))) #str(factura.net_total)		#Sem Impostos Total Factura
 
 				grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 				if factura.rounded_total:
-					grosstotal.text = str("{0:.2f}".format(guiaremessa.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+					grosstotal.text = str("{0:.2f}".format(abs(flt(guiaremessa.rounded_total)))) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 				else:
 					grosstotal.text = "0.00"
 
@@ -4114,15 +4127,6 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		'''
 			Campo Workdate, SystemEntryDate, DocumentNumber, GrossTotal, Last Hash from previous Doc.
 		'''
-		if sourcedocuments == None:
-			sourcedocuments = ET.SubElement(data,'SourceDocuments')
-
-
-		workingdocuments = ET.SubElement(sourcedocuments,'WorkingDocuments')
-
-		numberofentries = ET.SubElement(workingdocuments,'NumberOfEntries')
-
-		totaldebit = ET.SubElement(workingdocuments,'TotalDebit')
 
 
 		#Debitos ou pagamentos
@@ -4132,26 +4136,37 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 		print facturas
 		print int(facturas[0]['count(name)'])
 
+		if int(facturas[0]['count(name)']) !=0:
+			if sourcedocuments == None:
+				sourcedocuments = ET.SubElement(data,'SourceDocuments')
 
-		##### POR FAZER
-		totalcredit = ET.SubElement(workingdocuments,'TotalCredit')
+
+			workingdocuments = ET.SubElement(sourcedocuments,'WorkingDocuments')
+
+			numberofentries = ET.SubElement(workingdocuments,'NumberOfEntries')
+
+			totaldebit = ET.SubElement(workingdocuments,'TotalDebit')
+
+
+			##### POR FAZER
+			totalcredit = ET.SubElement(workingdocuments,'TotalCredit')
 
 		####### POR FAZER
 
-		if int(facturas[0]['count(name)']) !=0:
+		#if int(facturas[0]['count(name)']) !=0:
 			numberofentries.text = str(int(facturas[0]['count(name)']))
-			totaldebit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
+			totaldebit.text = str("{0:.2f}".format(abs(flt(facturas[0]['sum(rounded_total)']))))
 
-		else:
-			numberofentries.text = "0"
-			totaldebit.text = "0.00"
+		#else:
+		#	numberofentries.text = "0"
+		#	totaldebit.text = "0.00"
 
 		#Creditos ou devolucoes
 		facturas = frappe.db.sql(""" select count(name), sum(rounded_total) from `tabQuotation` where company = %s and docstatus <> 0 and transaction_date >= %s and transaction_date <= %s """,(empresa.name,primeirodiames,ultimodiames), as_dict=True)
 		if int(facturas[0]['count(name)']) !=0:
 			#totalcredit.text = str(int(facturas[0]['sum(rounded_total)']))
 			if facturas[0]['sum(rounded_total)'] != 0:
-				totalcredit.text = str("{0:.2f}".format(int(facturas[0]['sum(rounded_total)'])))
+				totalcredit.text = str("{0:.2f}".format(abs(flt(facturas[0]['sum(rounded_total)']))))
 			else:
 				totalcredit.text = "0.00"
 
@@ -4227,7 +4242,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			documentstatus = ET.SubElement(invoice,'DocumentStatus')
 			invoicestatus = ET.SubElement(documentstatus,'WorkStatus')
 			if factura.status =="Paid" and factura.docstatus == 1:
-				invoicestatus.text = "F"	#Facturado
+				invoicestatus.text = "N" #"F"	#Facturado
 			elif factura.status =="Cancelled" and factura.docstatus == 2:
 				invoicestatus.text = "A"	#Anulado
 
@@ -4285,7 +4300,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			#else:
 			invoicetype.text = "PF"	#default Proforma
-			salesinvoicehashcontrol.text = "1" + "PF" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+			salesinvoicehashcontrol.text = "1" #+ "PF" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			'''
 			#specialRegimes
@@ -4319,7 +4334,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			systementrydate.text = factura.creation.strftime("%Y-%m-%dT%H:%M:%S")	#creation date
 
 			#transactions = ET.SubElement(invoice,'Transactions')
-			transactionid = ET.SubElement(invoice,'TransactionID')
+			#transactionid = ET.SubElement(invoice,'TransactionID')
 			#transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
 
 			'''
@@ -4453,7 +4468,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					#POR VER SE TEM....
 
 				#tax
-				taxes = ET.SubElement(line,'Taxes')
+				#taxes = ET.SubElement(line,'Taxes')
 			
 				### TAX por PRODUTO OU SERVICO
 
@@ -4487,7 +4502,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								print entradagl.account
 								print entradagl.credit_in_account_currency
 								if "34210000" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -4504,16 +4519,18 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
-
-									taxamount = ET.SubElement(tax,'TaxAmount')
+									
+									
 									if entradagl.credit:
-										taxamount.text = str(entradagl.credit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.credit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 
 								elif "34710000" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -4529,17 +4546,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
-									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar	
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
 									if entradagl.credit:
-										taxamount.text = str(entradagl.credit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.credit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 
 								elif "34140000" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -4555,19 +4574,22 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
-									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar	
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
+
 									if entradagl.debit:
-										taxamount.text = str(entradagl.debit)
-									else:
-										taxamount.text = "0.00"
-	
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.debit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 
 
 
 								elif "IVA" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -4586,13 +4608,15 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
 									if entradagl.credit:
-										taxamount.text = str(entradagl.credit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.credit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 			
 								#return			
 
@@ -4607,7 +4631,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					print taxacharge.account_head
 
 					if "3422" in taxacharge.account_head:	#34220000
-						tax = ET.SubElement(taxes,'Tax')
+						tax = ET.SubElement(line,'Tax')
 						taxtype = ET.SubElement(tax,'TaxType')
 
 						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -4630,12 +4654,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 						taxpercentage = ET.SubElement(tax,'TaxPercentage')
 						taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-						taxamount = ET.SubElement(tax,'TaxAmount')
+						
+						#taxamount = ET.SubElement(tax,'TaxAmount')
 						#if entradagl.credit:
 						#	taxamount.text = str(entradagl.credit)
 						#else:
-						taxamount.text = "0.00"
+						#taxamount.text = "0.00"
+						
 
 				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
 				taxexemptionreason.text = "Regime Transitório"	#
@@ -4664,7 +4689,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				if salestaxescharges: 
 					print salestaxescharges[0].tax_amount
-					taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+					taxpayable.text = str("{0:.2f}".format(abs(flt(salestaxescharges[0].tax_amount)))) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 				else:
 					taxpayable.text = "0.00" 		#por ir buscar 
 
@@ -4674,11 +4699,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 			nettotal = ET.SubElement(documenttotals,'NetTotal')
-			nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
+			nettotal.text = str("{0:.2f}".format(abs(flt(factura.net_total)))) #str(factura.net_total)		#Sem Impostos Total Factura
 
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 			if factura.rounded_total:
-				grosstotal.text = str("{0:.2f}".format(factura.rounded_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+				grosstotal.text = str("{0:.2f}".format(abs(flt(factura.rounded_total)))) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 			else:
 				grosstotal.text = "0.00"
 
@@ -4908,7 +4933,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 			#else:
 			invoicetype.text = "PF"	#default Proforma
-			salesinvoicehashcontrol.text = "1" + "PF" + "D " + str(factura.name)  	#default ver 1 as per the certificate
+			salesinvoicehashcontrol.text = "1" #+ "PF" + "D " + str(factura.name)  	#default ver 1 as per the certificate
 
 			'''
 			#specialRegimes
@@ -4941,7 +4966,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			systementrydate.text = factura.creation.strftime("%Y-%m-%dT%H:%M:%S")	#creation date
 
 			#transactions = ET.SubElement(invoice,'Transactions')
-			transactionid = ET.SubElement(invoice,'TransactionID')
+			#transactionid = ET.SubElement(invoice,'TransactionID')
 			#transactionid.text = entradagl.name	#entrada GL;single invoice can generate more than 2GL
 
 			'''
@@ -5083,7 +5108,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					#POR VER SE TEM....
 
 				#tax
-				taxes = ET.SubElement(line,'Taxes')
+				#taxes = ET.SubElement(line,'Taxes')
 			
 				### TAX por PRODUTO OU SERVICO
 
@@ -5120,7 +5145,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 								print entradagl.account
 								print entradagl.credit_in_account_currency
 								if "34210000" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -5137,17 +5162,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
 									if entradagl.credit:
-										taxamount.text = str(entradagl.credit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.credit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 
 
 								elif "34710000" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -5164,17 +5191,19 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
 									if entradagl.credit:
-										taxamount.text = str(entradagl.credit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.credit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 
 
 								elif "34140000" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -5191,18 +5220,20 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
 									if entradagl.debit:
-										taxamount.text = str(entradagl.debit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.debit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 
 
 
 								elif "IVA" in entradagl.account:
-									tax = ET.SubElement(taxes,'Tax')
+									tax = ET.SubElement(line,'Tax')
 									taxtype = ET.SubElement(tax,'TaxType')
 
 									taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -5221,13 +5252,15 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 									taxpercentage = ET.SubElement(tax,'TaxPercentage')
 									taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+									
 
-									taxamount = ET.SubElement(tax,'TaxAmount')
 									if entradagl.credit:
-										taxamount.text = str(entradagl.credit)
-									else:
-										taxamount.text = "0.00"
-
+										if entradagl.credit != 0:
+											taxamount = ET.SubElement(tax,'TaxAmount')
+											taxamount.text = str(entradagl.credit)
+									#else:
+									#	taxamount.text = "0.00"
+									
 			
 								#return			
 
@@ -5241,7 +5274,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					print taxacharge.account_head
 
 					if "3422" in taxacharge.account_head:	#34220000
-						tax = ET.SubElement(taxes,'Tax')
+						tax = ET.SubElement(line,'Tax')
 						taxtype = ET.SubElement(tax,'TaxType')
 
 						taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -5264,12 +5297,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 						taxpercentage = ET.SubElement(tax,'TaxPercentage')
 						taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-						taxamount = ET.SubElement(tax,'TaxAmount')
+						
+						#taxamount = ET.SubElement(tax,'TaxAmount')
 						#if entradagl.credit:
 						#	taxamount.text = str(entradagl.credit)
 						#else:
-						taxamount.text = "0.00"
+						#taxamount.text = "0.00"
+						
 
 				taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
 				taxexemptionreason.text = "Regime Transitório"	#
@@ -5298,7 +5332,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 				if salestaxescharges: 
 					print salestaxescharges[0].tax_amount
-					taxpayable.text = str("{0:.2f}".format(salestaxescharges[0].tax_amount)) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
+					taxpayable.text = str("{0:.2f}".format(abs(flt(salestaxescharges[0].tax_amount)))) #str(salestaxescharges[0].tax_amount) 		#por ir buscar 
 				else:
 					taxpayable.text = "0.00" 		#por ir buscar 
 
@@ -5308,11 +5342,11 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			#	taxpayable.text = str(retencao.credit_in_account_currency) 		#por ir buscar 
 
 			nettotal = ET.SubElement(documenttotals,'NetTotal')
-			nettotal.text = str("{0:.2f}".format(factura.net_total)) #str(factura.net_total)		#Sem Impostos Total Factura
+			nettotal.text = str("{0:.2f}".format(abs(flt(factura.net_total)))) #str(factura.net_total)		#Sem Impostos Total Factura
 
 			grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 			if factura.grand_total:
-				grosstotal.text = str("{0:.2f}".format(factura.grand_total)) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
+				grosstotal.text = str("{0:.2f}".format(abs(flt(factura.grand_total)))) #str(factura.rounded_total)		#Total Factura + impostos.... por ir buscar
 			else:
 				grosstotal.text = "0.00"
 
@@ -5411,7 +5445,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 			numberofentries.text = str(pagamentos[0]['count(name)'])
 
 
-			totaldebit.text = str("{0:.2f}".format(pagamentos[0]['sum(paid_amount)'])) 
+			totaldebit.text = str("{0:.2f}".format(abs(flt(pagamentos[0]['sum(paid_amount)']))))
 
 
 
@@ -5427,7 +5461,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				period = ET.SubElement(payment,'Period')
 				period.text = str(recibo.posting_date.strftime("%m"))	#str(recibo.modified.month)	#last modified month
 
-				transactionid = ET.SubElement(payment,'TransactionID')
+				#transactionid = ET.SubElement(payment,'TransactionID')
 				#GLs created .... 
 				entradasgl =  frappe.db.sql(""" select * from `tabGL Entry` where voucher_type ='payment entry' and company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
 
@@ -5435,7 +5469,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 				if entradasgl:
 					for entradagl in entradasgl:
 						print entradagl.name
-						transactionid.text = entradagl.name
+						#AGT REMOVE FOR NOW
+						#transactionid.text = entradagl.name
 
 
 				transactiondate = ET.SubElement(payment,'TransactionDate')
@@ -5600,10 +5635,10 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
 							taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
-
-							taxamount = ET.SubElement(tax,'TaxAmount')
-							taxamount.text = "0.00"		 			#0 if percentagem exists
-
+							
+							#taxamount = ET.SubElement(tax,'TaxAmount')
+							#taxamount.text = "0.00"		 			#0 if percentagem exists
+							
 							taxexemptionreason = ET.SubElement(line,'TaxExemptionReason')
 							taxexemptionreason.text = "Regime Transitório"
 
@@ -5625,13 +5660,15 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
 							taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
+							
 
-							taxamount = ET.SubElement(tax,'TaxAmount')
 							if entradagl.credit:
-								taxamount.text = str(entradagl.credit)
-							else:
-								taxamount.text = "0.00"
-
+								if entradagl.credit != 0:
+									taxamount = ET.SubElement(tax,'TaxAmount')
+									taxamount.text = str(entradagl.credit)
+							#else:
+							#	taxamount.text = "0.00"
+							
 
 
 						'''
@@ -5655,8 +5692,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
 							taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-							taxamount = ET.SubElement(tax,'TaxAmount')
-							taxamount.text = str(entradagl.credit) 		
+							#taxamount = ET.SubElement(tax,'TaxAmount')
+							#taxamount.text = str(entradagl.credit) 		
 
 
 					
@@ -5679,8 +5716,8 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
 							taxpercentage.text = str(retn[0].percentagem)		#por ir buscar
 
-							taxamount = ET.SubElement(tax,'TaxAmount')
-							taxamount.text = str(entradagl.debit) 		
+							#taxamount = ET.SubElement(tax,'TaxAmount')
+							#taxamount.text = str(entradagl.debit) 		
 
 						'''
 
@@ -5698,7 +5735,7 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 						print entradaglinva.account
 
 						if "3422" in entradaglinva.account:	#34220000
-							tax = ET.SubElement(taxes,'Tax')
+							tax = ET.SubElement(line,'Tax')
 							taxtype = ET.SubElement(tax,'TaxType')
 
 							taxcountryregion = ET.SubElement(tax,'TaxCountryRegion')
@@ -5721,13 +5758,13 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 
 							taxpercentage = ET.SubElement(tax,'TaxPercentage')
 							taxpercentage.text = str("{0:.0f}".format(retn[0].percentagem)) #str(retn[0].percentagem)		#por ir buscar
-
-							taxamount = ET.SubElement(tax,'TaxAmount')
+							
+							#taxamount = ET.SubElement(tax,'TaxAmount')
 							#if entradagl.credit:
 							#	taxamount.text = str(entradagl.credit)
 							#else:
-							taxamount.text = "0.00"
-			
+							#taxamount.text = "0.00"
+							
 
 				#documenttotals
 				documenttotals = ET.SubElement(payment,'DocumentTotals')
@@ -5741,16 +5778,16 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					#print pagamentotaxas[0].amount
 					if recibo.paid_to_account_currency !="KZ":
 						#Eur, USD ....
-						taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit_in_account_currency)) #str(entradagl.credit)
+						taxpayable.text = str("{0:.2f}".format(abs(flt(pagamentotaxas[0].credit_in_account_currency)))) #str(entradagl.credit)
 					else:
-						taxpayable.text = str("{0:.2f}".format(pagamentotaxas[0].credit)) #str(entradagl.credit)	 	 
+						taxpayable.text = str("{0:.2f}".format(abs(flt(pagamentotaxas[0].credit)))) #str(entradagl.credit)	 	 
 				else:
 					taxpayable.text = "0.00" 		#por ir buscar 
 
 
 				#Should it get from Each invoice the NETtotal and GrossTotal and do SUM
 				nettotal = ET.SubElement(documenttotals,'NetTotal')
-				nettotal.text = str("{0:.2f}".format(recibo.paid_amount)) #str(recibo.paid_amount)	#Paid amount...
+				nettotal.text = str("{0:.2f}".format(abs(flt(recibo.paid_amount)))) #str(recibo.paid_amount)	#Paid amount...
 
 				pagamentofinal = frappe.db.sql(""" select sum(debit), sum(debit_in_account_currency) from `tabGL Entry` where company = %s and voucher_no = %s """,(empresa.name,recibo.name), as_dict=True)
 				if pagamentofinal[0]['sum(debit_in_account_currency)'] != None:
@@ -5758,9 +5795,9 @@ def gerar_saft_ao(company = None, processar = "Mensal", datainicio = None, dataf
 					grosstotal = ET.SubElement(documenttotals,'GrossTotal')
 			
 					if recibo.paid_to_account_currency != "KZ":
-						grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit_in_account_currency)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
+						grosstotal.text = str("{0:.2f}".format(abs(flt(pagamentofinal[0]['sum(debit_in_account_currency)'])))) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
 					else:
-						grosstotal.text = str("{0:.2f}".format(pagamentofinal[0]['sum(debit)'])) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
+						grosstotal.text = str("{0:.2f}".format(abs(flt(pagamentofinal[0]['sum(debit)'])))) #str(pagamentofinal[0]['sum(debit)'])	#Total Allocated Amount
 
 				#settlement
 				#settlement = ET.SubElement(documenttotals,'Settlement')
