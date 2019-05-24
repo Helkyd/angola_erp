@@ -101,13 +101,13 @@ def get_invoices(filters, additional_query_columns):
 
 
 	#added POS invoices to report
-	#Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Pagamento, paid_amount as Total, (paid_amount*1/100) as Selo, payment_type from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Pagamento, paid_amount as Total, (paid_amount*1/100) as Selo, payment_type from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
 
-	#FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Factura, paid_amount as Total, (paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, day(posting_date) as Dia, name as Factura, paid_amount as Total, (paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s order by year(posting_date), month(posting_date), day(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
-	Facturas = frappe.db.sql(""" select year(gl.posting_date) as Ano, month(gl.posting_date) as Mes, day(gl.posting_date) as Dia, gl.voucher_no as Pagamento, pe.paid_amount as Total, gl.credit as II, pe.paid_amount, per.reference_name as Factura from `tabGL Entry` gl  join (select name,paid_amount from `tabPayment Entry`) pe on pe.name = gl.voucher_no join (select reference_name,parent from `tabPayment Entry Reference`) per on per.parent = pe.name where gl.account like '3471%%' and gl.docstatus = 1 and gl.company=%(company)s and gl.posting_date >= %(from_date)s and gl.posting_date <= %(to_date)s order by year(posting_date), month(posting_date), day(posting_date) """, filters, as_dict=1) 	
+	#Facturas = frappe.db.sql(""" select year(gl.posting_date) as Ano, month(gl.posting_date) as Mes, day(gl.posting_date) as Dia, gl.voucher_no as Pagamento, pe.paid_amount as Total, gl.credit as Selo, pe.paid_amount, per.reference_name as Factura from `tabGL Entry` gl  join (select name,paid_amount from `tabPayment Entry`) pe on pe.name = gl.voucher_no join (select reference_name,parent from `tabPayment Entry Reference`) per on per.parent = pe.name where gl.account like '3471%%' and gl.docstatus = 1 and gl.company=%(company)s and gl.posting_date >= %(from_date)s and gl.posting_date <= %(to_date)s and gl.credit !=0 order by year(posting_date), month(posting_date), day(posting_date) """, filters, as_dict=1) 	
 
 
-	return Facturas #+ FacturasPOS
+	return Facturas + FacturasPOS
 
