@@ -100,18 +100,19 @@ def get_invoices(filters, additional_query_columns):
 
 
 	#added POS invoices to report
-#	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+	Facturas = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
 
-#	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
+	FacturasPOS = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(paid_amount) as Total, sum(paid_amount*1/100) as Selo from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 %s group by month(posting_date) order by year(posting_date), month(posting_date)""".format(additional_query_columns or '') % conditions, filters, as_dict=1)	
 
 
 #	Facturas1 = frappe.db.sql(""" select year(x.posting_date) as Ano, month(x.posting_date) as Mes, sum(x.paid_amount) as Total, sum(x.paid_amount*1/100) as Selo from (select posting_date, paid_amount from `tabPayment Entry` where payment_type='receive' and docstatus=1 and paid_amount <> 0 and company=%(company)s and posting_date >= %(from_date)s and posting_date <= %(to_date)s UNION ALL select posting_date, paid_amount from `tabSales Invoice` where is_pos = 1 and docstatus=1 and paid_amount <> 0 and company=%(company)s and posting_date >= %(from_date)s and posting_date <= %(to_date)s ) as x GROUP BY Mes ORDER BY Ano, Mes""", filters, as_dict=1)	
 
 	
 
-	Facturas1 = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(credit) as Selo from `tabGL Entry` where account like '3471%%' and docstatus = 1 and company=%(company)s and posting_date >= %(from_date)s and posting_date <= %(to_date)s  GROUP BY Mes ORDER BY Ano, Mes """, filters, as_dict=1) 	
+#	Facturas1 = frappe.db.sql(""" select year(posting_date) as Ano, month(posting_date) as Mes, sum(credit) as Selo from `tabGL Entry` where account like '3471%%' and docstatus = 1 and company=%(company)s and posting_date >= %(from_date)s and posting_date <= %(to_date)s  GROUP BY Mes ORDER BY Ano, Mes """, filters, as_dict=1) 	
 
+#	Facturas1 = frappe.db.sql(""" select year(gl.posting_date) as Ano, month(gl.posting_date) as Mes, sum(pe.paid_amount) as Total, sum(gl.credit) as Selo from `tabGL Entry` gl  join (select name,paid_amount from `tabPayment Entry`) pe on pe.name = gl.voucher_no where gl.account like '3471%%' and gl.docstatus = 1 and gl.company=%(company)s and gl.posting_date >= %(from_date)s and gl.posting_date <= %(to_date)s and gl.credit != 0 GROUP BY Mes order by year(posting_date), month(posting_date)  """, filters, as_dict=1) 
 
-	return Facturas1
-	#return Facturas + FacturasPOS
+	#return Facturas1
+	return Facturas + FacturasPOS
