@@ -201,8 +201,8 @@ scheduler_events = {
 # 		"angola_erp.tasks.all"
 
 		"angola_erp.gestao_residencial.doctype.api.verifica_check_in",
-		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida", #Saida dos Quartos
-		"angola_erp.util.saft_ao.set_saft_ao"	#TESTE
+		"angola_erp.gestao_residencial.doctype.api.verifica_hora_saida" #Saida dos Quartos
+
  	],
 # 	"daily": [
 	"hourly": [
