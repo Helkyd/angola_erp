@@ -1001,6 +1001,7 @@ def get_dn_for_si(source_name=None, datafiltro=None):
 
 		print(dn_for_si)
 	else:
+		print "SEM DATAFILTRO"
 		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill'},fields=['name','customer','posting_date','is_return','return_against'])
 
 	#Filter returned invoices ... and remove from selection
