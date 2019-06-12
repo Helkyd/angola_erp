@@ -349,11 +349,12 @@ def validate(doc,method):
 			doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
 			doc.total_taxes_and_charges = totalgeralimpostoconsumo
 		if not doc.additional_discount_percentage:	
+
+#			doc.rounded_total = doc.grand_total
+			doc.base_grand_total = totalgeralimpostoconsumo + doc.net_total
 			doc.grand_total = totalgeralimpostoconsumo + doc.net_total
-			doc.rounded_total = doc.grand_total
-			doc.base_grand_total = doc.grand_total
-			doc.base_rounded_total = doc.grand_total
-			doc.outstanding_amount = doc.grand_total
+#			doc.base_rounded_total = doc.grand_total
+#			doc.outstanding_amount = doc.grand_total
 	elif totalgeraliva:
 		#IVA
 		print "iva nos TOTAIS"
@@ -362,21 +363,23 @@ def validate(doc,method):
 			doc.total_taxes_and_charges = totalgeraliva
 			print 'totalgeraliva ', totalgeraliva
 		if not doc.additional_discount_percentage:
+			doc.base_grand_total = totalgeraliva + doc.net_total
 			doc.grand_total = totalgeraliva + doc.net_total
 			print 'totalgeraliva + net total ', totalgeraliva + doc.net_total
-			doc.rounded_total = doc.grand_total
+#			doc.rounded_total = doc.grand_total
 			print 'Grand total ', doc.grand_total
-			doc.base_grand_total = doc.grand_total
-			doc.base_rounded_total = doc.grand_total
-			doc.outstanding_amount = doc.grand_total
+
+#			doc.base_rounded_total = doc.grand_total
+#			doc.outstanding_amount = doc.grand_total
 		
 
-		print "Rouding ....."
-		print "Rouding ....."
-		print doc.base_rounding_adjustment
+#	print "Rouding ....."
+#	print "Rouding ....."
+#	print doc.base_rounding_adjustment
+#	print round(doc.base_rounding_adjustment)
 		#print 'tem centimos ',str(doc.base_rounding_adjustment).find('.')
-		#if str(doc.base_rounding_adjustment).find('.'):
-		#	doc.base_rounding_adjustment = round(doc.base_rounding_adjustment)
+	#if str(doc.base_rounding_adjustment).find('.'):
+	#	doc.base_rounding_adjustment = round(doc.base_rounding_adjustment)
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
