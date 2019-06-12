@@ -349,11 +349,12 @@ def validate(doc,method):
 			doc.base_total_taxes_and_charges = totalgeralimpostoconsumo
 			doc.total_taxes_and_charges = totalgeralimpostoconsumo
 		if not doc.additional_discount_percentage:	
+
+#			doc.rounded_total = doc.grand_total
+			doc.base_grand_total = totalgeralimpostoconsumo + doc.net_total
 			doc.grand_total = totalgeralimpostoconsumo + doc.net_total
-			doc.rounded_total = doc.grand_total
-			doc.base_grand_total = doc.grand_total
-			doc.base_rounded_total = doc.grand_total
-			doc.outstanding_amount = doc.grand_total
+#			doc.base_rounded_total = doc.grand_total
+#			doc.outstanding_amount = doc.grand_total
 	elif totalgeraliva:
 		#IVA
 		print "iva nos TOTAIS"
@@ -371,12 +372,13 @@ def validate(doc,method):
 			doc.outstanding_amount = doc.grand_total
 		
 
-		print "Rouding ....."
-		print "Rouding ....."
-		print doc.base_rounding_adjustment
+	print "Rouding ....."
+	print "Rouding ....."
+	print doc.base_rounding_adjustment
+	print round(doc.base_rounding_adjustment)
 		#print 'tem centimos ',str(doc.base_rounding_adjustment).find('.')
-		#if str(doc.base_rounding_adjustment).find('.'):
-		#	doc.base_rounding_adjustment = round(doc.base_rounding_adjustment)
+	#if str(doc.base_rounding_adjustment).find('.'):
+	#	doc.base_rounding_adjustment = round(doc.base_rounding_adjustment)
 
 	company_currency = erpnext.get_company_currency(doc.company)
 	print company_currency
@@ -451,7 +453,7 @@ def before_submit(doc,method):
 #	os.system("/usr/bin/python /tmp/angolaerp.cert2/assinar_ssl.py")	
 	print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	print angola_erp.util.saft_ao.assinar_ssl1(hashinfo)
+	#print angola_erp.util.saft_ao.assinar_ssl1(hashinfo)
 	 
 
 #	p = Popen(["/frappe-bench/apps/angola_erp/angola_erp/util/hash_ao_erp.sh"],shell=True, stdout=PIPE, stderr=PIPE)
