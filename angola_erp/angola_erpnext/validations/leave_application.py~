@@ -5,6 +5,11 @@ from frappe.model.naming import make_autoname
 
 def autoname(doc,method):
 
+	print(doc.name)
+	print(len(doc.naming_series))
+	print(make_autoname(doc.naming_series))
+#	print(make_autoname(self.serie_tipo)[0:13])
+#	self.numero_de_processo = self.numero_de_processo + make_autoname(self.serie_tipo)[0:13] # 'FO/' + '.YYYY./.#####')
 	doc.name = make_autoname(doc.naming_series)
 
 
