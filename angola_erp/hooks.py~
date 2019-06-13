@@ -11,7 +11,7 @@ app_color = "grey"
 app_email = "hcesar@gmail.com"
 app_license = "MIT"
 fixtures = ["Custom Field","Custom Script"]
-agt_lic = "123456789"
+agt_lic = "016AGT03062019"
 
 error_report_email = "angolaerp@angolaerp.co.ao"
 
