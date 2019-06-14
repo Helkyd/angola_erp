@@ -185,7 +185,7 @@ doc_events = {
 	},
 	"Leave Application": {
 		"autoname": "angola_erp.angola_erpnext.validations.leave_application.autoname",
-
+		"validate": "angola_erp.angola_erpnext.validations.leave_application.validate",
 	},
 
 

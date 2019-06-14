@@ -183,6 +183,10 @@ doc_events = {
 		"before_submit": "angola_erp.angola_erpnext.validations.delivery_note.before_submit",
 
 	},
+	"Leave Application": {
+		"autoname": "angola_erp.angola_erpnext.validations.leave_application.autoname",
+
+	},
 
 
 
