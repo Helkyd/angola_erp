@@ -149,12 +149,6 @@ def validate(doc,method):
 	print "MEU TESTE"
 	print "VALOR POR EXTENSO"
 
-	company_currency = erpnext.get_company_currency(doc.company)
-	print company_currency
-	if (company_currency =='KZ'):
-		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'
-	else:
-		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 
 	print "MEU TESTE"
 	print "MEU TESTE"
@@ -162,6 +156,14 @@ def validate(doc,method):
 	print "VALIDAR SUBSIDIO DE FERIAS"
 
 	valida_sub_ferias(doc,diaspagamento,totaldiastrabalho)
+
+	company_currency = erpnext.get_company_currency(doc.company)
+	print company_currency
+	if (company_currency =='KZ'):
+		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'
+
+	else:
+		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 
 	return
 
