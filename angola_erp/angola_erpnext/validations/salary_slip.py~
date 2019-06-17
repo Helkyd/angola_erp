@@ -530,6 +530,8 @@ def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 	print round(valorbruto)
 	if doc.gross_pay != valorbruto:
 		doc.gross_pay = round(valorbruto)
+		doc.net_pay = round(valorbruto) - round(doc.total_deduction) - round(doc.total_loan_repayment)
+		doc.rounded_total = round(valorbruto) - round(doc.total_deduction) - round(doc.total_loan_repayment)	
 
 @frappe.whitelist()
 def proc_salario_iliquido(mes,ano,empresa):
