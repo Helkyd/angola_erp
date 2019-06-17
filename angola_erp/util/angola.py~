@@ -387,18 +387,43 @@ def set_fee_pago(propina,fatura):
 #		pago.save()
 
 
+@frappe.whitelist()
+def set_fees_pago(fatura):
+
+	propinaspagar = frappe.model.frappe.get_all('propinas_pagar',filters={'parent':fatura},fields=['parent','propina'])
+	for x in propinaspagar:
+		pago = frappe.get_doc('Fees',x.propina)	
+		print 'propina paga'
+		print pago.outstanding_amount
+	
+		#factura = frappe.get_doc('Sales Invoice',fatura) #self.format_as_links(ss.name)[0]
+
+		if pago.outstanding_amount:
+			#PAID
+			if pago.grand_total:
+				frappe.db.set_value("Fees", x.propina, "paid_amount", pago.grand_total)
+			else:
+				frappe.db.set_value("Fees", x.propina, "paid_amount", pago.total_amount)
+			frappe.db.set_value("Fees", x.propina, "outstanding_amount", 0)
+			#frappe.db.set_value("Fees", x.propina, "sales_invoice", fatura)
+
+#		pago.paid_amount = pago.total_amount
+#		pago.outstanding_amount = 0
+#		pago.save()
 
 
 @frappe.whitelist()
 def get_programa_enroll(aluno):
 
-	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno},fields=['name','student_name','program'])
+	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program', 'student_batch_name'])
 
 	print ('segundo ')
 
-	print frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=False)
-
-	return frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=True)
+	comFee = frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=False)
+	if comFee:
+		return frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=True)
+	else:
+		return frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program'])
 
 
 
@@ -1001,6 +1026,7 @@ def get_dn_for_si(source_name=None, datafiltro=None):
 
 		print(dn_for_si)
 	else:
+		print "SEM DATAFILTRO"
 		dn_for_si =  frappe.model.frappe.get_all('Delivery Note',filters={'customer':source_name,'status':'To Bill'},fields=['name','customer','posting_date','is_return','return_against'])
 
 	#Filter returned invoices ... and remove from selection
@@ -1144,5 +1170,26 @@ def verifica_imposto_expirado():
 			if retencao.data_limite.strftime("%Y-%m-%d") < frappe.utils.nowdate():
 				print "ESTA EXPIRADO..."
 				frappe.publish_realtime(event='msgprint', message='IMPOSTO ' + retencao.descricao  + ' Expirou ' + retencao.data_limite, user=frappe.session.user,doctype='Retencoes')
+
+
+@frappe.whitelist()
+def get_aluno_email_guardian(aluno):
+
+	alunoemail = frappe.model.frappe.get_all('Student',filters={'name':aluno},fields=['name','student_email_id'])
+	print alunoemail
+	if alunoemail[0].student_email_id:
+		return alunoemail
+	else:	
+		alunoguardian = frappe.model.frappe.get_all('Student Guardian',filters={'parent':aluno},fields=['name','parent','guardian'], order_by='guardian')
+		print 'Aluno guardian'
+		print alunoguardian	
+		if alunoguardian:
+			for x in alunoguardian:				
+				alunoguardianemail = frappe.model.frappe.get_all('Guardian',filters={'name':x.guardian},fields=['name','email_address'])
+				print alunoguardianemail
+				if alunoguardianemail[0].email_address:
+					#print alunoguardianemail
+					return alunoguardianemail
+
 
 
