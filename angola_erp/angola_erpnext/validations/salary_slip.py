@@ -16,7 +16,7 @@ from num2words import num2words
 #from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.accounts.utils import get_fiscal_year
 
-global diaspagamento, totaldiastrabalho, horasextra, trabalhouferiado 
+global diaspagamento, totaldiastrabalho, horasextra, trabalhouferiado, valorbruto
 
 def validate(doc,method):
 #	get_edc(doc, method)
@@ -164,147 +164,6 @@ def validate(doc,method):
 	valida_sub_ferias(doc,diaspagamento,totaldiastrabalho)
 
 	return
-
-	m = get_month_details(mes_startdate.year, mes_startdate.month)
-	msd = m.month_start_date
-	med = m.month_end_date
-	emp = frappe.get_doc("Employee", doc.employee)
-	
-	tdim, twd = get_total_days(doc,method, emp, msd, med, m)
-	
-	get_loan_deduction(doc,method, msd, med)
-	get_expense_claim(doc,method)
-	holidays = get_holidays(doc, method, msd, med, emp)
-	
-	lwp, plw = get_leaves(doc, method, msd, med, emp)
-	
-	doc.leave_without_pay = lwp
-		
-	doc.posting_date = m.month_end_date
-	wd = twd - holidays #total working days
-	doc.total_days_in_month = tdim
-	att = frappe.db.sql("""SELECT sum(overtime), count(name) FROM `tabAttendance` 
-		WHERE employee = '%s' AND attendance_date >= '%s' AND attendance_date <= '%s' 
-		AND status = 'Present' AND docstatus=1""" \
-		%(doc.employee, msd, med),as_list=1)
-
-	half_day = frappe.db.sql("""SELECT count(name) FROM `tabAttendance` 
-		WHERE employee = '%s' AND attendance_date >= '%s' AND attendance_date <= '%s' 
-		AND status = 'Half Day' AND docstatus=1""" \
-		%(doc.employee, msd, med),as_list=1)
-	
-	t_hd = flt(half_day[0][0])
-	t_ot = flt(att[0][0])
-	doc.total_overtime = t_ot
-	tpres = flt(att[0][1])
-
-	ual = twd - tpres - lwp - holidays - plw - (t_hd/2)
-	
-	if ual < 0:
-		frappe.throw(("Unauthorized Leave cannot be Negative for Employee {0}").\
-			format(doc.employee_name))
-	
-	paydays = tpres + (t_hd/2) + plw + math.ceil((tpres+(t_hd/2))/wd * holidays)
-	pd_ded = flt(doc.payment_days_for_deductions)
-	doc.payment_days = paydays
-	
-#	if doc.change_deductions == 0:
-#		doc.payment_days_for_deductions = doc.payment_days
-	
-#	doc.unauthorized_leaves = ual 
-	
-	ot_ded = round(8*ual,1)
-	if ot_ded > t_ot:
-		ot_ded = (int(t_ot/8))*8
-	doc.overtime_deducted = ot_ded
-	d_ual = int(ot_ded/8)
-	
-	#Calculate Earnings
-	chk_ot = 0 #Check if there is an Overtime Rate
-	for d in doc.earnings:
-		if d.salary_component == "Overtime Rate":
-			chk_ot = 1
-			
-	for d in doc.earnings:
-		earn = frappe.get_doc("Salary Component", d.salary_component)
-		if earn.depends_on_lwp == 1:
-			d.depends_on_lwp = 1
-		else:
-			d.depends_on_lwp = 0
-		
-		if earn.based_on_earning:
-			for d2 in doc.earnings:
-				#Calculate Overtime Value
-				if earn.earning == d2.salary_component:
-					d.default_amount = flt(d2.amount) * t_ot
-					d.amount = flt(d2.amount) * (t_ot - ot_ded)
-		else:
-			if d.depends_on_lwp == 1 and earn.books == 0:
-				if chk_ot == 1:
-					d.amount = round(flt(d.default_amount) * (paydays+d_ual)/tdim,0)
-				else:
-					d.amount = round(flt(d.default_amount) * (paydays)/tdim,0)
-			elif d.depends_on_lwp == 1 and earn.books == 1:
-				d.amount = round(flt(d.default_amount) * flt(doc.payment_days_for_deductions)/ tdim,0)
-			else:
-				d.amount = d.default_amount
-		
-		if earn.only_for_deductions <> 1:
-			gross_pay += flt(d.amount)
-
-	if gross_pay < 0:
-		doc.arrear_amount = -1 * gross_pay
-	gross_pay += flt(doc.arrear_amount) + flt(doc.leave_encashment_amount)
-	
-	#Calculate Deductions
-	for d in doc.deductions:
-		#Check if deduction is in any earning's formula
-		chk = 0
-		for e in doc.earnings:
-			earn = frappe.get_doc("Salary Component", e.salary_component)
-			for form in earn.deduction_contribution_formula:
-				if d.salary_component == form.salary_component:
-					chk = 1
-					d.amount = 0
-		if chk == 1:
-			for e in doc.earnings:
-				earn = frappe.get_doc("Salary Component", e.salary_component)
-				for form in earn.deduction_contribution_formula:
-					if d.salary_component == form.salary_component:
-						d.default_amount = flt(e.default_amount) * flt(form.percentage)/100
-						d.amount += flt(e.amount) * flt(form.percentage)/100
-			d.amount = round(d.amount,0)
-			d.default_amount = round(d.default_amount,0)
-		elif d.salary_component <> 'Loan Deduction':
-			str = frappe.get_doc("Salary Structure", doc.salary_structure)
-			for x in str.deductions:
-				if x.salary_component == d.salary_component:
-					d.default_amount = x.amount
-					d.amount = d.default_amount
-
-		tot_ded +=d.amount
-	
-	#Calculate Contributions
-	for c in doc.contributions:
-		#Check if contribution is in any earning's formula
-		chk = 0
-		for e in doc.earnings:
-			earn = frappe.get_doc("Salary Component", e.salary_component)
-			for form in earn.deduction_contribution_formula:
-				if c.salary_component == form.salary_component:
-					chk = 1
-		if chk == 1:
-			c.amount = round((flt(c.default_amount) * flt(doc.payment_days_for_deductions)/tdim),0)
-		tot_cont += c.amount
-	
-	doc.gross_pay = gross_pay
-	doc.total_deduction = tot_ded
-	doc.net_pay = doc.gross_pay - doc.total_deduction
-	doc.rounded_total = myround(doc.net_pay, 10)
-		
-	company_currency = erpnext.get_company_currency(doc.company)
-	doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
-	doc.total_ctc = doc.gross_pay + tot_cont
 
 
 
@@ -576,6 +435,7 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 
 def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 
+	valorbruto = 0
 	emp = frappe.get_doc("Employee", doc.employee)
 	for d in doc.earnings:
 		#print d.salary_component 
@@ -658,6 +518,20 @@ def valida_sub_ferias(doc,dias_pagamento,total_dias_trabalho):
 		qry_result=''
 			#if (datetime.date(datetime.datetime.today().year,12,31) - emp.date_of_joining) < 12:
 			#	print "A Menos de um Ano na Empresa"
+		valorbruto += d.amount
+
+	print "GROSS PAY"
+	print "GROSS PAY"
+	print "GROSS PAY"
+	print doc.gross_pay
+	print "total Deduct ", doc.total_deduction
+	print "total Loan ", doc.total_loan_repayment
+	print "total NET ", doc.net_pay
+	print round(valorbruto)
+	if doc.gross_pay != valorbruto:
+		doc.gross_pay = round(valorbruto)
+		doc.net_pay = round(valorbruto) - round(doc.total_deduction) - round(doc.total_loan_repayment)
+		doc.rounded_total = round(valorbruto) - round(doc.total_deduction) - round(doc.total_loan_repayment)	
 
 @frappe.whitelist()
 def proc_salario_iliquido(mes,ano,empresa):

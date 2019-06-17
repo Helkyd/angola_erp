@@ -387,12 +387,35 @@ def set_fee_pago(propina,fatura):
 #		pago.save()
 
 
+@frappe.whitelist()
+def set_fees_pago(fatura):
+
+	propinaspagar = frappe.model.frappe.get_all('propinas_pagar',filters={'parent':fatura},fields=['parent','propina'])
+	for x in propinaspagar:
+		pago = frappe.get_doc('Fees',x.propina)	
+		print 'propina paga'
+		print pago.outstanding_amount
+	
+		#factura = frappe.get_doc('Sales Invoice',fatura) #self.format_as_links(ss.name)[0]
+
+		if pago.outstanding_amount:
+			#PAID
+			if pago.grand_total:
+				frappe.db.set_value("Fees", x.propina, "paid_amount", pago.grand_total)
+			else:
+				frappe.db.set_value("Fees", x.propina, "paid_amount", pago.total_amount)
+			frappe.db.set_value("Fees", x.propina, "outstanding_amount", 0)
+			#frappe.db.set_value("Fees", x.propina, "sales_invoice", fatura)
+
+#		pago.paid_amount = pago.total_amount
+#		pago.outstanding_amount = 0
+#		pago.save()
 
 
 @frappe.whitelist()
 def get_programa_enroll(aluno):
 
-	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program'])
+	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program', 'student_batch_name'])
 
 	print ('segundo ')
 

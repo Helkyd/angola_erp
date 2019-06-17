@@ -415,7 +415,7 @@ def set_fees_pago(fatura):
 @frappe.whitelist()
 def get_programa_enroll(aluno):
 
-	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program'])
+	print frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program', 'student_batch_name'])
 
 	print ('segundo ')
 
@@ -423,7 +423,7 @@ def get_programa_enroll(aluno):
 	if comFee:
 		return frappe.db.sql(""" select p.name,p.student,p.student_name,p.program, f.parent,f.fee_structure,f.amount from `tabProgram Fee` f JOIN `tabProgram Enrollment` p on f.parent = p.name where p.student = %s; """, (aluno),as_dict=True)
 	else:
-		return frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program'])
+		return frappe.model.frappe.get_all('Program Enrollment',filters={'student':aluno, 'docstatus': 1},fields=['name','student','student_name','program', 'student_batch_name'])
 
 
 

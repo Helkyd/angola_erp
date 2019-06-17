@@ -82,7 +82,16 @@ def on_submit(doc,method):
 					frappe.db.set_value("Fees",prop.propina, "paid_amount", prop.valor)
 					frappe.db.set_value("Fees",prop.propina, "outstanding_amount", 0)
 					frappe.db.commit()
-	
+			elif refs.reference_doctype == "Fees":
+				propina = frappe.get_doc("Fees", refs.reference_name)
+				print propina.name
+
+				#Agora clear outstanding from Fees	
+				frappe.db.set_value("Fees",propina.name, "paid_amount", refs.allocated_amount)
+				frappe.db.set_value("Fees",propina.name, "pagamento_nr", doc.name)
+				#frappe.db.set_value("Fees",prop.propina, "outstanding_amount", 0)
+				frappe.db.commit()
+
 			
 	#++++++++++ FEES
 
