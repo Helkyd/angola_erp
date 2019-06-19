@@ -48,7 +48,7 @@ def validate(doc,method):
 	#Falta Justificada c/salario
 	ja= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
-	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
+	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and leave_type != 'Subsidio de Ferias' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
 
 	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
@@ -551,7 +551,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 		#SI = (SB + HE - PA + PP) - (FTJSS - FI )
 		print salslip
 		salario_iliquido =0;
-		tab_detalhes = frappe.db.sql(""" select parent,abbr,amount from `tabSalary Detail` where abbr in ('SB','HE','PA','PP','FTJSS','FI','IH','SDF','DU','ST','ABF','SA','PAT','SN') and parent= %s""",(salslip.name),as_dict=True)
+		tab_detalhes = frappe.db.sql(""" select parent,abbr,amount from `tabSalary Detail` where abbr in ('SB','HE','PA','PP','FTJSS','FI','IH','SDF','DU','ST','ABF','SA','PAT','SN','FTI1') and parent= %s""",(salslip.name),as_dict=True)
 
 #(SB + HE + PA + PP + IH + SDF + DU + ST) - (FTJSS - FTI1)
 
@@ -563,7 +563,7 @@ def proc_salario_iliquido(mes,ano,empresa):
 #			elif (r.abbr == 'SA') or (r.abbr == 'ABF'):
 #				salario_iliquido = salario_iliquido - flt(r.amount)
 
-			elif (r.abbr == 'FTJSS') or (r.abbr == 'FI'):
+			elif (r.abbr == 'FTJSS') or (r.abbr == 'FI') or (r.abbr == 'FTI1'):
 				salario_iliquido = salario_iliquido - flt(r.amount)
 
 			print "iliquido"
