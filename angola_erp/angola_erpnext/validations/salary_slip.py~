@@ -48,7 +48,7 @@ def validate(doc,method):
 	#Falta Justificada c/salario
 	ja= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'Absent' and tipo_de_faltas = 'Falta Justificada C/Salario' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
-	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
+	j1= frappe.db.sql(""" SELECT count(status) from `tabAttendance` where employee = %s and status = 'On leave' and leave_type != 'Subsidio de Ferias' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year, doc.company), as_dict=True)
 
 	j2= frappe.db.sql(""" SELECT sum(numero_de_horas) as horas from `tabAttendance` where employee = %s and status = 'Present' and month(attendance_date) = %s and year(attendance_date) = %s and docstatus=1 and company = %s """,(doc.employee,mes_startdate.month,mes_startdate.year,doc.company), as_dict=True)
 
@@ -149,12 +149,6 @@ def validate(doc,method):
 	print "MEU TESTE"
 	print "VALOR POR EXTENSO"
 
-	company_currency = erpnext.get_company_currency(doc.company)
-	print company_currency
-	if (company_currency =='KZ'):
-		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'
-	else:
-		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 
 	print "MEU TESTE"
 	print "MEU TESTE"
@@ -162,6 +156,14 @@ def validate(doc,method):
 	print "VALIDAR SUBSIDIO DE FERIAS"
 
 	valida_sub_ferias(doc,diaspagamento,totaldiastrabalho)
+
+	company_currency = erpnext.get_company_currency(doc.company)
+	print company_currency
+	if (company_currency =='KZ'):
+		doc.total_in_words = num2words(doc.rounded_total, lang='pt_BR').title() + ' Kwanzas.'
+
+	else:
+		doc.total_in_words = money_in_words(doc.rounded_total, company_currency)
 
 	return
 
