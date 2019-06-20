@@ -199,6 +199,22 @@ def get_data():
 				   "is_query_report": True
 				  }, 
 
+				 {
+				   "description": "Registo de Vendas de Item Inteligente por Utilizador", 
+				   "name": "User Item-wise Sales Register", 
+				   "label": _("User Item-wise Sales Register"),
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
+				 {
+				   "description": "Registo de Vendas de Item Inteligente por Utilizador Resumo", 
+				   "name": "User Item-wise Sales Register Summary", 
+				   "label": _("User Item-wise Sales Register Summary"),
+				   "doctype": "Sales Invoice",
+				   "type": "report",
+				   "is_query_report": True
+				  }, 
 
 
 			]

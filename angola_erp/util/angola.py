@@ -1192,4 +1192,10 @@ def get_aluno_email_guardian(aluno):
 					return alunoguardianemail
 
 
+@frappe.whitelist()
+def desactivar_employee_user(status = None, employee = None):
+	if status == "Left":
+		funcionario = frappe.db.get_value("Employee", {"Employee": employee},"user_id")
+		if funcionario:	
+			frappe.db.set_value("User", funcionario, "enabled", 0)
 
