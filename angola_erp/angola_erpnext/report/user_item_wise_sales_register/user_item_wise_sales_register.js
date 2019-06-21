@@ -31,6 +31,13 @@ frappe.query_reports["User Item-wise Sales Register"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center"
+		},
+
+		{
 			"fieldname":"mode_of_payment",
 			"label": __("Mode of Payment"),
 			"fieldtype": "Link",

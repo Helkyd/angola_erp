@@ -40,7 +40,8 @@ frappe.query_reports["User Item-wise Sales Register"] = {
 			"fieldname":"owner",
 			"label": __("User"),
 			"fieldtype": "Link",
-			"options": "User"
+			"options": "User",
+			"default": frappe.session.user !='Administrator' && frappe.session.user 
 		}
 
 	]

@@ -41,7 +41,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 #		if not delivery_note and d.update_stock:
 #			delivery_note = d.parent
 
-		row = [d.item_code, d.item_name, d.item_group, d.posting_date]
+		row = [d.posting_date, d.cost_center, d.item_code, d.item_name, d.item_group]
 
 		if additional_query_columns:
 			for col in additional_query_columns:
@@ -68,8 +68,9 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 def get_columns(additional_table_columns):
 	columns = [
+		_("Posting Date") + "::100", _("Cost Center") + "::120",
 		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
-		_("Item Group") + ":Link/Item Group:120", _("Posting Date") + ":Date:80",
+		_("Item Group") + ":Link/Item Group:120",
 		_("Stock Qty") + ":Float:100",
 		_("Amount") + ":Currency/currency:120" ]
 
@@ -113,6 +114,7 @@ def get_items(filters, additional_query_columns):
 
 	return frappe.db.sql("""
 		select
+			`tabSales Invoice`.posting_date, `tabSales Invoice Item`.cost_center,
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
 			`tabSales Invoice`.posting_date, `tabSales Invoice Item`.item_code, `tabSales Invoice Item`.item_name,
 			`tabSales Invoice Item`.item_group, sum(`tabSales Invoice Item`.stock_qty) as stock_qty, 
@@ -121,8 +123,8 @@ def get_items(filters, additional_query_columns):
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 %s %s
-		group by `tabSales Invoice Item`.item_code
-		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc
+		group by `tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.item_code
+		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.cost_center desc,`tabSales Invoice Item`.item_code desc
 		""".format(additional_query_columns or '') % (conditions, match_conditions), filters, as_dict=1)
 
 def get_delivery_notes_against_sales_order(item_list):

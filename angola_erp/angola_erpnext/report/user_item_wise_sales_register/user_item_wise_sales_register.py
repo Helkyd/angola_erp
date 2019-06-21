@@ -97,6 +97,7 @@ def get_conditions(filters):
 	conditions = ""
 
 	for opts in (("company", " and company=%(company)s"),
+		("cost_center", " and `tabSales Invoice Item`.cost_center = %(cost_center)s"),
 		("customer", " and `tabSales Invoice`.customer = %(customer)s"),
 		("item_code", " and `tabSales Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabSales Invoice`.posting_date>=%(from_date)s"),
@@ -140,7 +141,7 @@ def get_items(filters, additional_query_columns):
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 %s %s
-		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc
+		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.cost_center desc, `tabSales Invoice Item`.item_code desc
 		""".format(additional_query_columns or '') % (conditions, match_conditions), filters, as_dict=1)
 
 def get_delivery_notes_against_sales_order(item_list):
