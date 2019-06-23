@@ -16,7 +16,7 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.stock.get_item_details import get_pos_profile
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.controllers.accounts_controller import AccountsController #get_gl_dict
+#from erpnext.controllers.accounts_controller import AccountsController #get_gl_dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.stock_controller import StockController #get_items_and_warehouses
 
@@ -29,22 +29,31 @@ form_grid_templates = {
 	"items": "templates/form_grid/gestao_quartos_list.html"
 }
 
-#class GestaodeQuartos(AccountsController):
 
 class GestaodeQuartos(StockController):
-	def __init__(self, arg1, arg2=None):
-		super(GestaodeQuartos, self).__init__(arg1, arg2)
+#class GestaodeQuartos(Document):
+	#def __init__(self, arg1, arg2=None):
+#	def __init__(self, *args, **kwargs):
+#		print "INIT"
+#		print args
+#		print kwargs
+#		super(GestaodeQuartos, self).__init__(args, **kwargs)
+		#super(GestaodeQuartos, self).__init__(arg1, arg2)
 
 #class GestaodeQuartos(Document):
 
 	def autoname(self):
+		print "AUTO NAME"
 		self.name = make_autoname(self.numero_quarto + '-' + '.#####')
 		self.update_stock = 1
 #		self.posting_time = frappe.utils.nowtime()
 
 	def validate(self):
 
-		super(GestaodeQuartos, self).validate()
+#		super(GestaodeQuartos, self).validate()
+		print "VALIDATE "
+		print "VALIDATE "
+		print "VALIDATE "
 		print "DOC STATUS"
 		print self.name
 		print self.docstatus
@@ -65,13 +74,16 @@ class GestaodeQuartos(StockController):
 
 		elif self.hora_entrada == self.hora_saida:
 			validated=False
-			frappe.throw(_("Hora de Saida tem que sair diferente que Hora de Entrada."))
+			frappe.throw(_("Hora de Saida deve ser diferente que Hora de Entrada."))
 
 
 	def on_update(self):
 #		self.posting_time = frappe.utils.nowtime()
 
 		#self.valor_pago = self.total_servicos
+		print ("ON UPDATE")
+		print ("ON UPDATE")
+		print ("ON UPDATE")
 		print ("Doc Status ", self.docstatus)
 		if self.status_quarto == "Fechado":
 			print ("DEVE SER SUBMETIDO")
@@ -98,12 +110,17 @@ class GestaodeQuartos(StockController):
 		if (self.total_servicos == 0) or (self.total_servicos != 0):
 			#Adiciona o pagamento na Sales Invoice Payment
 #			self.docstatus =0
+
 			self.pagamentos_feitos()
+
 #			frappe.throw ("Pagamentos pode ser AQUI")
 #		set_account_for_mode_of_payment(self)
 
 		if self.status_quarto == "Fechado":
-			self.pagamentos_feitos1()
+			print "pagamentos_feitos1...."
+			print "pagamentos_feitos1...."
+			print "Should create new one not remove the previous one created...."
+			#self.pagamentos_feitos1()
 #		elif self.total_servicos != 0:
 #			self.pagamentos_feitos1()
 
@@ -115,6 +132,7 @@ class GestaodeQuartos(StockController):
 
 		if self.servico_pago_por:
 			for d in self.get('servicos'):
+				print ("Servicos no Quarto ", d)
 				if d.servico_produto:
 					#Pagamentos
 #					set_account_for_mode_of_payment(self)
@@ -129,34 +147,42 @@ class GestaodeQuartos(StockController):
 		self.docstatus=1
 		self.save()
 
+
 	def pagamentos_feitos(self):
 
 		if self.pagamento_por =='Cash':
 			pagopor ="Cash"
 
-		elif self.pagamento_por =='TPA':
+		elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
 			pagopor ="Bank"
 
-		x = 1
-		for x in range(1,2):
-			
-			pagamento_feito = frappe.get_doc({
-				"doctype": "Sales Invoice Payment",
-				"parent": self.name,
-				"parentfield": "pagamento",
-				"parenttype": "Gestao de Quartos",
-				"amount": self.total if (x == 1) else 0,
-				"base_amount": self.total if (x == 1) else 0,
-				"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "TPA", "company": self.company}, "default_account"),
-				#self.return_against if cint(self.is_return) else self.name)
-				"type": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),
-				"mode_of_payment": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment"),
-#				"name": self.name,
-				"idx": +x
-			})
-			pagamento_feito.insert()
-			print (x)
-			print("Parece que CRIOU O PAYMENT DOC")
+		temregisto = frappe.model.frappe.get_all('Sales Invoice Payment',filters={'parent':self.name, 'parenttype': 'Gestao de Quartos', 'type': pagopor},fields=['parent','parentfield','amount','base_amount', 'account'])
+
+		print 'check se tem Sales Invoice Payment'
+		print temregisto
+
+		if not temregisto:
+			x = 1
+			for x in range(1,2):
+				print "criar Sales Invoice pagamento ", x
+				print "valor ", self.total
+				pagamento_feito = frappe.get_doc({
+					"doctype": "Sales Invoice Payment",
+					"parent": self.name,
+					"parentfield": "pagamento",
+					"parenttype": "Gestao de Quartos",
+					"amount": self.total if (x == 1) else 0,
+					"base_amount": self.total if (x == 1) else 0,
+					"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"),
+					#self.return_against if cint(self.is_return) else self.name)
+					"type": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),
+					"mode_of_payment": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment"),
+	#				"name": self.name,
+					"idx": +x
+				})
+				pagamento_feito.insert()
+				print (x)
+				print("Parece que CRIOU O PAYMENT DOC")
 
 	def pagamentos_feitos1(self):
 
@@ -166,7 +192,7 @@ class GestaodeQuartos(StockController):
 			if self.pagamento_por =='Cash':
 				pagopor ="Cash"
 			#elif self.servico_pago_por =='2-TPA':
-			elif self.pagamento_por =='TPA':
+			elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
 				pagopor ="Bank"
 
 			pagamento_feito = frappe.get_doc({
@@ -176,7 +202,7 @@ class GestaodeQuartos(StockController):
 				"parenttype": "Gestao de Quartos",
 				"amount": 0,
 				"base_amount": 0,
-				"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "TPA", "company": self.company}, "default_account"),
+				"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"),
 				#self.return_against if cint(self.is_return) else self.name)
 				"type": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),
 				"mode_of_payment": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment"),
@@ -189,7 +215,7 @@ class GestaodeQuartos(StockController):
 			pagamento_feito.amount = self.total_servicos
 
 			pagamento_feito.base_amount = self.total_servicos
-			pagamento_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "TPA", "company": self.company}, "default_account")
+			pagamento_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account")
 
 				#"account": frappe.db.get_value("Mode of Payment Account", {"parent": pagopor, "company": self.company}, "default_account"),
 			pagamento_feito.type = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type")
@@ -455,7 +481,8 @@ class GestaodeQuartos(StockController):
 
 		print ("Upd stock SL ENTRIES")
 		print (sl_entries)
-		self.make_sl_entries(sl_entries)
+		if sl_entries:
+			self.make_sl_entries(sl_entries)
 
 	def get_items_and_warehouses(self):
 		items, warehouses = [], []
@@ -524,7 +551,8 @@ class GestaodeQuartos(StockController):
 		#from erpnext.stock.stock_ledger import make_sl_entries
 		print("SL ENTRIES 1")
 		print(sl_entries)
-		self.make_slentries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
+		if sl_entries:
+			self.make_slentries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
 
 
 
@@ -574,6 +602,8 @@ class GestaodeQuartos(StockController):
 		if not self.total_servicos:
 			return
 		gl_entries = self.get_gl_entries()
+		print "Make gl entries" 
+		print gl_entries
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
@@ -801,6 +831,9 @@ def get_bank_cash_account(mode_of_payment, company):
 
 @frappe.whitelist()
 def mode_of_payment(company):
+	print frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa,
+		 `tabMode of Payment` mp where mpa.parent = mp.name and mpa.company = %(company)s""", {'company': company}, as_dict=True)
+
 	return frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa,
 		 `tabMode of Payment` mp where mpa.parent = mp.name and mpa.company = %(company)s""", {'company': company}, as_dict=True)
 
@@ -861,3 +894,28 @@ def get_perfil_pos():
 		'pos_profile': pos_profile
 #		'meta': get_meta()
 	}
+
+@frappe.whitelist()
+def update_statusquarto(doc,status = None):
+	#Deve submer para fazer pagamento ??????
+	print ("Update Status Quarto")
+	
+	if status:
+		frappe.db.set_value('Gestao de Quartos',doc,'status_quarto',status)
+		frappe.db.commit()
+
+		# Change Quarto status 
+		quarto = frappe.get_doc("Quartos", frappe.db.get_value('Gestao de Quartos',doc,'numero_quarto'))
+		
+		if status == "Ocupado":
+			quarto.status_quarto = "Ocupado"
+		elif status == "Ativo":
+			quarto.status_quarto = "Ocupado"
+		elif status == "Livre":
+			quarto.status_quarto = "Livre"
+		elif status == "Fechado":
+			quarto.status_quarto = "Livre"
+
+		quarto.save()		
+
+
