@@ -2,8 +2,8 @@
 # Copyright (c) 2016, Helio de Jesus and contributors
 # For license information, please see license.txt
 
-#Date Changed: 24/04/2019
-#Version: 1.0.4
+#Date Changed: 26/06/2019
+#Version: 1.0.5
 
 from __future__ import unicode_literals
 
@@ -6140,7 +6140,11 @@ def assinar_ssl():
 	datas.close()
 	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
 	exists = os.path.isfile("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem")
-	if exists:
+        newexists = os.path.isfile("/home/frappe/angolaerp-selfsigned-priv.pem")
+        if newexists:
+                key_file = open("/home/frappe/angolaerp-selfsigned-priv.pem","rb")
+
+        elif exists:
 		key_file = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
 	else:
 		key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
@@ -6171,7 +6175,11 @@ def assinar_ssl1(hashinfo):
 
 	#key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
 	exists = os.path.isfile("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-cert.pem")
-	if exists:
+        newexists = os.path.isfile("/home/frappe/angolaerp-selfsigned-cert.pem")
+        if newexists:
+                key_file0 = open("/home/frappe/angolaerp-selfsigned-cert.pem","rb")
+
+        elif exists:
 		key_file0 = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-cert.pem","rb")
 	else:
 		key_file0 = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-cert.pem","rb")
@@ -6182,7 +6190,11 @@ def assinar_ssl1(hashinfo):
 
 	#key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
 	exists = os.path.isfile("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem")
-	if exists:
+        newexists = os.path.isfile("/home/frappe/angolaerp-selfsigned-priv.pem")
+        if newexists:
+                key_file = open("/home/frappe/angolaerp-selfsigned-priv.pem","rb")
+
+        elif exists:
 		key_file = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/angolaerp-selfsigned-priv.pem","rb")
 	else:
 		key_file = open("/tmp/angolaerp.cert2/angolaerp-selfsigned-priv.pem","rb")
@@ -6193,7 +6205,11 @@ def assinar_ssl1(hashinfo):
 
 	#key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
 	exists = os.path.isfile("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem")
-	if exists:
+        newexists = os.path.isfile("/home/frappe/publickey.pem")
+        if newexists:
+                key_file1 = open("/home/frappe/publickey.pem","rb")
+
+        elif exists:
 		key_file1 = open("/home/frappe/frappe-bench/apps/angola_erp/angola_erp/util/publickey.pem","rb")
 	else:
 		key_file1 = open("/tmp/angolaerp.cert2/publickey.pem","rb")
@@ -6241,39 +6257,3 @@ def assinar_ssl1(hashinfo):
 	return data_base64
 
 
-'''
-Eh9lq4L1+uw48J/Wf/dPVetijSFNimx0dQOI2b5huJyIoT0BMOG/kuxUFaNJ3wjZxd+UiI0Unclv1XgYzS9BKJ1PmxnxzZI7UKoKmP6XuUkBSDIvwiLmNYObvt3xrKYVVlAanZx3QRt+RsB7bA4tkR3Iz/oRlEGcUKzQpR8p2YM=
-Eh9lq4L1+uw48J/Wf/dPVetijSFNimx0dQOI2b5huJyIoT0BMOG/kuxUFaNJ3wjZxd+UiI0Unclv1XgYzS9BKJ1PmxnxzZI7UKoKmP6XuUkBSDIvwiLmNYObvt3xrKYVVlAanZx3QRt+RsB7bA4tkR3Iz/oRlEGcUKzQpR8p2YM=
-'''
-
-'''
-
-PEM = """-----BEGIN CERTIFICATE-----
-MIICsDCCAhmgAwIBAgIJAJrZExFauz5pMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
-BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
-aWRnaXRzIFB0eSBMdGQwHhcNMTMwMzA3MDkzNjQyWhcNMTgwMzA3MDkzNjQyWjBF
-MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
-ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB
-gQDRiW70Ea0CIrJmv9nwO0882mZ51ygAqQrQLfaYB2EUE5SRE99GaQbT9TsmcPK1
-aG5ZDmazWRGBWe8UCL0W6fFrkg6Cb6VwFGqUSAsFhlT+XhOqAF9p3dfqu3S85zyY
-7zJ5YIAMgDbd8/KmaqP8xn2aNY1cUxN/0HxOB4fz2/f/YQIDAQABo4GnMIGkMB0G
-A1UdDgQWBBRj2EiZsFFFc4IbLHJa9CupE9ynbzB1BgNVHSMEbjBsgBRj2EiZsFFF
-c4IbLHJa9CupE9ynb6FJpEcwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgTClNvbWUt
-U3RhdGUxITAfBgNVBAoTGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZIIJAJrZExFa
-uz5pMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAip8XS5JX3hFG8wjZ
-0FxqU/FLjSJkGrAscs16y7iq9YnUIfPt0Fha4a36vB5nG42vai10BtLgZEP/mifJ
-DQXbDZA46G7gBiV9AvqtJWDNOfn7c34g23G9lxIEuU8ptLoyN+38TFdS+eWQDo/q
-a/1IvCESUYYY43s+aOp6nbkDoGw=
------END CERTIFICATE-----
-"""
-
-MSG = """
-"""
-
-SIG = """
-FFOSR4UhPjheKN3hNAXIh/XL5OByp23+Gk+NRgonsZoI0eQHJn7nCEr/b1NbL/DP7UVL7o
-nM6+RC1/yjiSi4J8wj4kqs19PY4ZGQXbnnDxutJoMfo+lhRA/H+jTPL5u8bs/d07ln0eHl
-AzyOCxee3DRTxJKbmQewb48xhmou4jQ=
-"""
-
-'''
