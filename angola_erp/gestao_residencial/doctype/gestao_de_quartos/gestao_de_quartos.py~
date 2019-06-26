@@ -87,9 +87,8 @@ class GestaodeQuartos(StockController):
 		print ("Doc Status ", self.docstatus)
 		if self.status_quarto == "Fechado":
 			print ("DEVE SER SUBMETIDO")
-	
-					
-			self.on_submit()
+			if self.docstatus == 0:
+				self.on_submit()
 
 
 		self.Quartos_Status()
@@ -119,6 +118,11 @@ class GestaodeQuartos(StockController):
 		if self.status_quarto == "Fechado":
 			print "pagamentos_feitos1...."
 			print "pagamentos_feitos1...."
+			print "Should create new one not remove the previous one created...."
+			#self.pagamentos_feitos1()
+		if self.servico_pago_por:
+			print "servico pago por...."
+			print "servico pago por...."
 
 			self.pagamentos_feitos1()
 #		elif self.total_servicos != 0:
@@ -150,13 +154,23 @@ class GestaodeQuartos(StockController):
 
 	def pagamentos_feitos(self):
 
-		if self.pagamento_por =='Cash':
-			pagopor ="Cash"
+		#if self.pagamento_por =='Cash':
+		#	pagopor ="Cash"
 
-		elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
-			pagopor ="Bank"
+		#elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
+		#	pagopor ="Bank"
 
-		temregisto = frappe.model.frappe.get_all('Sales Invoice Payment',filters={'parent':self.name, 'parenttype': 'Gestao de Quartos', 'type': pagopor},fields=['parent','parentfield','amount','base_amount', 'account'])
+		#if 'Cash' in self.pagamento_por:
+		#if self.pagamento_por =='Cash':
+		#	pagopor ="Cash"
+		#else:
+		#elif self.servico_pago_por =='2-TPA':
+		#elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
+			
+		#	pagopor = self.servico_pago_por
+
+
+		temregisto = frappe.model.frappe.get_all('Sales Invoice Payment',filters={'parent':self.name, 'parenttype': 'Gestao de Quartos', 'type': self.pagamento_por},fields=['parent','parentfield','amount','base_amount', 'account'])
 
 		print 'check se tem Sales Invoice Payment'
 		print temregisto
@@ -166,6 +180,8 @@ class GestaodeQuartos(StockController):
 			for x in range(1,2):
 				print "criar Sales Invoice pagamento ", x
 				print "valor ", self.total
+				print 'type ', frappe.db.get_value("Mode of Payment", {"name": self.pagamento_por}, "type")
+				print 'modo ', frappe.db.get_value("Mode of Payment", {"name": self.pagamento_por}, "mode_of_payment")
 				pagamento_feito = frappe.get_doc({
 					"doctype": "Sales Invoice Payment",
 					"parent": self.name,
@@ -173,10 +189,10 @@ class GestaodeQuartos(StockController):
 					"parenttype": "Gestao de Quartos",
 					"amount": self.total if (x == 1) else 0,
 					"base_amount": self.total if (x == 1) else 0,
-					"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"),
+					"account": frappe.db.get_value("Mode of Payment Account", {"parent": self.pagamento_por, "company": self.company}, "default_account"),
 					#self.return_against if cint(self.is_return) else self.name)
-					"type": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),
-					"mode_of_payment": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment"),
+					"type": frappe.db.get_value("Mode of Payment", {"name": self.pagamento_por}, "type"),
+					"mode_of_payment": frappe.db.get_value("Mode of Payment", {"name": self.pagamento_por}, "mode_of_payment"),
 	#				"name": self.name,
 					"idx": +x
 				})
@@ -188,45 +204,92 @@ class GestaodeQuartos(StockController):
 
 		#adds only the second payment for the Services added
 		if self.total_servicos:
-			#if self.servico_pago_por =='1-Cash':
-			if self.pagamento_por =='Cash':
+			if 'Cash' in self.servico_pago_por:
+			#if self.pagamento_por =='Cash':
 				pagopor ="Cash"
+			else:
 			#elif self.servico_pago_por =='2-TPA':
-			elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
-				pagopor ="Bank"
+			#elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
+				pagopor = self.servico_pago_por
+			print 'nome ', self.name
+			print 'valor ', self.total_servicos
+			print 'pago por ', pagopor
+			print 'conta ', frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else pagopor, "company": self.company}, "default_account")
+			print 'tipo ', frappe.db.get_value("Mode of Payment", {"name": pagopor}, "type")
+			print 'modo ', frappe.db.get_value("Mode of Payment", {"name": pagopor}, "mode_of_payment")
+
+#			frappe.db.sql("INSERT into `tabSales Invoice Payment` (name,parent, parentfield, parenttype, amount, base_amount, account, type, mode_of_payment) values (%s,'pagamento','Gestao de Quartos',%s,%s,%s,%s,%s) ",(self.name, self.total_servicos, self.total_servicos ,frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"), 'Cash', 'Cash'))
+
+#			frappe.db.sql("INSERT into `tabSales Invoice Payment` (name,parent, parentfield, parenttype, amount, base_amount, account, type, mode_of_payment) values (%s,%s,'pagamento','Gestao de Quartos',%s,%s,%s,%s,%s) ",(make_autoname(self.name + '-' + '.#####'),self.name, self.total_servicos, self.total_servicos ,'45110000 - Caixa Kwanza - DP', 'Cash', 'Cash'))
+
+#			frappe.db.commit()
+
+# frappe.db.sql(" INSERT INTO `tabSales Invoice Payment` (parent, parentfield, parenttype, amount, base_amount, account, type, mode_of_payment) VALUES (%s,'pagamento','Gestao de Quartos',%s,%s,%s,%s,%s) ",(self.name, self.total_servicos,self.total_servicos,frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"),frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment"))
+
+#			frappe.db.sql("INSERT into tabMovimentos_Caixa (name, docstatus, parent, parenttype, parentfield, tipo_pagamento, descricao_movimento, valor_pago, hora_atendimento, creation, modified, usuario_movimentos, company) values (%s,0,%s,'Caixa de Registo','movimentos_caixa',%s,%s,%s,%s,%s,%s,%s,%s) ",(ddd, caixa, d.pagamento_por ,d.name, d.total_servicos, d.hora_atendimento, frappe.utils.now(), frappe.utils.now(),d.bar_tender,d.company))
+
+			print 'pagfeito ....'
+			print 'pagfeito ....'
+
+
 
 			pagamento_feito = frappe.get_doc({
 				"doctype": "Sales Invoice Payment",
+				"name": make_autoname(self.name + '-' + '.#####'),
 				"parent": self.name,
 				"parentfield": "pagamento",
 				"parenttype": "Gestao de Quartos",
-				"amount": 0,
-				"base_amount": 0,
-				"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"),
+				"amount": self.total_servicos,
+				"base_amount": self.total_servicos,
+				"account": frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else pagopor, "company": self.company}, "default_account"),
 				#self.return_against if cint(self.is_return) else self.name)
-				"type": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),
-				"mode_of_payment": frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment"),
-				"idx": 2
+				"type": frappe.db.get_value("Mode of Payment", {"name": pagopor}, "type"),
+				"mode_of_payment": frappe.db.get_value("Mode of Payment", {"name": pagopor}, "mode_of_payment")
+				#"idx": 2
 			})
-			print(pagamento_feito.idx)
-			print(pagamento_feito.parent)
-			print(pagamento_feito.amount)
+			pagamento_feito.insert()
+#			pagamento_feito.save()
 
-			pagamento_feito.amount = self.total_servicos
 
-			pagamento_feito.base_amount = self.total_servicos
-			pagamento_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account")
+#			pagamento1_feito = frappe.new_doc('Sales Invoice Payment')
+#			pagamento1_feito.parent = self.name
+#			pagamento1_feito.parentfield = 'pagamento'
+#			pagamento1_feito.parenttype = 'Gestao de Quartos'
+#			pagamento1_feito.amount = self.total_servicos
+#			pagamento1_feito.base_amount = self.total_servicos
+#			pagamento1_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account")
+
+#			pagamento1_feito.type = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type")
+#			pagamento1_feito.mode_of_payment = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment") 
+#			pagamento_feito.idx = 2
+#			pagamento1_feito.name = self.name
+#			pagamento1_feito.insert()
+
+#			frappe.db.sql("INSERT into `tabSales Invoice Payment` (name,parent, parentfield, parenttype, amount, base_amount, account, type, mode_of_payment) values (%s,%s,'pagamento','Gestao de Quartos',%s,%s,%s,%s,%s) ",(make_autoname(self.name + '-' + '.#####'),self.name, self.total_servicos, self.total_servicos ,'45110000 - Caixa Kwanza - DP', 'Cash', 'Cash'))
+
+
+
+#			print(pagamento1_feito.idx)
+#			print(pagamento1_feito.parent)
+#			print(pagamento1_feito.amount)
+
+#			pagamento_feito.amount = self.total_servicos
+
+#			pagamento_feito.base_amount = self.total_servicos
+#			pagamento_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account")
 
 				#"account": frappe.db.get_value("Mode of Payment Account", {"parent": pagopor, "company": self.company}, "default_account"),
-			pagamento_feito.type = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type")
-			pagamento_feito.mode_of_payment = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment")
+#			pagamento_feito.type = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type")
+#			pagamento_feito.mode_of_payment = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment")
 #				"name": frappe.utils.now(),
 
 #			})
 #			print(pagamento_feito)
-			pagamento_feito.save()
 
-			print(pagamento_feito.amount)
+#			pagamento_feito.save()
+#			pagamento_feito.insert()
+
+#			print(pagamento_feito.amount)
 			print("CRIOU O SEGUNDO PAYMENT DOC")
 			print("CRIOU O SEGUNDO PAYMENT DOC")
 			print("CRIOU O SEGUNDO PAYMENT DOC")
@@ -243,10 +306,17 @@ class GestaodeQuartos(StockController):
 		if self.pagamento_por =='Cash':
 			pagopor ="Cash"
 		#elif self.servico_pago_por =='2-TPA':
-		elif self.pagamento_por =='TPA':
+		elif self.pagamento_por =='TPA' or self.pagamento_por =='Bank':
 			pagopor ="Bank"
 		#TO DELETE
 #		pagamento_feito = frappe.new_doc("Sales Invoice Payment")
+
+		print 'nome ', self.name
+		print 'conta ', frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account")
+		print 'tipo ', frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type")
+		print 'modo ', frappe.db.get_value("Mode of Payment", {"type": pagopor}, "mode_of_payment")
+
+
 		pagamento_feito = self.append('pagamento',{})
 		
 #		pagamento_feito.docstatus = 0
@@ -255,7 +325,7 @@ class GestaodeQuartos(StockController):
 		pagamento_feito.parenttype = "Gestao de Quartos"
 		pagamento_feito.amount = self.total_servicos
 		pagamento_feito.base_amount = self.total_servicos
-		pagamento_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "TPA", "company": self.company}, "default_account"),
+		pagamento_feito.account = frappe.db.get_value("Mode of Payment Account", {"parent": "Cash" if (pagopor=="Cash") else "Bank", "company": self.company}, "default_account"),
 
 				#"account": frappe.db.get_value("Mode of Payment Account", {"parent": pagopor, "company": self.company}, "default_account"),
 		pagamento_feito.type = frappe.db.get_value("Mode of Payment", {"type": pagopor}, "type"),
@@ -728,6 +798,9 @@ class GestaodeQuartos(StockController):
 			for payment_mode in self.pagamento:
 				if payment_mode.amount:
 					# POS, make payment entries
+					print 'make pos gl entries pagamentos...'
+					print 'make pos gl entries pagamentos...'
+					print 'make pos gl entries pagamentos...'
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,

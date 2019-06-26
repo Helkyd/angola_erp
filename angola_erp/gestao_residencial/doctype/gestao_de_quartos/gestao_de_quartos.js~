@@ -5,6 +5,13 @@
 var estadoQuarto;
 var horaentrada=0;
 var debito_p_contab;
+var naorefresh=0;
+var opcao0 ="";
+var opcao0_tipo = "";
+var opcao1 = "";
+var opcao1_tipo = "";
+var opcao2 = "";
+var opcao2_tipo = "";
 
 
 lista =cur_frm.call({method:"lista_clientes",args:{"start":"moeda"}})
@@ -175,11 +182,36 @@ frappe.ui.form.on('Gestao de Quartos', {
 			//Reservado
 				
 		}
-		if (cur_frm.doc.__unsaved == undefined && cur_frm.doc.__islocal == undefined) {
-//			cur_frm.reload_doc()
-//			cur_frm.refresh_fields()
+
+		console.log('pgamentos ', cur_frm.doc.pagamento)
+		if (cur_frm.doc.__unsaved == undefined && cur_frm.doc.__islocal == undefined && cur_frm.doc.pagamento != undefined) {
+			if (cur_frm.doc.pagamento.length == 0 && naorefresh == 0){
+				naorefresh += 1
+				cur_frm.refresh_fields("pagamento");	
+				cur_frm.reload_doc()
+				cur_frm.refresh_fields()
+			}
 
 		}
+
+		if (modopagamento.responseJSON != undefined) {
+			for (mod in modopagamento.responseJSON.message){
+				if (mod == 0){
+					opcao0 = modopagamento.responseJSON.message[mod].parent
+					opcao0_tipo = modopagamento.responseJSON.message[mod].type
+				}else if (mod == 1){ 
+					opcao1 = modopagamento.responseJSON.message[mod].parent
+					opcao1_tipo = modopagamento.responseJSON.message[mod].type
+				} else{
+					opcao2 = modopagamento.responseJSON.message[mod].parent
+					opcao2_tipo = modopagamento.responseJSON.message[mod].type
+				}
+			}
+			console.log(opcao0)
+			console.log(opcao1)
+			console.log(opcao2)
+		}
+
 
 	},
 
@@ -467,18 +499,17 @@ frappe.ui.form.on('Gestao de Quartos', {
 			cur_frm.doc.hora_saida=moment(moment(cur_frm.doc.hora_entrada).add(cur_frm.doc.horas,'hours'));
 			cur_frm.doc.total = cur_frm.doc.preco*cur_frm.doc.horas
 			//cur_frm.call({method:"horas_quarto",args:{"horain":frm.doc.hora_entrada,"horaout":frm.doc.hora_entrada,"registo":frm.doc.name}})
-			cur_frm.reload_doc()
+//			if (cur_frm.doc.__unsaved == 1 && cur_frm.doc.__islocal == 1) {
+
+//				cur_frm.refresh_fields("pagamento");	
+//				cur_frm.reload_doc();
+//			}
+
 			cur_frm.refresh_fields();	
 
 		}
 		horaentrada=0;
 
-		if (cur_frm.doc.__unsaved == undefined && cur_frm.doc.__islocal == undefined) {
-			console.log('validar undefined unsaved and islocal')
-//			cur_frm.reload_doc()
-//			cur_frm.refresh_fields()
-
-		}
 	
 	}
 
@@ -542,12 +573,12 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
 
 	console.log(modopagamento)
 
-	opcao0 ="";
-	opcao0_tipo = "";
-	opcao1 = "";
-	opcao1_tipo = "";
-	opcao2 = "";
-	opcao2_tipo = "";
+//	opcao0 ="";
+//	opcao0_tipo = "";
+//	opcao1 = "";
+//	opcao1_tipo = "";
+//	opcao2 = "";
+//	opcao2_tipo = "";
 
 //	if (modopagamento) {for (mod in modopagamento.responseJSON.message){(modopagamento.responseJSON.message[mod].parent) + "," }}
 	if (modopagamento) {
@@ -578,6 +609,8 @@ cur_frm.cscript.pagar_servicos = function(frm,cdt,cdn) {
             var c = d.get_values();
             var me = this;
             frappe.show_alert("Selecionado : " + c.priority,5)
+		console.log(opcao0 + ' ' + opcao1 + ' ' + opcao2)
+		console.log(opcao0_tipo + ' ' + opcao1_tipo + ' ' + opcao2_tipo)
 		// Status Quarto deve mudar para Livre
 		// Status da Gestao_quarto para 
 		if (c.priority=="4-Não Pagar"){
@@ -741,46 +774,74 @@ frappe.ui.form.on("Gestao de Quartos","status_quarto",function(frm,cdt,cdn){
 	}else if (frm.doc.status_quarto=="Fechado"){
 	// Tem que verificar os pagamentos ....
 		cur_frm.toggle_display("servico_pago_por",true)
-		if (frm.doc.servico_pago_por == opcao0){
-			//any opcao as long is Cash or TPA
-			if ((opcao0_tipo == "Bank") || (opcao0_tipo == "Cash")){
-				// Pode prosseguir com pagamento
-				//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
-				frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
-				this.cur_page.page.frm._save()
+		if (cur_frm.doc.total_servicos != 0) {
+			if (frm.doc.servico_pago_por == opcao0){
+				//any opcao as long is Cash or TPA
+				if ((opcao0_tipo == "Bank") || (opcao0_tipo == "Cash")){
+					// Pode prosseguir com pagamento
+					//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
+					frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
+					this.cur_page.page.frm._save()
 
-			}
+				}
 
-		}else if (frm.doc.servico_pago_por == opcao1){
-			//any opcao as long is Cash or TPA
-			if ((opcao1_tipo == "Bank") || (opcao1_tipo == "Cash")){
-				// Pode prosseguir com pagamento
-				//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
-				frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
-				this.cur_page.page.frm._save()
+			}else if (frm.doc.servico_pago_por == opcao1){
+				//any opcao as long is Cash or TPA
+				if ((opcao1_tipo == "Bank") || (opcao1_tipo == "Cash")){
+					// Pode prosseguir com pagamento
+					//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
+					frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
+					this.cur_page.page.frm._save()
 
-			}
+				}
 		
-		}else if (frm.doc.servico_pago_por == opcao2){
-			//any opcao as long is Cash or TPA
-			if ((opcao2_tipo == "Bank") || (opcao2_tipo == "Cash")){
+			}else if (frm.doc.servico_pago_por == opcao2){
+				//any opcao as long is Cash or TPA
+				if ((opcao2_tipo == "Bank") || (opcao2_tipo == "Cash")){
+					// Pode prosseguir com pagamento
+					//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
+					frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
+					console.log('docstatus ', cur_frm.doc.docstatus)
+					this.cur_page.page.frm._save()
+
+				}
+
+			} else if ((frm.doc.servico_pago_por =="1-Cash") || (frm.doc.servico_pago_por =="2-TPA")){
 				// Pode prosseguir com pagamento
 				//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
 				frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
 				this.cur_page.page.frm._save()
+			} else if (frm.doc.pagamento_por =="Conta-Corrente"){ 
+				//Conta-Corrente, can close as long as client name is correct
+				if (frm.doc.nome_cliente !="Diversos"){ 
 
+				}
+			} else if (frm.doc.total_servicos==0) {	
+				frappe.show_alert("QUARTO LIVRE. Sem servicos por pagar...",3)
+
+				console.log(frm.doc.__unsaved)
+				console.log(frm.doc.__islocal)
+				console.log(frm.doc.docstatus)
+	//			cur_frm.doc.__unsaved = 1
+				if (cur_frm.doc.docstatus == 0) {
+					cur_frm.doc.docstatus = 1 //TO Submit
+		//			cur_frm.save() 
+		//			this.cur_page.page.frm._save()
+					this.cur_page.page.frm.savesubmit()
+		//			this.cur_page.page.frm._update()
+					cur_frm.toggle_enable("status_quarto",false)
+
+		//			cur_frm.reload_doc()
+		//			cur_frm.refresh_fields()
+				}	
+			} else {
+				// Esta vazio .....
+				alert("Pagamento de servicos em falta!!!")	
+				cur_frm.disable_save()
+	//			frappe.model.set_value(cdt,cdn,'status',"Ocupado")
+	//			cur_frm.refresh_fields("status");	
 			}
 
-		} else if ((frm.doc.servico_pago_por =="1-Cash") || (frm.doc.servico_pago_por =="2-TPA")){
-			// Pode prosseguir com pagamento
-			//alert("Pagamento de Serviços feito. Por favor salvar registo para liberar o Quarto.")	
-			frappe.show_alert("Pagamento de Serviços feito. QUARTO LIVRE",3)
-			this.cur_page.page.frm._save()
-		} else if (frm.doc.pagamento_por =="Conta-Corrente"){ 
-			//Conta-Corrente, can close as long as client name is correct
-			if (frm.doc.nome_cliente !="Diversos"){ 
-
-			}
 		} else if (frm.doc.total_servicos==0) {	
 			frappe.show_alert("QUARTO LIVRE. Sem servicos por pagar...",3)
 
@@ -806,6 +867,7 @@ frappe.ui.form.on("Gestao de Quartos","status_quarto",function(frm,cdt,cdn){
 //			frappe.model.set_value(cdt,cdn,'status',"Ocupado")
 //			cur_frm.refresh_fields("status");	
 		}
+
 //	}else if ((frm.doc.status_quarto=="Ativo") && (frm.doc.reserva_numero !="")){
 	//ATIVO only from RESERVAS
 //		alert("Quarto Ativo... por favor Salvar registo")
@@ -970,7 +1032,7 @@ var pagamento_cash = function(prioridade){
 	console.log('pagamento cash')
 	//Quarto Status Fechado ... Ja nao se pode alterar.
 	frappe.model.set_value(cur_frm.doctype,cur_frm.docname,'servico_pago_por',prioridade)
-	frappe.model.set_value(cur_frm.doctype,cur_frm.docname,'status_quarto',"Fechado")
+//	frappe.model.set_value(cur_frm.doctype,cur_frm.docname,'status_quarto',"Fechado")
 
 
 	cur_frm.refresh_fields("status_quarto");	
